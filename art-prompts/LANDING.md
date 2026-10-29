@@ -84,8 +84,8 @@ cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown out
 > El agujero de gusano (azul-morado) jala a Gusanita; Gusanito intenta alcanzarla. Es el momento más dramático.
 
 ## Cuando tengas las imágenes
-1. Guárdalas **crudas** en `art-inbox/` con el nombre exacto (`title_hero.png`, `logo.png`, `title_bg.png`, `btn_wood.png`, `intro_bg.png`, `story_01.png`, `story_02.png`, `story_03.png`).
-2. Ejecuta `npm run art` (quita fondos y ajusta tamaños) y luego `npm run art:status`.
+1. **Súbelas crudas** a `art-inbox/` (directo a git, rama `main`) con el nombre exacto (`title_hero.png`, `logo.png`, `title_bg.png`, `btn_wood.png`, `intro_bg.png`, `story_01.png`, `story_02.png`, `story_03.png`).
+2. GitHub las procesa solo en 1-2 minutos («Procesar arte»); o ejecuta `npm run art` en tu computadora y luego `npm run art:status`.
 3. Mírala en el juego: `npm run dev`. La intro se repite desde **⚙ Ajustes → Ver historia**; el título aparece al terminarla.
 4. Si algo se ve mal, cámbialo y vuelve a correr `npm run art`; **no hay que tocar código**.
 

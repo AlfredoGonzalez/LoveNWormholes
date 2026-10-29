@@ -6,8 +6,8 @@
 
 ## Cómo funciona (3 pasos)
 1. **Genera** cada imagen con la IA usando el prompt de su archivo (carpeta `art-prompts/`). Pide el tamaño al menos al doble del final; el script reduce.
-2. **Guarda** el resultado crudo en `art-inbox/` con el **nombre exacto** del archivo (p. ej. `stick_idle.png`, `coin.png`). Cada ícono y cada hoja de sprites va **por separado**.
-3. Ejecuta `npm run art`. El script **quita el fondo**, **corta los cuadros**, **unifica el tamaño** y deja el archivo final en `public/assets/`. `npm run art:status` muestra qué ya está y qué falta.
+2. **Sube** el resultado crudo a `art-inbox/` con el **nombre exacto** del archivo (p. ej. `stick_idle.png`, `coin.png`; sirven png, jpg y webp). Cada ícono y cada hoja de sprites va **por separado**. Puedes subirlos **directo a git** (en GitHub: *Add file → Upload files*, rama `main`): el flujo automático «Procesar arte» hace el paso 3 por ti.
+3. Se ejecuta `npm run art` (en GitHub solo, o en tu computadora). El script **quita el fondo**, **corta los cuadros**, **unifica el tamaño** y deja el archivo final en `public/assets/`. `npm run art:status` muestra qué ya está y qué falta.
 
 El juego carga lo que exista y usa figuras de reemplazo para lo que falte: puedes ir entregando el arte poco a poco. Al compilar (`npm run build`) se genera solo `assets/manifest.json` con los archivos presentes, así que el juego únicamente pide lo que existe.
 

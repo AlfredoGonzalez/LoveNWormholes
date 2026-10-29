@@ -78,8 +78,8 @@ writeFileSync(path.join(OUT, 'README.md'), `# Guía de arte — Love N Wormholes
 
 ## Cómo funciona (3 pasos)
 1. **Genera** cada imagen con la IA usando el prompt de su archivo (carpeta \`art-prompts/\`). Pide el tamaño al menos al doble del final; el script reduce.
-2. **Guarda** el resultado crudo en \`art-inbox/\` con el **nombre exacto** del archivo (p. ej. \`stick_idle.png\`, \`coin.png\`). Cada ícono y cada hoja de sprites va **por separado**.
-3. Ejecuta \`npm run art\`. El script **quita el fondo**, **corta los cuadros**, **unifica el tamaño** y deja el archivo final en \`public/assets/\`. \`npm run art:status\` muestra qué ya está y qué falta.
+2. **Sube** el resultado crudo a \`art-inbox/\` con el **nombre exacto** del archivo (p. ej. \`stick_idle.png\`, \`coin.png\`; sirven png, jpg y webp). Cada ícono y cada hoja de sprites va **por separado**. Puedes subirlos **directo a git** (en GitHub: *Add file → Upload files*, rama \`main\`): el flujo automático «Procesar arte» hace el paso 3 por ti.
+3. Se ejecuta \`npm run art\` (en GitHub solo, o en tu computadora). El script **quita el fondo**, **corta los cuadros**, **unifica el tamaño** y deja el archivo final en \`public/assets/\`. \`npm run art:status\` muestra qué ya está y qué falta.
 
 El juego carga lo que exista y usa figuras de reemplazo para lo que falte: puedes ir entregando el arte poco a poco. Al compilar (\`npm run build\`) se genera solo \`assets/manifest.json\` con los archivos presentes, así que el juego únicamente pide lo que existe.
 
@@ -290,8 +290,8 @@ ${prompt(a)}
 `;
 });
 md += `## Cuando tengas las imágenes
-1. Guárdalas **crudas** en \`art-inbox/\` con el nombre exacto (\`title_hero.png\`, \`logo.png\`, \`title_bg.png\`, \`btn_wood.png\`, \`intro_bg.png\`, \`story_01.png\`, \`story_02.png\`, \`story_03.png\`).
-2. Ejecuta \`npm run art\` (quita fondos y ajusta tamaños) y luego \`npm run art:status\`.
+1. **Súbelas crudas** a \`art-inbox/\` (directo a git, rama \`main\`) con el nombre exacto (\`title_hero.png\`, \`logo.png\`, \`title_bg.png\`, \`btn_wood.png\`, \`intro_bg.png\`, \`story_01.png\`, \`story_02.png\`, \`story_03.png\`).
+2. GitHub las procesa solo en 1-2 minutos («Procesar arte»); o ejecuta \`npm run art\` en tu computadora y luego \`npm run art:status\`.
 3. Mírala en el juego: \`npm run dev\`. La intro se repite desde **⚙ Ajustes → Ver historia**; el título aparece al terminarla.
 4. Si algo se ve mal, cámbialo y vuelve a correr \`npm run art\`; **no hay que tocar código**.
 

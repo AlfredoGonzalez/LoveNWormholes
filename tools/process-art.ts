@@ -156,6 +156,7 @@ async function main() {
     console.warn(`? ${path.relative(ROOT, f)}: nombre desconocido. ¿Quisiste decir "${near}"?`);
   }
   console.log(`\n${ok} procesados, ${failed} con error. Siguiente: npm run art:status`);
+  if (failed > 0) process.exitCode = 1;
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

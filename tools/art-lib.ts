@@ -68,6 +68,10 @@ export function keyBackground(rgba: Uint8Array, w: number, h: number, bg: RGB, t
     if (!seen[p]) continue;
     const a = Math.max(0, Math.min(1, (d(p) - t0) / (t1 - t0)));
     rgba[p * 4 + 3] = Math.round(rgba[p * 4 + 3] * a);
+    if (a > 0 && a < 1) {
+      // Quita el tinte del fondo en los bordes suavizados: c = (mezcla − fondo·(1−a)) / a
+      for (let c = 0; c < 3; c++) rgba[p * 4 + c] = Math.max(0, Math.min(255, Math.round((rgba[p * 4 + c] - bg[c] * (1 - a)) / a)));
+    }
   }
 }
 
