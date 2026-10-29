@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { Battle, MAX_ENERGY } from '../game/sim';
 import { LEVELS, eraById, levelById, type EraDef, type LevelDef } from '../game/data';
-import { applyWin, modsFrom, starsFor } from '../game/economy';
+import { REVIVE_GEMS, applyWin, doubleReward, modsFrom, spendGems, starsFor } from '../game/economy';
+import { services } from '../services';
 import { game, persist } from '../services/save';
 import { t, tf } from '../i18n';
 import { W, H, button } from '../ui';
@@ -17,6 +18,11 @@ export class BattleScene extends Phaser.Scene {
   private sand?: Phaser.GameObjects.Rectangle;
   private alertText?: Phaser.GameObjects.Text;
   private msgs: string[] = [];
+  private resultObjs: Phaser.GameObjects.GameObject[] = [];
+  private reviveUsed = false;
+  private boostUsed = false;
+  private busy = false;
+  private boostBtn?: Phaser.GameObjects.Container;
   private gfx!: Phaser.GameObjects.Graphics;
   private energyText!: Phaser.GameObjects.Text;
   private wormholeBtn!: Phaser.GameObjects.Text;
@@ -35,6 +41,10 @@ export class BattleScene extends Phaser.Scene {
     this.unitButtons = [];
     this.sprites.clear();
     this.ended = false;
+    this.reviveUsed = false;
+    this.boostUsed = false;
+    this.busy = false;
+    this.resultObjs = [];
     this.cameras.main.setBackgroundColor(this.era.sky);
     const bgKey = `bg_${this.era.id}_far`;
     if (this.textures.exists(bgKey)) this.add.image(W / 2, 200, bgKey).setDisplaySize(W, 400);
@@ -58,6 +68,9 @@ export class BattleScene extends Phaser.Scene {
       fontSize: '16px', color: '#fff', backgroundColor: '#6a2cdc', padding: { x: 12, y: 18 }, align: 'center',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     this.wormholeBtn.on('pointerdown', () => { if (!this.tutorialBox) this.battle.castWormhole(); });
+
+    this.boostBtn = button(this, W - 120, H - 125, 170, 34, t('boost_energy'), () => this.watchBoost(), { color: 0xd98324, fontSize: 15 });
+    services.analytics.track('level_start', { level: this.level.id });
 
     this.tutorialStep = 0;
     this.tutorialBox = undefined;
@@ -132,7 +145,7 @@ export class BattleScene extends Phaser.Scene {
     }
     for (const [uid, s] of this.sprites) if (!alive.has(uid)) { s.destroy(); this.sprites.delete(uid); }
 
-    this.energyText.setText(`${t('energy')}: ${Math.floor(b.energy)}/${MAX_ENERGY}`);
+    this.energyText.setText(`${t('energy')}: ${Math.floor(b.energy)}/${MAX_ENERGY}${b.boostActive ? '  ' + t('energy_boost_on') : ''}`);
     for (const ub of this.unitButtons) ub.bg.setAlpha(b.energy >= ub.cost ? 1 : 0.4);
     const cd = Math.ceil(b.wormholeCd);
     this.wormholeBtn.setText(cd > 0 ? `${t('wormhole')}\n${cd}s` : `${t('wormhole')}\n🌀`);
@@ -141,22 +154,72 @@ export class BattleScene extends Phaser.Scene {
     if (b.outcome !== 'playing' && !this.ended) { this.ended = true; this.showResult(); }
   }
 
+  private async watchBoost() {
+    if (this.boostUsed || this.busy || this.tutorialBox || this.battle.outcome !== 'playing') return;
+    this.busy = true;
+    try {
+      if (await services.ads.showRewarded('energy_boost')) {
+        this.battle.energyBoost(); this.boostUsed = true; this.boostBtn?.setVisible(false);
+        services.analytics.track('ad_rewarded', { placement: 'energy_boost' });
+      }
+    } finally { this.busy = false; }
+  }
+
+  private addResult<T extends Phaser.GameObjects.GameObject>(o: T): T { this.resultObjs.push(o); return o; }
+
+  private clearResult() { this.resultObjs.forEach(o => o.destroy()); this.resultObjs = []; }
+
   private showResult() {
     const b = this.battle;
     const win = b.outcome === 'win';
     let msg = t(win ? 'win' : 'lose');
+    let coins = 0;
     if (win) {
       const stars = starsFor(b.playerBaseHp / b.playerBaseMax);
-      const coins = applyWin(game.save, this.level, stars);
+      coins = applyWin(game.save, this.level, stars);
       persist();
       msg += `\n${'★'.repeat(stars)}${'·'.repeat(3 - stars)}\n${t('reward')}: 🪙 ${coins}`;
     }
-    this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.65).setDepth(20);
-    this.add.text(W / 2, 170, msg, { fontSize: '30px', color: '#fff', align: 'center', lineSpacing: 10 }).setOrigin(0.5).setDepth(21);
+    services.analytics.track('level_end', { level: this.level.id, win: win ? 1 : 0, revived: this.reviveUsed ? 1 : 0 });
+    this.addResult(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.65).setDepth(20));
+    this.addResult(this.add.text(W / 2, 140, msg, { fontSize: '30px', color: '#fff', align: 'center', lineSpacing: 10 }).setOrigin(0.5).setDepth(21));
+
+    // Extras OPCIONALES: nunca se muestra un anuncio sin que el jugador toque el botón.
+    if (win && coins > 0) {
+      const dbl = this.addResult(button(this, W / 2, 255, 320, 50, tf('double_reward', { n: coins }), async () => {
+        if (this.busy) return; this.busy = true;
+        try {
+          if (await services.ads.showRewarded('double_reward')) {
+            doubleReward(game.save, coins); persist(); dbl.destroy();
+            services.analytics.track('ad_rewarded', { placement: 'double_reward' });
+            this.addResult(this.add.text(W / 2, 255, `🪙 +${coins}`, { fontSize: '26px', color: '#ffe066' }).setOrigin(0.5).setDepth(21));
+          }
+        } finally { this.busy = false; }
+      }, { color: 0xd98324, fontSize: 18 }).setDepth(21));
+    }
+    if (!win && !this.reviveUsed) {
+      this.addResult(button(this, W / 2 - 170, 255, 300, 50, t('revive'), async () => {
+        if (this.busy) return; this.busy = true;
+        try {
+          if (await services.ads.showRewarded('revive')) {
+            services.analytics.track('ad_rewarded', { placement: 'revive' }); this.doRevive();
+          }
+        } finally { this.busy = false; }
+      }, { color: 0xd98324, fontSize: 18 }).setDepth(21));
+      this.addResult(button(this, W / 2 + 170, 255, 300, 50, tf('revive_gems', { n: REVIVE_GEMS }), () => {
+        if (spendGems(game.save, REVIVE_GEMS)) { persist(); this.doRevive(); }
+      }, { color: 0x2a7fb8, fontSize: 18, disabled: game.save.gems < REVIVE_GEMS }).setDepth(21));
+    }
+
     const idx = LEVELS.indexOf(this.level), next = LEVELS[idx + 1];
     const btns: [string, () => void][] = [[t('retry'), () => this.scene.restart({ levelId: this.level.id })], [t('map'), () => this.scene.start('EraMap')]];
     if (win && next) btns.splice(1, 0, [t('next'), () => this.scene.start('Battle', { levelId: next.id })]);
-    btns.forEach(([label, cb], i) => button(this, W / 2 + (i - (btns.length - 1) / 2) * 180, 330, 160, 56, label, cb).setDepth(21));
+    btns.forEach(([label, cb], i) => this.addResult(button(this, W / 2 + (i - (btns.length - 1) / 2) * 180, 360, 160, 56, label, cb).setDepth(21)));
+  }
+
+  private doRevive() {
+    if (!this.battle.revive()) return;
+    this.reviveUsed = true; this.ended = false; this.clearResult();
   }
 
   private bar(g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, pct: number, color: number) {

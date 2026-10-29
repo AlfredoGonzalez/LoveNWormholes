@@ -59,7 +59,7 @@ describe('i18n', () => {
   });
 });
 
-import { applyWin, buyUpgrade, claimDaily, isUnlocked, modsFrom, starsFor } from '../src/game/economy';
+import { CHEST_COOLDOWN_MS, applyPurchase, applyWin, buyUpgrade, chestRemainingMs, claimDaily, doubleReward, exchangeGems, hasDoubleCoins, isUnlocked, modsFrom, openChest, restoreOwned, spendGems, starsFor } from '../src/game/economy';
 import { defaultSave, loadSave, migrate, writeSave } from '../src/services/save';
 
 const bot = (b: Battle) => {
@@ -168,5 +168,64 @@ describe('dificultad', () => {
     const b = new Battle(l);
     for (let i = 0; i < 8000 && b.outcome === 'playing'; i++) b.update(0.05);
     expect(b.outcome).toBe('lose');
+  });
+});
+
+describe('monetización', () => {
+  it('gemas consumibles se acumulan; no consumibles solo una vez', () => {
+    const s = defaultSave();
+    expect(applyPurchase(s, 'gems_s')).toBe(true);
+    expect(applyPurchase(s, 'gems_s')).toBe(true);
+    expect(s.gems).toBe(200);
+    expect(applyPurchase(s, 'starter')).toBe(true);
+    expect(applyPurchase(s, 'starter')).toBe(false);
+    expect(s.coins).toBe(500);
+    expect(applyPurchase(s, 'no_existe')).toBe(false);
+  });
+  it('monedas x2 permanente duplica recompensas de victoria', () => {
+    const a = defaultSave(), b = defaultSave();
+    applyPurchase(b, 'double_coins');
+    expect(hasDoubleCoins(b)).toBe(true);
+    expect(applyWin(b, LEVELS[0], 3)).toBe(applyWin(a, LEVELS[0], 3) * 2);
+  });
+  it('restaurar marca no consumibles sin regalar recursos', () => {
+    const s = defaultSave();
+    restoreOwned(s, ['double_coins', 'gems_s', 'starter']);
+    expect(s.owned.sort()).toEqual(['double_coins', 'starter']);
+    expect(s.coins + s.gems).toBe(0);
+  });
+  it('cofre gratis respeta el enfriamiento', () => {
+    const s = defaultSave(), now = 1_000_000;
+    const r = openChest(s, now, 0.5)!;
+    expect(r.coins).toBeGreaterThanOrEqual(50);
+    expect(openChest(s, now + 1000, 0.5)).toBeNull();
+    expect(chestRemainingMs(s, now)).toBe(CHEST_COOLDOWN_MS);
+    expect(openChest(s, now + CHEST_COOLDOWN_MS, 0.9)!.gems).toBe(5);
+  });
+  it('cambio de gemas, gasto y duplicar recompensa', () => {
+    const s = defaultSave();
+    expect(exchangeGems(s)).toBe(false);
+    s.gems = 25;
+    expect(exchangeGems(s)).toBe(true);
+    expect(s.gems).toBe(15);
+    expect(spendGems(s, 20)).toBe(false);
+    expect(spendGems(s, 10)).toBe(true);
+    s.coins = 10; doubleReward(s, 10);
+    expect(s.coins).toBe(20);
+  });
+  it('revivir devuelve la partida y el boost de energía acelera la regeneración', () => {
+    const b = new Battle(LEVELS[0]);
+    b.units = [];           // sin héroe → derrota
+    b.update(0.1);
+    expect(b.outcome).toBe('lose');
+    expect(b.revive()).toBe(true);
+    expect(b.outcome).toBe('playing');
+    expect(b.units.some(u => u.isHero)).toBe(true);
+    expect(b.revive()).toBe(false); // solo si se perdió
+
+    const a = new Battle(LEVELS[0]), c = new Battle(LEVELS[0]);
+    a.energy = c.energy = 0; c.energyBoost();
+    a.update(1); c.update(1);
+    expect(c.energy).toBeCloseTo(a.energy * 2, 5);
   });
 });

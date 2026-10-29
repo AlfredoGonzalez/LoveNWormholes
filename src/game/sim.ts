@@ -31,6 +31,8 @@ export const SANDSTORM_SLOW = 0.6;
 export const GHOST_LIFETIME = 12;
 export const METEOR_RADIUS = 90;
 export const STAMPEDE_PUSH = 120;
+export const BOOST_SECONDS = 30;
+export const REVIVE_CLEAR_X = 300;
 
 /** Generador pseudoaleatorio determinista (mulberry32) para poder probar las anomalías. */
 function rng(seed: number) {
@@ -56,6 +58,8 @@ export class Battle {
   outcome: Outcome = 'playing';
   readonly era: EraDef;
   sandUntil = 0;
+  boostUntil = 0;
+  private heroDef!: UnitDef;
   private events: BattleEvent[] = [];
   private nextUid = 1;
   private waveIdx = 0;
@@ -70,7 +74,23 @@ export class Battle {
     this.playerBaseHp = this.playerBaseMax;
     this.enemyBaseHp = level.enemyBaseHp;
     const hero = scaleUnit(HERO_DEF, this.era.power);
-    this.spawn({ ...hero, damage: hero.damage * mods.heroDamage }, 'player', true);
+    this.heroDef = { ...hero, damage: hero.damage * mods.heroDamage };
+    this.spawn(this.heroDef, 'player', true);
+  }
+
+  get boostActive() { return this.time < this.boostUntil; }
+
+  /** Energía x2 por unos segundos (recompensa de anuncio opcional). */
+  energyBoost(seconds = BOOST_SECONDS) { this.boostUntil = this.time + seconds; }
+
+  /** Segunda oportunidad: recupera el hogar al 50 %, devuelve al héroe y despeja enemigos cercanos. */
+  revive(): boolean {
+    if (this.outcome !== 'lose') return false;
+    this.playerBaseHp = Math.max(this.playerBaseHp, this.playerBaseMax * 0.5);
+    this.units = this.units.filter(u => u.side === 'player' || u.x > REVIVE_CLEAR_X);
+    if (!this.units.some(u => u.isHero)) this.spawn(this.heroDef, 'player', true);
+    this.outcome = 'playing';
+    return true;
   }
 
   get sandstormActive() { return this.time < this.sandUntil; }
@@ -127,7 +147,7 @@ export class Battle {
   update(dt: number) {
     if (this.outcome !== 'playing') return;
     this.time += dt;
-    this.energy = Math.min(MAX_ENERGY, this.energy + ENERGY_REGEN * this.mods.energyRegen * dt);
+    this.energy = Math.min(MAX_ENERGY, this.energy + ENERGY_REGEN * this.mods.energyRegen * (this.boostActive ? 2 : 1) * dt);
     this.wormholeCd = Math.max(0, this.wormholeCd - dt);
 
     this.anomalyTimer -= dt;
