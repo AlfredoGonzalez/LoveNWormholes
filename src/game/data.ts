@@ -26,24 +26,57 @@ export const ENEMY_UNITS: Record<string, UnitDef> = {
   mammoth: { id: 'mammoth', nameKey: 'enemy_mammoth', cost: 0, hp: 900, damage: 35, range: 50, speed: 22, cooldown: 1.6, color: 0x6b4423, size: 44 },
 };
 
+export interface WaveEntry { at: number; enemy: string; count: number }
+
 export const HERO_DEF: UnitDef = {
   id: 'hero', nameKey: 'unit_chief', cost: 0, hp: 300, damage: 18, range: 40, speed: 55, cooldown: 0.7, color: 0xff7bac, size: 24,
 };
 
-export interface WaveEntry { at: number; enemy: string; count: number }
+export interface LevelDef {
+  id: string;
+  eraId: string;
+  nameKey: Key;
+  laneLength: number;
+  baseHp: number;
+  coins: number; // recompensa base por estrella
+  waves: WaveEntry[];
+}
 
-// Prehistoria nivel 1: oleadas por tiempo, jefe al final.
-export const LEVEL_PREHISTORIA_1 = {
-  eraId: 'prehistoria',
-  laneLength: 1000,
-  baseHp: 500,
-  waves: [
-    { at: 2, enemy: 'rat', count: 2 },
-    { at: 15, enemy: 'rat', count: 3 },
-    { at: 30, enemy: 'bird', count: 2 },
-    { at: 45, enemy: 'rat', count: 4 },
-    { at: 60, enemy: 'bird', count: 3 },
-    { at: 80, enemy: 'mammoth', count: 1 },
-  ] as WaveEntry[],
-};
-export type LevelDef = typeof LEVEL_PREHISTORIA_1;
+export const LEVELS: LevelDef[] = [
+  {
+    id: 'prehistoria-1', eraId: 'prehistoria', nameKey: 'level_prehistoria_1', laneLength: 1000, baseHp: 500, coins: 30,
+    waves: [
+      { at: 2, enemy: 'rat', count: 2 },
+      { at: 15, enemy: 'rat', count: 3 },
+      { at: 30, enemy: 'bird', count: 2 },
+      { at: 45, enemy: 'rat', count: 4 },
+      { at: 60, enemy: 'bird', count: 3 },
+      { at: 80, enemy: 'mammoth', count: 1 },
+    ],
+  },
+  {
+    id: 'prehistoria-2', eraId: 'prehistoria', nameKey: 'level_prehistoria_2', laneLength: 1000, baseHp: 500, coins: 45,
+    waves: [
+      { at: 2, enemy: 'rat', count: 3 },
+      { at: 12, enemy: 'bird', count: 2 },
+      { at: 25, enemy: 'rat', count: 5 },
+      { at: 40, enemy: 'bird', count: 4 },
+      { at: 55, enemy: 'rat', count: 6 },
+      { at: 70, enemy: 'bird', count: 5 },
+      { at: 90, enemy: 'mammoth', count: 1 },
+    ],
+  },
+  {
+    id: 'prehistoria-3', eraId: 'prehistoria', nameKey: 'level_prehistoria_3', laneLength: 1000, baseHp: 500, coins: 60,
+    waves: [
+      { at: 2, enemy: 'bird', count: 3 },
+      { at: 15, enemy: 'rat', count: 6 },
+      { at: 30, enemy: 'mammoth', count: 1 },
+      { at: 50, enemy: 'bird', count: 5 },
+      { at: 65, enemy: 'rat', count: 8 },
+      { at: 85, enemy: 'mammoth', count: 2 },
+    ],
+  },
+];
+
+export const levelById = (id: string): LevelDef => LEVELS.find(l => l.id === id) ?? LEVELS[0];

@@ -13,6 +13,10 @@ export interface Unit {
   isHero: boolean;
 }
 
+/** Multiplicadores que vienen de las mejoras permanentes. */
+export interface Mods { energyRegen: number; baseHp: number; heroDamage: number }
+export const NO_MODS: Mods = { energyRegen: 1, baseHp: 1, heroDamage: 1 };
+
 export const MAX_ENERGY = 100;
 export const ENERGY_REGEN = 10; // por segundo
 export const WORMHOLE_COOLDOWN = 20;
@@ -25,15 +29,17 @@ export class Battle {
   wormholeCd = 0;
   units: Unit[] = [];
   playerBaseHp: number;
+  readonly playerBaseMax: number;
   enemyBaseHp: number;
   outcome: Outcome = 'playing';
   private nextUid = 1;
   private waveIdx = 0;
 
-  constructor(readonly level: LevelDef) {
-    this.playerBaseHp = level.baseHp;
+  constructor(readonly level: LevelDef, private readonly mods: Mods = NO_MODS) {
+    this.playerBaseMax = Math.round(level.baseHp * mods.baseHp);
+    this.playerBaseHp = this.playerBaseMax;
     this.enemyBaseHp = level.baseHp;
-    this.spawn(HERO_DEF, 'player', true);
+    this.spawn({ ...HERO_DEF, damage: HERO_DEF.damage * mods.heroDamage }, 'player', true);
   }
 
   get enemyBaseX() { return this.level.laneLength; }
@@ -65,7 +71,7 @@ export class Battle {
   update(dt: number) {
     if (this.outcome !== 'playing') return;
     this.time += dt;
-    this.energy = Math.min(MAX_ENERGY, this.energy + ENERGY_REGEN * dt);
+    this.energy = Math.min(MAX_ENERGY, this.energy + ENERGY_REGEN * this.mods.energyRegen * dt);
     this.wormholeCd = Math.max(0, this.wormholeCd - dt);
 
     const waves = this.level.waves;

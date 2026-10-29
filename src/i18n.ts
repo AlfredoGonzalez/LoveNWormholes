@@ -20,6 +20,28 @@ const dict = {
     enemy_bird: 'Pájaro dientes',
     enemy_mammoth: 'Mamut peludo',
     story_intro: 'Gusanita tocó un botón raro... ¡y desapareció! Gusanito: "¡Voy por ti, mi amor!"',
+    level_prehistoria_1: 'Primer paso',
+    level_prehistoria_2: 'Valle de las ratas',
+    level_prehistoria_3: 'La manada peluda',
+    play: 'Jugar',
+    upgrades: 'Mejoras',
+    back: 'Volver',
+    next: 'Siguiente',
+    map: 'Mapa',
+    coins: 'Monedas',
+    locked: 'Bloqueado',
+    up_energy: 'Energía más rápida',
+    up_base: 'Hogar resistente',
+    up_hero: 'Gusanito fuerte',
+    maxed: 'MAX',
+    daily: 'Regalo diario',
+    daily_claimed: '¡Regalo diario: +{n} monedas!',
+    language: 'Idioma: Español',
+    tut1: 'Toca una unidad para invocarla. Cuesta energía ⚡',
+    tut2: 'Gusanito pelea solo. ¡Protege tu hogar!',
+    tut3: 'El agujero de gusano daña a todos los enemigos. ¡Úsalo en apuros!',
+    tap_continue: '(toca para continuar)',
+    reward: 'Recompensa',
   },
   en: {
     title: 'Love N Wormholes',
@@ -40,6 +62,28 @@ const dict = {
     enemy_bird: 'Toothy bird',
     enemy_mammoth: 'Woolly mammoth',
     story_intro: 'Gusanita pressed a weird button... and vanished! Gusanito: "I\'m coming for you, my love!"',
+    level_prehistoria_1: 'First step',
+    level_prehistoria_2: 'Rat valley',
+    level_prehistoria_3: 'The furry herd',
+    play: 'Play',
+    upgrades: 'Upgrades',
+    back: 'Back',
+    next: 'Next',
+    map: 'Map',
+    coins: 'Coins',
+    locked: 'Locked',
+    up_energy: 'Faster energy',
+    up_base: 'Sturdy home',
+    up_hero: 'Strong Gusanito',
+    maxed: 'MAX',
+    daily: 'Daily gift',
+    daily_claimed: 'Daily gift: +{n} coins!',
+    language: 'Language: English',
+    tut1: 'Tap a unit to summon it. It costs energy ⚡',
+    tut2: 'Gusanito fights on his own. Protect your home!',
+    tut3: 'The wormhole damages every enemy. Use it when in trouble!',
+    tap_continue: '(tap to continue)',
+    reward: 'Reward',
   },
 } as const;
 
@@ -51,3 +95,7 @@ export const setLang = (l: Lang) => { lang = l; };
 export const getLang = () => lang;
 export const t = (k: Key): string => dict[lang][k];
 export const dictionaries = dict;
+
+/** Traducción con variables: tf('daily_claimed', { n: 100 }) */
+export const tf = (k: Key, vars: Record<string, string | number>): string =>
+  Object.entries(vars).reduce((s, [n, v]) => s.replace(`{${n}}`, String(v)), t(k));
