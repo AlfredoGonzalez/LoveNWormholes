@@ -164,45 +164,6 @@ cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown out
 ```
 
 
-### Jefe de la tribu · `chief` · aliado
-
-_Descripción:_ a worm tribe chief, red-pink, huge feathered headdress, bone necklace, holding a carved totem staff, proud expression
-
-#### `chief_idle.png`
-**Archivo:** `chief_idle.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a worm tribe chief, red-pink, huge feathered headdress, bone necklace, holding a carved totem staff, proud expression. IDLE loop (calm breathing): frame 1 neutral, frame 2 body slightly stretched up, frame 3 neutral, frame 4 body slightly squashed down. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-#### `chief_walk.png`
-**Archivo:** `chief_walk.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-_Adjunta `chief_idle.png` como referencia._
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a worm tribe chief, red-pink, huge feathered headdress, bone necklace, holding a carved totem staff, proud expression. WALK cycle (worm inching forward, facing right): frame 1 body compressed, frame 2 front stretching forward, frame 3 fully stretched, frame 4 back pulling forward. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-#### `chief_attack.png`
-**Archivo:** `chief_attack.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-_Adjunta `chief_idle.png` como referencia._
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a worm tribe chief, red-pink, huge feathered headdress, bone necklace, holding a carved totem staff, proud expression. ATTACK: frame 1 wind-up (leaning back), frame 2 strike at full extension, frame 3 follow-through with a small impact spark, frame 4 recovery. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-#### `chief_die.png`
-**Archivo:** `chief_die.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-_Adjunta `chief_idle.png` como referencia._
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a worm tribe chief, red-pink, huge feathered headdress, bone necklace, holding a carved totem staff, proud expression. DEFEAT: frame 1 hit flinch, frame 2 dizzy with little stars, frame 3 flattened on the ground, frame 4 fading away with sparkles. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-
 ### Rata cavernaria · `rat` · enemigo
 
 _Descripción:_ a cave rat with oversized front teeth, brown, tiny stone axe, angry but cute
@@ -477,45 +438,6 @@ _Adjunta `sarcophagus_idle.png` como referencia._
 
 ```text
 cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a sturdy worm inside a half-open golden sarcophagus used as armor, only eyes and arms visible, grumpy cute. DEFEAT: frame 1 hit flinch, frame 2 dizzy with little stars, frame 3 flattened on the ground, frame 4 fading away with sparkles. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-
-### Faraón Gusano · `pharaoh` · aliado
-
-_Descripción:_ a blue worm pharaoh with a tall double crown, golden crook and flail, regal and slightly pompous
-
-#### `pharaoh_idle.png`
-**Archivo:** `pharaoh_idle.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a blue worm pharaoh with a tall double crown, golden crook and flail, regal and slightly pompous. IDLE loop (calm breathing): frame 1 neutral, frame 2 body slightly stretched up, frame 3 neutral, frame 4 body slightly squashed down. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-#### `pharaoh_walk.png`
-**Archivo:** `pharaoh_walk.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-_Adjunta `pharaoh_idle.png` como referencia._
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a blue worm pharaoh with a tall double crown, golden crook and flail, regal and slightly pompous. WALK cycle (worm inching forward, facing right): frame 1 body compressed, frame 2 front stretching forward, frame 3 fully stretched, frame 4 back pulling forward. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-#### `pharaoh_attack.png`
-**Archivo:** `pharaoh_attack.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-_Adjunta `pharaoh_idle.png` como referencia._
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a blue worm pharaoh with a tall double crown, golden crook and flail, regal and slightly pompous. ATTACK: frame 1 wind-up (leaning back), frame 2 strike at full extension, frame 3 follow-through with a small impact spark, frame 4 recovery. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-#### `pharaoh_die.png`
-**Archivo:** `pharaoh_die.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-_Adjunta `pharaoh_idle.png` como referencia._
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a blue worm pharaoh with a tall double crown, golden crook and flail, regal and slightly pompous. DEFEAT: frame 1 hit flinch, frame 2 dizzy with little stars, frame 3 flattened on the ground, frame 4 fading away with sparkles. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
 ```
 
 
@@ -796,45 +718,6 @@ cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown out
 ```
 
 
-### Rey Gusano · `king` · aliado
-
-_Descripción:_ a red-robed worm king with a golden crown and an ermine cape, holding a scepter, proud
-
-#### `king_idle.png`
-**Archivo:** `king_idle.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a red-robed worm king with a golden crown and an ermine cape, holding a scepter, proud. IDLE loop (calm breathing): frame 1 neutral, frame 2 body slightly stretched up, frame 3 neutral, frame 4 body slightly squashed down. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-#### `king_walk.png`
-**Archivo:** `king_walk.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-_Adjunta `king_idle.png` como referencia._
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a red-robed worm king with a golden crown and an ermine cape, holding a scepter, proud. WALK cycle (worm inching forward, facing right): frame 1 body compressed, frame 2 front stretching forward, frame 3 fully stretched, frame 4 back pulling forward. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-#### `king_attack.png`
-**Archivo:** `king_attack.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-_Adjunta `king_idle.png` como referencia._
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a red-robed worm king with a golden crown and an ermine cape, holding a scepter, proud. ATTACK: frame 1 wind-up (leaning back), frame 2 strike at full extension, frame 3 follow-through with a small impact spark, frame 4 recovery. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-#### `king_die.png`
-**Archivo:** `king_die.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-_Adjunta `king_idle.png` como referencia._
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a red-robed worm king with a golden crown and an ermine cape, holding a scepter, proud. DEFEAT: frame 1 hit flinch, frame 2 dizzy with little stars, frame 3 flattened on the ground, frame 4 fading away with sparkles. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-
 ### Duende ladrón · `goblin` · enemigo
 
 _Descripción:_ a sneaky green goblin with a dagger and a stolen coin bag, big ears, mischievous grin
@@ -1109,45 +992,6 @@ _Adjunta `barrel_idle.png` como referencia._
 
 ```text
 cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a sturdy worm wearing a wooden barrel as armor, only eyes and feet visible, grumpy cute. DEFEAT: frame 1 hit flinch, frame 2 dizzy with little stars, frame 3 flattened on the ground, frame 4 fading away with sparkles. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-
-### Gusano sheriff · `sheriff` · aliado
-
-_Descripción:_ a golden worm sheriff with a big star badge, long mustache, cowboy hat
-
-#### `sheriff_idle.png`
-**Archivo:** `sheriff_idle.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a golden worm sheriff with a big star badge, long mustache, cowboy hat. IDLE loop (calm breathing): frame 1 neutral, frame 2 body slightly stretched up, frame 3 neutral, frame 4 body slightly squashed down. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-#### `sheriff_walk.png`
-**Archivo:** `sheriff_walk.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-_Adjunta `sheriff_idle.png` como referencia._
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a golden worm sheriff with a big star badge, long mustache, cowboy hat. WALK cycle (worm inching forward, facing right): frame 1 body compressed, frame 2 front stretching forward, frame 3 fully stretched, frame 4 back pulling forward. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-#### `sheriff_attack.png`
-**Archivo:** `sheriff_attack.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-_Adjunta `sheriff_idle.png` como referencia._
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a golden worm sheriff with a big star badge, long mustache, cowboy hat. ATTACK: frame 1 wind-up (leaning back), frame 2 strike at full extension, frame 3 follow-through with a small impact spark, frame 4 recovery. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
-```
-
-#### `sheriff_die.png`
-**Archivo:** `sheriff_die.png` → `public/assets/characters/` · **Tamaño final:** 1024×256 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
-
-_Adjunta `sheriff_idle.png` como referencia._
-
-```text
-cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Sprite sheet of a golden worm sheriff with a big star badge, long mustache, cowboy hat. DEFEAT: frame 1 hit flinch, frame 2 dizzy with little stars, frame 3 flattened on the ground, frame 4 fading away with sparkles. 4 frames arranged in a single horizontal row (aspect ratio 4:1, final 1024×256 px, each frame 256×256 px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
 ```
 
 

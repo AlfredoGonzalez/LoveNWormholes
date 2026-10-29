@@ -42,7 +42,6 @@ const SUBJECT: Record<string, string> = {
   stick: 'a small tan-orange worm warrior holding a big wooden club almost taller than itself, fur loincloth',
   slinger: 'a small green worm with a leather sling and a pebble, leaf hat, mischievous grin',
   rock: 'a big sturdy grey worm carrying a huge round rock as a shield, stone helmet, grumpy cute face',
-  chief: 'a worm tribe chief, red-pink, huge feathered headdress, bone necklace, holding a carved totem staff, proud expression',
   rat: 'a cave rat with oversized front teeth, brown, tiny stone axe, angry but cute',
   bird: 'a toothy prehistoric bird, blue, small wings, sharp beak with teeth, silly menacing look',
   mammoth: 'a giant woolly mammoth boss, brown shaggy fur, large curved tusks, grumpy eyes, wearing a tiny crown, imposing yet comical',
@@ -50,7 +49,6 @@ const SUBJECT: Record<string, string> = {
   spear: 'a small golden-tan worm warrior with a long spear, linen kilt, kohl eyes, brave face',
   archer: 'a teal worm archer with a bow and a papyrus quiver, eye-of-Horus necklace, focused look',
   sarcophagus: 'a sturdy worm inside a half-open golden sarcophagus used as armor, only eyes and arms visible, grumpy cute',
-  pharaoh: 'a blue worm pharaoh with a tall double crown, golden crook and flail, regal and slightly pompous',
   scarab: 'an angry dark-blue scarab beetle with tiny gold wings and little mandibles, cute but fierce',
   mummy: 'a bandaged mummy with one eye peeking out, arms stretched forward, a funny trailing bandage',
   scarabking: 'a giant golden scarab king boss, jeweled shell, tiny crown, glowing eyes, imposing yet comical',
@@ -58,7 +56,6 @@ const SUBJECT: Record<string, string> = {
   sword: 'a grey worm squire with a small sword and a wooden shield, tiny chainmail cap',
   crossbow: 'a green worm crossbowman in a hood, big crossbow, cheeky smile',
   knight: 'a big sturdy worm in full plate armor with a tower shield, visor slit showing eyes',
-  king: 'a red-robed worm king with a golden crown and an ermine cape, holding a scepter, proud',
   goblin: 'a sneaky green goblin with a dagger and a stolen coin bag, big ears, mischievous grin',
   skeleton: 'a dancing skeleton with a rusty sword, floppy pose, funny not scary',
   dragon: 'a big sleepy dragon boss, brown-orange scales, half-closed eyes, small wings, tiny smoke puffs, cute and imposing',
@@ -66,7 +63,6 @@ const SUBJECT: Record<string, string> = {
   cowboy: 'a brown worm cowboy with a lasso and a hat, bandana, determined',
   sharp: 'a dark-teal worm gunslinger with a revolver, poncho, squinting eyes',
   barrel: 'a sturdy worm wearing a wooden barrel as armor, only eyes and feet visible, grumpy cute',
-  sheriff: 'a golden worm sheriff with a big star badge, long mustache, cowboy hat',
   coyote: 'a bandit coyote with a mask and a bandana, sneaky grin, small pistol',
   outlaw: 'an outlaw cactus with a tiny hat and an angry face, spiky arms',
   scorpion: 'a giant scorpion boss wearing a sheriff hat and a star badge, big claws, purple-maroon shell, comical menace',
@@ -128,6 +124,7 @@ icon('gem.png', 'a single cute purple crystal gem with facets and a small sparkl
 icon('star_full.png', 'a chunky golden star with a thick outline and a small highlight, happy', true);
 icon('star_empty.png', 'a chunky grey-blue star, empty/unearned, thick outline, no shine', true);
 icon('energy.png', 'a yellow-orange lightning bolt with a thick outline and a small highlight', false, 'magenta', 128, 3);
+icon('bone_coin.png', 'a small cartoon bone used as a battle currency, slightly shiny, with a tiny highlight', false, 'magenta', 128, 3, 'moneda de batalla (huesos): se gana al derrotar enemigos y se reinicia en cada nivel');
 icon('wormhole.png', 'a swirling spiral wormhole portal, purple to cyan rings, sparkles, glowing, front view', false, 'white', 256, 3);
 icon('heart.png', 'a glowing pink heart with tiny wings and sparkles (used for revive)', false, 'white', 256, 3);
 icon('lock.png', 'a cute padlock icon, grey-blue with a thick outline', false, 'magenta', 128, 4);

@@ -37,7 +37,7 @@ export interface EraDef {
   power: number;      // factor de poder de unidades/bases de la era
   sky: number;
   ground: number;
-  units: UnitDef[];   // las 4 unidades invocables de la era
+  units: UnitDef[];   // las 3 unidades invocables de la era: [cuerpo a cuerpo, a distancia, fuerte]
   enemies: UnitDef[]; // [pequeño, mediano, jefe]
   ghost: UnitDef;     // aliado fantasma (anomalía 'ghost')
   anomaly: AnomalyDef;
@@ -46,11 +46,10 @@ export interface EraDef {
 
 // ---- Arquetipos (balance base de la Prehistoria; cada era los escala con `power`) ----
 type Stats = Omit<UnitDef, 'id' | 'nameKey' | 'color'>;
-const PLAYER: Record<'fighter' | 'ranged' | 'tank' | 'elite', Stats> = {
-  fighter: { cost: 20, hp: 60, damage: 8, range: 30, speed: 55, cooldown: 0.8, size: 18 },
-  ranged: { cost: 35, hp: 40, damage: 10, range: 140, speed: 45, cooldown: 1.1, size: 16 },
-  tank: { cost: 60, hp: 220, damage: 12, range: 32, speed: 35, cooldown: 1.4, size: 26 },
-  elite: { cost: 100, hp: 160, damage: 30, range: 45, speed: 50, cooldown: 1.0, size: 24 },
+const PLAYER: Record<'fighter' | 'ranged' | 'brute', Stats> = {
+  fighter: { cost: 20, hp: 60, damage: 8, range: 30, speed: 55, cooldown: 0.8, size: 18 },   // cuerpo a cuerpo, barato
+  ranged: { cost: 40, hp: 40, damage: 11, range: 140, speed: 45, cooldown: 1.1, size: 16 },   // a distancia
+  brute: { cost: 90, hp: 280, damage: 26, range: 36, speed: 36, cooldown: 1.2, size: 28 },    // mucha vida y mucha fuerza
 };
 const ENEMY: Record<'small' | 'mid' | 'boss', Stats> = {
   small: { cost: 0, hp: 40, damage: 6, range: 28, speed: 60, cooldown: 0.8, size: 16 },
@@ -80,7 +79,7 @@ function genWaves(small: string, mid: string, boss: string, lvl: number): WaveEn
 function levels(eraId: string, eraIdx: number, power: number, names: [Key, Key, Key], ids: [string, string, string]): LevelDef[] {
   return names.map((nameKey, i) => ({
     id: `${eraId}-${i + 1}`, eraId, nameKey, laneLength: 1000,
-    baseHp: Math.round(500 * power), enemyBaseHp: Math.round((1500 + i * 700) * power), enemyBoost: [1.3, 1.6, 1.8][i], coins: 30 + eraIdx * 20 + i * 15,
+    baseHp: Math.round(500 * power), enemyBaseHp: Math.round((1500 + i * 700) * power), enemyBoost: [1.7, 2.0, 1.8][i], coins: 30 + eraIdx * 20 + i * 15,
     waves: genWaves(ids[0], ids[1], ids[2], i),
   }));
 }
@@ -96,8 +95,7 @@ const prehistoria: EraDef = {
   units: [
     mk('stick', 'unit_stick', PLAYER.fighter, 0xf2a65a, 1),
     mk('slinger', 'unit_slinger', PLAYER.ranged, 0x7bc67e, 1),
-    mk('rock', 'unit_rock', PLAYER.tank, 0x9a8f97, 1),
-    mk('chief', 'unit_chief', PLAYER.elite, 0xe85d75, 1),
+    mk('rock', 'unit_rock', PLAYER.brute, 0x9a8f97, 1),
   ],
   enemies: [
     mk('rat', 'enemy_rat', ENEMY.small, 0x8a6d5a, 1),
@@ -111,14 +109,14 @@ const prehistoria: EraDef = {
 // Los 3 niveles de la Prehistoria tienen oleadas escritas a mano.
 prehistoria.levels = [
   {
-    id: 'prehistoria-1', eraId: 'prehistoria', nameKey: 'level_prehistoria_1', laneLength: 1000, baseHp: 500, enemyBaseHp: 1500, enemyBoost: 1.3, coins: 30,
+    id: 'prehistoria-1', eraId: 'prehistoria', nameKey: 'level_prehistoria_1', laneLength: 1000, baseHp: 500, enemyBaseHp: 1500, enemyBoost: 1.7, coins: 30,
     waves: [
       { at: 2, enemy: 'rat', count: 2 }, { at: 15, enemy: 'rat', count: 3 }, { at: 30, enemy: 'bird', count: 2 },
       { at: 45, enemy: 'rat', count: 4 }, { at: 60, enemy: 'bird', count: 3 }, { at: 80, enemy: 'mammoth', count: 1 },
     ],
   },
   {
-    id: 'prehistoria-2', eraId: 'prehistoria', nameKey: 'level_prehistoria_2', laneLength: 1000, baseHp: 500, enemyBaseHp: 2200, enemyBoost: 1.6, coins: 45,
+    id: 'prehistoria-2', eraId: 'prehistoria', nameKey: 'level_prehistoria_2', laneLength: 1000, baseHp: 500, enemyBaseHp: 2200, enemyBoost: 2.1, coins: 45,
     waves: [
       { at: 2, enemy: 'rat', count: 3 }, { at: 12, enemy: 'bird', count: 2 }, { at: 25, enemy: 'rat', count: 5 },
       { at: 40, enemy: 'bird', count: 4 }, { at: 55, enemy: 'rat', count: 6 }, { at: 70, enemy: 'bird', count: 5 },
@@ -126,7 +124,7 @@ prehistoria.levels = [
     ],
   },
   {
-    id: 'prehistoria-3', eraId: 'prehistoria', nameKey: 'level_prehistoria_3', laneLength: 1000, baseHp: 500, enemyBaseHp: 2900, enemyBoost: 1.3, coins: 60,
+    id: 'prehistoria-3', eraId: 'prehistoria', nameKey: 'level_prehistoria_3', laneLength: 1000, baseHp: 500, enemyBaseHp: 2900, enemyBoost: 1.6, coins: 60,
     waves: [
       { at: 2, enemy: 'bird', count: 3 }, { at: 15, enemy: 'rat', count: 6 }, { at: 30, enemy: 'mammoth', count: 1 },
       { at: 50, enemy: 'bird', count: 5 }, { at: 65, enemy: 'rat', count: 8 }, { at: 85, enemy: 'mammoth', count: 2 },
@@ -139,8 +137,7 @@ const egipto: EraDef = {
   units: [
     mk('spear', 'unit_spear', PLAYER.fighter, 0xd4a017, 1.5),
     mk('archer', 'unit_archer', PLAYER.ranged, 0x2a9d8f, 1.5),
-    mk('sarcophagus', 'unit_sarcophagus', PLAYER.tank, 0xb08d57, 1.5),
-    mk('pharaoh', 'unit_pharaoh', PLAYER.elite, 0x3a6ea5, 1.5),
+    mk('sarcophagus', 'unit_sarcophagus', PLAYER.brute, 0xb08d57, 1.5),
   ],
   enemies: [
     mk('scarab', 'enemy_scarab', ENEMY.small, 0x264653, 1.5),
@@ -158,8 +155,7 @@ const medieval: EraDef = {
   units: [
     mk('sword', 'unit_sword', PLAYER.fighter, 0x8d99ae, 2.1),
     mk('crossbow', 'unit_crossbow', PLAYER.ranged, 0x6a994e, 2.1),
-    mk('knight', 'unit_knight', PLAYER.tank, 0x6c757d, 2.1),
-    mk('king', 'unit_king', PLAYER.elite, 0xb23a48, 2.1),
+    mk('knight', 'unit_knight', PLAYER.brute, 0x6c757d, 2.1),
   ],
   enemies: [
     mk('goblin', 'enemy_goblin', ENEMY.small, 0x588157, 2.1),
@@ -177,8 +173,7 @@ const oeste: EraDef = {
   units: [
     mk('cowboy', 'unit_cowboy', PLAYER.fighter, 0x8c4a2f, 2.8),
     mk('sharp', 'unit_sharp', PLAYER.ranged, 0x264653, 2.8),
-    mk('barrel', 'unit_barrel', PLAYER.tank, 0x9c6644, 2.8),
-    mk('sheriff', 'unit_sheriff', PLAYER.elite, 0xe9c46a, 2.8),
+    mk('barrel', 'unit_barrel', PLAYER.brute, 0x9c6644, 2.8),
   ],
   enemies: [
     mk('coyote', 'enemy_coyote', ENEMY.small, 0xa68a64, 2.8),
@@ -199,3 +194,20 @@ export const levelById = (id: string): LevelDef => LEVELS.find(l => l.id === id)
 
 /** Registro de todos los enemigos por id. */
 export const ENEMY_UNITS: Record<string, UnitDef> = Object.fromEntries(ERAS.flatMap(e => e.enemies).map(u => [u.id, u]));
+
+// ---- Economía de la batalla (estilo WeAreWarriors) ----
+// Las monedas de batalla se ganan matando enemigos, se gastan DENTRO del nivel y se reinician al terminarlo.
+export const BATTLE_ECON = {
+  /** Monedas por enemigo derrotado: [pequeño, mediano, jefe]. */
+  killReward: [10, 16, 150],
+  /** Costo de desbloquear cada unidad de la era (la 1ª viene desbloqueada). */
+  unlockCost: [0, 70, 200],
+  /** Mejoras de energía: costo de cada nivel y bono de regeneración por nivel. */
+  energyCosts: [60, 120, 200, 300],
+  energyBonusPerLevel: 0.3,
+};
+
+/** Recompensa en monedas de batalla por id de enemigo. */
+export const ENEMY_COIN: Record<string, number> = Object.fromEntries(
+  ERAS.flatMap(e => e.enemies.map((u, i) => [u.id, BATTLE_ECON.killReward[i]])),
+);

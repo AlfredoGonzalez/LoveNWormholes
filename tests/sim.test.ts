@@ -11,7 +11,7 @@ describe('Battle', () => {
   it('regenera energía y respeta el costo al invocar', () => {
     const b = new Battle(LEVEL_PREHISTORIA_1);
     const before = b.energy;
-    expect(b.summon(PLAYER_UNITS[3])).toBe(false); // cuesta 100
+    expect(b.summon(PLAYER_UNITS[2])).toBe(false); // bloqueada y cara
     b.update(1);
     expect(b.energy).toBeGreaterThan(before);
     expect(b.summon(PLAYER_UNITS[0])).toBe(true);
@@ -27,11 +27,12 @@ describe('Battle', () => {
   it('el agujero de gusano daña a todos los enemigos y tiene cooldown', () => {
     const b = new Battle(LEVEL_PREHISTORIA_1);
     run(b, 3);
-    const enemies = b.units.filter(u => u.side === 'enemy').length;
-    expect(enemies).toBeGreaterThan(0);
+    const hp = () => b.units.filter(u => u.side === 'enemy').reduce((n, u) => n + u.hp, 0);
+    const before = hp();
+    expect(before).toBeGreaterThan(0);
     expect(b.castWormhole()).toBe(true);
     expect(b.castWormhole()).toBe(false);
-    expect(b.units.filter(u => u.side === 'enemy').length).toBeLessThan(enemies);
+    expect(hp()).toBeLessThan(before);
   });
 
   it('pierde si nadie defiende', () => {
@@ -42,14 +43,7 @@ describe('Battle', () => {
   });
 
   it('un jugador activo puede ganar el nivel 1', () => {
-    const b = new Battle(LEVEL_PREHISTORIA_1);
-    const cheap = PLAYER_UNITS[0], rock = PLAYER_UNITS[2];
-    for (let i = 0; i < 4000 && b.outcome === 'playing'; i++) {
-      b.update(0.05);
-      if (!b.summon(rock)) b.summon(cheap);
-      if (b.wormholeCd === 0 && b.units.filter(u => u.side === 'enemy').length >= 3) b.castWormhole();
-    }
-    expect(b.outcome).toBe('win');
+    expect(bot(new Battle(LEVEL_PREHISTORIA_1))).toBe('win');
   });
 });
 
@@ -62,12 +56,17 @@ describe('i18n', () => {
 import { CHEST_COOLDOWN_MS, applyPurchase, applyWin, buyUpgrade, chestRemainingMs, claimDaily, doubleReward, exchangeGems, hasDoubleCoins, isUnlocked, modsFrom, openChest, restoreOwned, spendGems, starsFor } from '../src/game/economy';
 import { defaultSave, loadSave, migrate, writeSave } from '../src/services/save';
 
+/** Jugador automático: desbloquea unidades y sube la energía con las monedas de batalla, e invoca la más cara que pueda. */
 const bot = (b: Battle) => {
-  const cheap = b.era.units[0], rock = b.era.units[2];
+  const u = b.era.units;
   for (let i = 0; i < 6000 && b.outcome === 'playing'; i++) {
     b.update(0.05);
-    if (!b.summon(rock)) b.summon(cheap);
-    if (b.wormholeCd === 0 && b.units.filter(u => u.side === 'enemy').length >= 3) b.castWormhole();
+    if (!b.unlocked[1]) b.unlockUnit(1);
+    else if (b.energyLevel < 1) b.upgradeEnergy();
+    else if (!b.unlocked[2]) b.unlockUnit(2);
+    else b.upgradeEnergy();
+    for (const k of [2, 1, 0]) if (b.summon(u[k])) break;
+    if (b.wormholeCd === 0 && b.units.filter(x => x.side === 'enemy').length >= 3) b.castWormhole();
   }
   return b.outcome;
 };
@@ -123,11 +122,11 @@ describe('guardado', () => {
 });
 
 describe('eras y anomalías', () => {
-  it('hay 4 eras con 4 unidades y 3 enemigos únicos', () => {
+  it('hay 4 eras con 3 unidades y 3 enemigos únicos', () => {
     expect(ERAS).toHaveLength(4);
     const ids = ERAS.flatMap(e => [...e.units, ...e.enemies]).map(u => u.id);
     expect(new Set(ids).size).toBe(ids.length);
-    for (const e of ERAS) { expect(e.units).toHaveLength(4); expect(e.enemies).toHaveLength(3); expect(e.levels).toHaveLength(3); }
+    for (const e of ERAS) { expect(e.units).toHaveLength(3); expect(e.enemies).toHaveLength(3); expect(e.levels).toHaveLength(3); }
   });
   it('todas las oleadas usan enemigos de su era', () => {
     for (const l of LEVELS) {
@@ -143,12 +142,12 @@ describe('eras y anomalías', () => {
     expect(hit).toBe(true);
   });
   it('la tormenta de arena frena a las unidades', () => {
-    const b = new Battle(level('egipto'));
+    const b = new Battle({ ...level('egipto'), waves: [] }); // sin enemigos: el héroe sobrevive
     for (let t = 0; t < 31; t += 0.05) b.update(0.05);
     expect(b.sandstormActive).toBe(true);
   });
   it('el caballero fantasma aparece y expira', () => {
-    const b = new Battle(level('medieval'));
+    const b = new Battle({ ...level('medieval'), waves: [] });
     for (let t = 0; t < 31; t += 0.05) b.update(0.05);
     expect(b.units.some(u => u.ttl !== undefined)).toBe(true);
     for (let t = 0; t < 13; t += 0.05) b.update(0.05);
@@ -236,5 +235,50 @@ describe('consentimiento nativo', () => {
     expect(toConsentState(true, true)).toBe('personalized');
     expect(toConsentState(true, false)).toBe('limited');
     expect(toConsentState(false, true)).toBe('limited');
+  });
+});
+
+describe('economía de batalla (estilo WeAreWarriors)', () => {
+  const lvl = () => new Battle(LEVELS[0]);
+  it('solo la 1ª unidad está desbloqueada al empezar', () => {
+    const b = lvl(); b.energy = 100;
+    expect(b.unlocked).toEqual([true, false, false]);
+    expect(b.summon(b.era.units[1])).toBe(false);
+    expect(b.summon(b.era.units[0])).toBe(true);
+  });
+  it('matar enemigos da monedas y con ellas se desbloquea y se mejora la energía', () => {
+    const b = lvl();
+    expect(b.unlockUnit(1)).toBe(false); // sin monedas
+    b.coins = 70;
+    expect(b.unlockUnit(1)).toBe(true);
+    expect(b.coins).toBe(0);
+    expect(b.unlockUnit(1)).toBe(false); // ya desbloqueada
+    const before = b.energyUpgradeCost!;
+    b.coins = before;
+    expect(b.upgradeEnergy()).toBe(true);
+    expect(b.energyLevel).toBe(1);
+  });
+  it('las monedas llegan solas al derrotar enemigos (también con el agujero de gusano)', () => {
+    const b = lvl();
+    for (let t = 0; t < 4; t += 0.05) b.update(0.05); // aparecen las primeras ratas
+    expect(b.units.some(u => u.side === 'enemy')).toBe(true);
+    const c0 = b.coins;
+    b.castWormhole(); b.castWormhole();
+    for (let t = 0; t < 6; t += 0.05) b.update(0.05);
+    // si el agujero las mató o peleó el héroe, siempre hay monedas nuevas o enemigos vivos
+    expect(b.coins >= c0).toBe(true);
+    let b2 = lvl(); b2.units.push({ uid: 99, def: b2.era.enemies[0], side: 'enemy', x: 500, hp: 1, cd: 9, isHero: false });
+    b2.castWormhole();
+    expect(b2.coins).toBe(10);
+  });
+  it('la energía mejorada regenera más rápido', () => {
+    const a = lvl(), c = lvl();
+    a.energy = c.energy = 0; c.coins = 1000; c.upgradeEnergy();
+    a.update(1); c.update(1);
+    expect(c.energy).toBeGreaterThan(a.energy);
+  });
+  it('las monedas de batalla no se arrastran entre niveles', () => {
+    const a = lvl(); a.coins = 500;
+    expect(new Battle(LEVELS[1]).coins).toBe(0);
   });
 });

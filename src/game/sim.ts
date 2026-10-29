@@ -1,4 +1,4 @@
-import { ENEMY_UNITS, HERO_DEF, eraById, scaleUnit, type AnomalyKind, type EraDef, type LevelDef, type UnitDef } from './data';
+import { BATTLE_ECON, ENEMY_COIN, ENEMY_UNITS, HERO_DEF, eraById, scaleUnit, type AnomalyKind, type EraDef, type LevelDef, type UnitDef } from './data';
 
 export type Side = 'player' | 'enemy';
 export type Outcome = 'playing' | 'win' | 'lose';
@@ -59,6 +59,11 @@ export class Battle {
   readonly era: EraDef;
   sandUntil = 0;
   boostUntil = 0;
+  /** Monedas de batalla (se ganan matando enemigos; se reinician en cada nivel). */
+  coins = 0;
+  /** Qué unidades de la era ya se desbloquearon (la 1ª siempre). */
+  unlocked: boolean[] = [true, false, false];
+  energyLevel = 0;
   private heroDef!: UnitDef;
   private events: BattleEvent[] = [];
   private nextUid = 1;
@@ -100,9 +105,28 @@ export class Battle {
   }
 
   summon(def: UnitDef): boolean {
-    if (this.outcome !== 'playing' || this.energy < def.cost) return false;
+    const idx = this.era.units.indexOf(def);
+    if (this.outcome !== 'playing' || this.energy < def.cost || (idx >= 0 && !this.unlocked[idx])) return false;
     this.energy -= def.cost;
     this.spawn(def, 'player');
+    return true;
+  }
+
+  /** Gasta monedas de batalla para desbloquear la unidad `idx` (1 o 2). */
+  unlockUnit(idx: number): boolean {
+    const cost = BATTLE_ECON.unlockCost[idx];
+    if (this.outcome !== 'playing' || idx < 1 || this.unlocked[idx] || cost === undefined || this.coins < cost) return false;
+    this.coins -= cost; this.unlocked[idx] = true;
+    return true;
+  }
+
+  /** Costo de la siguiente mejora de energía, o null si ya está al máximo. */
+  get energyUpgradeCost(): number | null { return BATTLE_ECON.energyCosts[this.energyLevel] ?? null; }
+
+  upgradeEnergy(): boolean {
+    const cost = this.energyUpgradeCost;
+    if (this.outcome !== 'playing' || cost === null || this.coins < cost) return false;
+    this.coins -= cost; this.energyLevel++;
     return true;
   }
 
@@ -110,8 +134,14 @@ export class Battle {
     if (this.outcome !== 'playing' || this.wormholeCd > 0) return false;
     this.wormholeCd = WORMHOLE_COOLDOWN;
     for (const u of this.units) if (u.side === 'enemy') u.hp -= WORMHOLE_DAMAGE * this.era.power;
-    this.units = this.units.filter(u => u.hp > 0);
+    this.reap();
     return true;
+  }
+
+  /** Retira a los muertos y paga monedas de batalla por los enemigos derrotados. */
+  private reap() {
+    for (const u of this.units) if (u.hp <= 0 && u.side === 'enemy') this.coins += ENEMY_COIN[u.def.id] ?? 0;
+    this.units = this.units.filter(u => u.hp > 0);
   }
 
   private spawn(def: UnitDef, side: Side, isHero = false, ttl?: number) {
@@ -147,7 +177,7 @@ export class Battle {
   update(dt: number) {
     if (this.outcome !== 'playing') return;
     this.time += dt;
-    this.energy = Math.min(MAX_ENERGY, this.energy + ENERGY_REGEN * this.mods.energyRegen * (this.boostActive ? 2 : 1) * dt);
+    this.energy = Math.min(MAX_ENERGY, this.energy + ENERGY_REGEN * this.mods.energyRegen * (1 + BATTLE_ECON.energyBonusPerLevel * this.energyLevel) * (this.boostActive ? 2 : 1) * dt);
     this.wormholeCd = Math.max(0, this.wormholeCd - dt);
 
     this.anomalyTimer -= dt;
@@ -181,7 +211,7 @@ export class Battle {
       }
     }
 
-    this.units = this.units.filter(u => u.hp > 0);
+    this.reap();
 
     if (this.enemyBaseHp <= 0) this.outcome = 'win';
     else if (this.playerBaseHp <= 0 || !this.units.some(u => u.isHero)) this.outcome = 'lose';

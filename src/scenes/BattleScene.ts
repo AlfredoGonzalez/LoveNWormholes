@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Battle, MAX_ENERGY } from '../game/sim';
-import { LEVELS, eraById, levelById, type EraDef, type LevelDef } from '../game/data';
+import { BATTLE_ECON, LEVELS, eraById, levelById, type EraDef, type LevelDef } from '../game/data';
 import { REVIVE_GEMS, applyWin, doubleReward, modsFrom, spendGems, starsFor } from '../game/economy';
 import { services } from '../services';
 import { game, persist } from '../services/save';
@@ -30,7 +30,9 @@ export class BattleScene extends Phaser.Scene {
   private gfx!: Phaser.GameObjects.Graphics;
   private energyText!: Phaser.GameObjects.Text;
   private wormholeBtn!: Phaser.GameObjects.Text;
-  private unitButtons: { bg: Phaser.GameObjects.Rectangle; cost: number }[] = [];
+  private unitButtons: { bg: Phaser.GameObjects.Rectangle; cost: number; idx: number; lock: Phaser.GameObjects.Text }[] = [];
+  private coinsText!: Phaser.GameObjects.Text;
+  private energyUpBtn!: Phaser.GameObjects.Container;
   private actors = new Map<number, Actor>();
   private ended = false;
   private tutorialStep = 0;
@@ -61,16 +63,24 @@ export class BattleScene extends Phaser.Scene {
     this.gfx = this.add.graphics();
     this.energyText = this.add.text(16, GROUND + 22, '', { fontSize: '18px', color: '#fff', stroke: '#3b2a3f', strokeThickness: 3 });
 
+    // 3 soldados por era: [cuerpo a cuerpo, a distancia, fuerte]. Los 2 últimos se desbloquean con monedas de batalla.
     this.era.units.forEach((def, i) => {
-      const x = 69 + i * 134, y = H - 70;
-      const bg = this.add.rectangle(x, y, 126, 100, def.color).setStrokeStyle(3, 0x3b2a3f).setInteractive({ useHandCursor: true });
-      this.add.text(x, y - 22, t(def.nameKey), { fontSize: '14px', color: '#1b1230', align: 'center', wordWrap: { width: 116 } }).setOrigin(0.5);
-      this.add.text(x, y + 28, `⚡${def.cost}`, { fontSize: '16px', color: '#1b1230' }).setOrigin(0.5);
-      bg.on('pointerdown', () => { if (!this.tutorialBox) this.battle.summon(def); });
-      this.unitButtons.push({ bg, cost: def.cost });
+      const x = 95 + i * 175, y = H - 80;
+      const bg = this.add.rectangle(x, y, 165, 130, def.color).setStrokeStyle(3, 0x3b2a3f).setInteractive({ useHandCursor: true });
+      this.add.text(x, y - 36, t(def.nameKey), { fontSize: '15px', color: '#1b1230', align: 'center', wordWrap: { width: 150 } }).setOrigin(0.5);
+      this.add.text(x, y + 6, `⚡${def.cost}`, { fontSize: '22px', color: '#1b1230' }).setOrigin(0.5);
+      const lock = this.add.text(x, y + 38, '', { fontSize: '16px', color: '#fff', backgroundColor: '#000000aa', padding: { x: 6, y: 3 } }).setOrigin(0.5);
+      bg.on('pointerdown', () => {
+        if (this.tutorialBox) return;
+        if (this.battle.unlocked[i]) this.battle.summon(def); else this.battle.unlockUnit(i);
+      });
+      this.unitButtons.push({ bg, cost: def.cost, idx: i, lock });
     });
 
-    this.wormholeBtn = this.add.text(W / 2, GROUND + 190, '', {
+    this.coinsText = this.add.text(16, GROUND + 70, '', { fontSize: '22px', color: '#ffe066', stroke: '#3b2a3f', strokeThickness: 4 });
+    this.energyUpBtn = button(this, W - 130, GROUND + 80, 220, 44, '', () => { if (!this.tutorialBox) this.battle.upgradeEnergy(); }, { color: 0x2a7fb8, fontSize: 16 });
+
+    this.wormholeBtn = this.add.text(W / 2, GROUND + 160, '', {
       fontSize: '20px', color: '#fff', backgroundColor: '#6a2cdc', padding: { x: 12, y: 12 }, align: 'center', fixedWidth: 480,
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     this.wormholeBtn.on('pointerdown', () => { if (!this.tutorialBox) this.battle.castWormhole(); });
@@ -82,7 +92,7 @@ export class BattleScene extends Phaser.Scene {
     this.tutorialBox = undefined;
     this.msgs = [];
     const first = LEVELS[0].id === this.level.id;
-    if (first && !game.save.tutorialDone) this.msgs.push(t('tut1'), t('tut2'), t('tut3'));
+    if (first && !game.save.tutorialDone) this.msgs.push(t('tut1'), t('tut4'), t('tut2'), t('tut3'));
     if (this.era.levels[0].id === this.level.id && !game.save.stars[this.level.id]) this.msgs.unshift(t(this.era.introKey));
     this.showMessages();
   }
@@ -168,7 +178,16 @@ export class BattleScene extends Phaser.Scene {
     }
 
     this.energyText.setText(`${t('energy')}: ${Math.floor(b.energy)}/${MAX_ENERGY}${b.boostActive ? '  ' + t('energy_boost_on') : ''}`);
-    for (const ub of this.unitButtons) ub.bg.setAlpha(b.energy >= ub.cost ? 1 : 0.4);
+    this.coinsText.setText(`🦴 ${b.coins}`);
+    for (const ub of this.unitButtons) {
+      const open = b.unlocked[ub.idx];
+      const need = BATTLE_ECON.unlockCost[ub.idx];
+      ub.bg.setAlpha(open ? (b.energy >= ub.cost ? 1 : 0.45) : (b.coins >= need ? 0.9 : 0.4));
+      ub.lock.setText(open ? '' : `🔒 🦴${need}`).setVisible(!open);
+    }
+    const upCost = b.energyUpgradeCost;
+    (this.energyUpBtn.list[1] as Phaser.GameObjects.Text).setText(upCost === null ? `⚡ ${t('maxed')}` : `⚡+ 🦴${upCost}`);
+    this.energyUpBtn.setAlpha(upCost !== null && b.coins >= upCost ? 1 : 0.45);
     const cd = Math.ceil(b.wormholeCd);
     this.wormholeBtn.setText(cd > 0 ? `${t('wormhole')}\n${cd}s` : `${t('wormhole')}\n🌀`);
     this.wormholeBtn.setAlpha(b.wormholeCd > 0 ? 0.5 : 1);
