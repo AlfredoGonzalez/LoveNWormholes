@@ -91,6 +91,14 @@ async function processFitted(a: Asset, r: Raw, align: 'center' | 'bottom') {
   return 'recortado y centrado';
 }
 
+/** Marcos de pantalla: se quita el color del hueco central en TODA la imagen y se ajusta al tamaño exacto. */
+async function processFrame(a: Asset, r: Raw) {
+  // En un marco las esquinas son del propio marco: el color a quitar es siempre el magenta del hueco (#FF00FF).
+  if (r.data[3] >= 250) keyBackground(r.data, r.w, r.h, [255, 0, 255], 50, 110, true);
+  await toSharp(r).resize(a.size[0], a.size[1], { fit: 'fill' }).png({ compressionLevel: 9 }).toFile(outPath(a));
+  return 'hueco central transparente';
+}
+
 async function processBackground(a: Asset, file: string) {
   await sharp(file).resize(a.size[0], a.size[1], { fit: 'cover' }).png({ compressionLevel: 9 }).toFile(outPath(a));
   return 'ajustado a tamaño';
@@ -134,7 +142,8 @@ async function main() {
       mkdirSync(path.dirname(outPath(a)), { recursive: true });
       const detail =
         a.kind === 'sheet' ? await processSheet(a, await readRaw(src))
-        : a.kind === 'background' ? await processBackground(a, src)
+        : a.kind === 'background' || a.kind === 'screen' || a.kind === 'panel' ? await processBackground(a, src)
+        : a.kind === 'frame' ? await processFrame(a, await readRaw(src))
         : a.kind === 'base' ? await processFitted(a, await readRaw(src), 'bottom')
         : await processFitted(a, await readRaw(src), 'center');
       console.log(`✔ ${a.dir}/${a.file}  (${detail})`);

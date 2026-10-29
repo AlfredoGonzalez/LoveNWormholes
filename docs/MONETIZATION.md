@@ -14,6 +14,15 @@
 
 Alternativa sin anuncio: revivir con 💎10, cambiar 💎10 → 🪙300.
 
+### Con el rediseño de interfaz (ver `docs/DESIGN.md`) — **planeado, aún no implementado**
+| Placement | Dónde | Recompensa |
+|---|---|---|
+| `reroll` | Mejoras → botón Reroll de cartas | Volver a sortear las cartas sin gastar monedas (opcional, 1 vez por día) |
+| `free_chest` | Worm Mart (ya existe) | Igual que hoy |
+| `daily_deal` | Worm Mart → oferta diaria | Un artículo gratis al día viendo un anuncio (opcional) |
+
+**Worm Mart — estructura.** (1) Ofertas diarias: 3 casillas rotativas con cronómetro (poción de energía, carta de ataque, paquete de monedas); se pagan con monedas, gemas o dinero real según el artículo. (2) Paquetes de gemas: Bolsita · Canasta · Montón (`gems_s/m/l`). (3) Productos únicos: Pack inicial y Monedas x2. (4) Cofre gratis y Restaurar compras.
+
 ## Productos IAP (ids a crear en App Store Connect / Google Play / RevenueCat)
 | id | Tipo | Contenido | Precio ref. |
 |---|---|---|---|
@@ -22,6 +31,7 @@ Alternativa sin anuncio: revivir con 💎10, cambiar 💎10 → 🪙300.
 | `gems_l` | Consumible | 1500 💎 | $9.99 |
 | `starter` | No consumible | 500 🪙 + 50 💎 (una vez) | $2.99 |
 | `double_coins` | No consumible | Monedas x2 en victorias, para siempre | $3.99 |
+| `energy_potion` *(propuesto)* | Consumible | Empezar una batalla con la energía llena | $0.99 |
 
 Los precios de `src/game/economy.ts` (`PRODUCTS`) son solo de referencia: en producción se muestran los precios localizados de la tienda.
 

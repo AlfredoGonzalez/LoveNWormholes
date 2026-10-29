@@ -44,6 +44,20 @@ describe('art-lib', () => {
   });
 });
 
+describe('marcos', () => {
+  it('con everywhere=true también se quita el hueco central que no toca el borde', () => {
+    const w = 30, h = 30, d = new Uint8Array(w * h * 4);
+    for (let i = 0; i < w * h; i++) d.set([120, 80, 40, 255], i * 4);              // marco marrón
+    for (let y = 8; y < 22; y++) for (let x = 8; x < 22; x++) d.set([255, 0, 255, 255], (y * w + x) * 4); // hueco magenta
+    const copy = d.slice();
+    keyBackground(copy, w, h, [255, 0, 255]);
+    expect(copy[(15 * w + 15) * 4 + 3]).toBe(255);          // modo normal: el hueco queda
+    keyBackground(d, w, h, [255, 0, 255], 50, 110, true);
+    expect(d[(15 * w + 15) * 4 + 3]).toBe(0);               // modo marco: el hueco desaparece
+    expect(d[(2 * w + 2) * 4 + 3]).toBe(255);               // el marco se conserva
+  });
+});
+
 describe('especificación de arte', () => {
   it('no repite archivos', () => {
     const keys = assets.map(a => `${a.dir}/${a.file}`);
@@ -57,6 +71,12 @@ describe('especificación de arte', () => {
       expect(files.has(`bg_${e.id}.png`)).toBe(true);
     }
     expect(files.has('ghost_idle.png')).toBe(true);
+  });
+  it('la interfaz nueva está completa', () => {
+    const files = new Set(assets.map(a => a.file));
+    for (const f of ['story_01.png', 'story_02.png', 'story_03.png', 'title_bg.png', 'btn_wood.png', 'navbar.png', 'nav_map.png', 'nav_memories.png', 'nav_battle.png', 'nav_upgrades.png', 'nav_shop.png', 'frame_map.png', 'frame_shop.png', 'memory_06.png', 'card_frame.png', 'mart_shopkeeper.png'])
+      expect(files.has(f), f).toBe(true);
+    for (const e of ERAS) for (const f of [`hub_bg_${e.id}.png`, `map_node_${e.id}.png`, `map_boss_${e.id}.png`, `gusanita_${e.id}.png`]) expect(files.has(f), f).toBe(true);
   });
   it('todos los personajes tienen descripción', () => {
     for (const a of assets) expect(a.subject, a.file).toBeTruthy();

@@ -39,16 +39,21 @@ export function detectBackground(rgba: Uint8Array, w: number, h: number, patch =
 }
 
 /**
- * Hace transparente el fondo: solo los píxeles parecidos al fondo que estén CONECTADOS con el borde
+ * Hace transparente el fondo: solo los píxeles parecidos al fondo que estén CONECTADOS con el borde (o todos, con `everywhere`)
  * (así los ojos blancos o las vendas blancas del interior no se borran). Modifica `rgba` en sitio.
  */
-export function keyBackground(rgba: Uint8Array, w: number, h: number, bg: RGB, t0 = 50, t1 = 110): void {
+export function keyBackground(rgba: Uint8Array, w: number, h: number, bg: RGB, t0 = 50, t1 = 110, everywhere = false): void {
   const n = w * h;
   const seen = new Uint8Array(n);
   const queue = new Int32Array(n);
   let head = 0, tail = 0;
   const d = (p: number): number => colorDist([rgba[p * 4], rgba[p * 4 + 1], rgba[p * 4 + 2]], bg);
   const push = (p: number) => { if (!seen[p] && d(p) < t1) { seen[p] = 1; queue[tail++] = p; } };
+  if (everywhere) {
+    // Marcos: el hueco del centro NO toca el borde, así que se quita el color de fondo en TODA la imagen.
+    for (let p = 0; p < n; p++) push(p);
+    head = tail;
+  }
   for (let x = 0; x < w; x++) { push(x); push((h - 1) * w + x); }
   for (let y = 0; y < h; y++) { push(y * w); push(y * w + w - 1); }
   while (head < tail) {

@@ -15,3 +15,5 @@ Formato: **vertical (portrait) 540×960**. En el Hito 5 se bloqueará la orienta
 
 ## Arte
 Genera con IA siguiendo `art-prompts/README.md`, deja los archivos crudos en `art-inbox/` y ejecuta `npm run art` (quita el fondo, corta los cuadros y los deja en `public/assets/`). `npm run art:status` muestra el avance.
+
+Documentación: [`docs/DESIGN.md`](docs/DESIGN.md) (diseño y recorrido del usuario), [`docs/MONETIZATION.md`](docs/MONETIZATION.md), [`docs/RELEASE.md`](docs/RELEASE.md), [`art-prompts/README.md`](art-prompts/README.md) (arte).

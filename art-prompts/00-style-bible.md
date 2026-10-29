@@ -3,12 +3,12 @@
 Pégala (o su resumen) al inicio de **cada** prompt para mantener consistencia.
 
 ## Dirección
-Cartoon 2D tierno y cómico, estilo "sticker" de juego móvil: contorno grueso y limpio (color marrón oscuro `#3b2a3f`, no negro), colores saturados pero cálidos, sombreado plano de 2 tonos (base + sombra) y un brillo pequeño. Sin texturas fotorrealistas, sin degradados complejos.
+Estilo **libro de cuentos entintado** (el del prototipo de Unity): contorno grueso marrón muy oscuro (`#2e2024`, no negro), sombreado *cel* con brillos suaves, colores saturados y cálidos, ambiente prehistórico de **piedra, madera y pergamino**. Fondos de papel crema con garabatos tenues. Sin texturas fotorrealistas ni degradados complejos.
 
 ## Los gusanos (personajes principales)
-- **Gusanito**: gusano rosa-salmón (`#ff8fa3`), cuerpo segmentado corto y regordete, ojos grandes con brillo, sonrisa valiente, una pequeña ceja decidida. Lleva un accesorio por era (taparrabos, tocado egipcio, casco, sombrero vaquero…).
-- **Gusanita**: gusano lila (`#c9a7ff`), mismas proporciones, pestañas, moño/flor en la cabeza. Siempre con expresión curiosa/traviesa.
-- Proporción: cabeza = ~40% del cuerpo, ojos = 1/3 de la cara. Cuerpo de 4-5 segmentos. Vista lateral, **todos los personajes miran a la DERECHA** (aliados y enemigos); el juego voltea a los enemigos por código.
+- **Gusanito**: gusano **verde brillante** (`#7ccf5a`), cuerpo segmentado corto y regordete, ojos grandes con brillo, cejas decididas y sonrisa valiente. **Siempre lleva su gorra negra con una «A» blanca** (su sello); cambia el resto del atuendo por era (garrote de hueso, collar dorado, peto y capa, bandana y estrella de sheriff).
+- **Gusanita**: gusano **rosa** (`#ff8fb8`) con **cabello largo ondulado rosa**, **lentes redondos** y una **flor blanca (margarita)** en la cabeza; ojos grandes, expresión dulce y curiosa.
+- Proporción: cabeza ≈ 40 % del cuerpo, ojos ≈ 1/3 de la cara. Cuerpo de 4-5 segmentos. Vista lateral, **todos los personajes miran a la DERECHA** (aliados y enemigos); el juego voltea a los enemigos por código.
 
 ## Paletas por era
 | Era | Cielo | Suelo | Acentos |
@@ -18,14 +18,17 @@ Cartoon 2D tierno y cómico, estilo "sticker" de juego móvil: contorno grueso y
 | Edad Media | `#9bb7d4` | `#7a8f5a` | `#b23a48`, `#8d99ae` |
 | Lejano Oeste | `#f4a261` | `#d9a066` | `#8c4a2f`, `#e9c46a` |
 
+## Interfaz
+Piezas de **piedra tallada, madera atada con cuerda y pergamino envejecido**, con el mismo contorno marrón. Los botones, píldoras, marcos y ventanas se entregan **en blanco (sin texto)**; el juego escribe los textos en español e inglés. Lista completa en `05-screens.md`.
+
 ## Wormhole (motivo recurrente)
 Portal en espiral violeta/cian (`#6a2cdc` → `#3de0ff`), anillos concéntricos, chispas. Aparece en cada era como "anomalía" y en la UI.
 
 ## Plantilla de prompt base
 ```
-[SUJETO], cute cartoon 2D game asset, thick clean dark-plum outline (#3b2a3f),
-flat two-tone shading with a small highlight, saturated warm colors,
-mobile game sticker style, friendly and humorous, side view,
+[SUJETO], cute cartoon 2D game asset in a hand-inked storybook style,
+thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors,
+prehistoric stone-and-wood mood, friendly and humorous, side view,
 isolated on a plain solid magenta (#ff00ff) background, centered, full body visible,
 no text, no watermark, no shadow on the ground
 ```

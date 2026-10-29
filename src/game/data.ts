@@ -87,7 +87,7 @@ function levels(eraId: string, eraIdx: number, power: number, names: [Key, Key, 
 
 // ---- Héroe ----
 export const HERO_DEF: UnitDef = {
-  id: 'hero', nameKey: 'unit_chief', cost: 0, hp: 300, damage: 18, range: 40, speed: 55, cooldown: 0.7, color: 0xff7bac, size: 24,
+  id: 'hero', nameKey: 'unit_chief', cost: 0, hp: 300, damage: 18, range: 40, speed: 55, cooldown: 0.7, color: 0x7ccf5a, size: 24,
 };
 
 // ---- Eras ----

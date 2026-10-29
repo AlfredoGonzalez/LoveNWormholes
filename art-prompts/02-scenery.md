@@ -16,21 +16,21 @@ cute cartoon 2D game background, flat two-tone shading, saturated warm colors, s
 ```
 
 ### `base_prehistoria_home.png`
-**Archivo:** `base_prehistoria_home.png` → `public/assets/bases/` · **Tamaño final:** 256×320 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
+**Archivo:** `base_prehistoria_home.png` → `public/assets/bases/` · **Tamaño final:** 512×640 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa · 📦 probablemente ya lo tienes (video de Unity)
 
-> hogar del jugador
+> hogar del jugador: se usa en la batalla Y como casa del hub (por eso es grande)
 
 ```text
-cute cartoon 2D game asset, thick clean dark-plum outline (#3b2a3f), flat two-tone shading with a small highlight, saturated warm colors, mobile game sticker style, friendly and humorous. Game building: a cozy worm home made of a giant hollow fruit with a leaf roof, warm light in the doorway and a tiny heart flag. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 256×320 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
+cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Game building: a cozy worm home shaped like a giant apple built from carved grey stone bricks with cave-painting carvings (mammoth, hunters), a green leaf and a stem on top, a winding stone staircase with vines leading to a dark doorway. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 512×640 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
 ```
 
 ### `base_prehistoria_enemy.png`
-**Archivo:** `base_prehistoria_enemy.png` → `public/assets/bases/` · **Tamaño final:** 256×320 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
+**Archivo:** `base_prehistoria_enemy.png` → `public/assets/bases/` · **Tamaño final:** 512×640 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
 
 > base enemiga
 
 ```text
-cute cartoon 2D game asset, thick clean dark-plum outline (#3b2a3f), flat two-tone shading with a small highlight, saturated warm colors, mobile game sticker style, friendly and humorous. Game building: a dark cave entrance with skull decorations and glowing red eyes inside, menacing but cartoonish. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 256×320 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
+cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Game building: a dark cave entrance with skull decorations and glowing red eyes inside, menacing but cartoonish. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 512×640 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
 ```
 
 
@@ -48,21 +48,21 @@ cute cartoon 2D game background, flat two-tone shading, saturated warm colors, s
 ```
 
 ### `base_egipto_home.png`
-**Archivo:** `base_egipto_home.png` → `public/assets/bases/` · **Tamaño final:** 256×320 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
+**Archivo:** `base_egipto_home.png` → `public/assets/bases/` · **Tamaño final:** 512×640 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
 
-> hogar del jugador
+> hogar del jugador: se usa en la batalla Y como casa del hub (por eso es grande)
 
 ```text
-cute cartoon 2D game asset, thick clean dark-plum outline (#3b2a3f), flat two-tone shading with a small highlight, saturated warm colors, mobile game sticker style, friendly and humorous. Game building: a cozy worm house made of papyrus reeds with a tiny heart flag. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 256×320 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
+cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Game building: a cozy worm house made of papyrus reeds with a tiny heart flag. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 512×640 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
 ```
 
 ### `base_egipto_enemy.png`
-**Archivo:** `base_egipto_enemy.png` → `public/assets/bases/` · **Tamaño final:** 256×320 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
+**Archivo:** `base_egipto_enemy.png` → `public/assets/bases/` · **Tamaño final:** 512×640 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
 
 > base enemiga
 
 ```text
-cute cartoon 2D game asset, thick clean dark-plum outline (#3b2a3f), flat two-tone shading with a small highlight, saturated warm colors, mobile game sticker style, friendly and humorous. Game building: a small dark pyramid with a glowing red eye at the top. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 256×320 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
+cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Game building: a small dark pyramid with a glowing red eye at the top. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 512×640 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
 ```
 
 
@@ -80,21 +80,21 @@ cute cartoon 2D game background, flat two-tone shading, saturated warm colors, s
 ```
 
 ### `base_medieval_home.png`
-**Archivo:** `base_medieval_home.png` → `public/assets/bases/` · **Tamaño final:** 256×320 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
+**Archivo:** `base_medieval_home.png` → `public/assets/bases/` · **Tamaño final:** 512×640 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
 
-> hogar del jugador
+> hogar del jugador: se usa en la batalla Y como casa del hub (por eso es grande)
 
 ```text
-cute cartoon 2D game asset, thick clean dark-plum outline (#3b2a3f), flat two-tone shading with a small highlight, saturated warm colors, mobile game sticker style, friendly and humorous. Game building: a small stone cottage with a banner showing a heart. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 256×320 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
+cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Game building: a small stone cottage with a banner showing a heart. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 512×640 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
 ```
 
 ### `base_medieval_enemy.png`
-**Archivo:** `base_medieval_enemy.png` → `public/assets/bases/` · **Tamaño final:** 256×320 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
+**Archivo:** `base_medieval_enemy.png` → `public/assets/bases/` · **Tamaño final:** 512×640 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
 
 > base enemiga
 
 ```text
-cute cartoon 2D game asset, thick clean dark-plum outline (#3b2a3f), flat two-tone shading with a small highlight, saturated warm colors, mobile game sticker style, friendly and humorous. Game building: a dark tower with a purple flag and glowing windows. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 256×320 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
+cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Game building: a dark tower with a purple flag and glowing windows. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 512×640 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
 ```
 
 
@@ -112,20 +112,20 @@ cute cartoon 2D game background, flat two-tone shading, saturated warm colors, s
 ```
 
 ### `base_oeste_home.png`
-**Archivo:** `base_oeste_home.png` → `public/assets/bases/` · **Tamaño final:** 256×320 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
+**Archivo:** `base_oeste_home.png` → `public/assets/bases/` · **Tamaño final:** 512×640 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
 
-> hogar del jugador
+> hogar del jugador: se usa en la batalla Y como casa del hub (por eso es grande)
 
 ```text
-cute cartoon 2D game asset, thick clean dark-plum outline (#3b2a3f), flat two-tone shading with a small highlight, saturated warm colors, mobile game sticker style, friendly and humorous. Game building: a wooden saloon-style house with a heart sign. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 256×320 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
+cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Game building: a wooden saloon-style house with a heart sign. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 512×640 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
 ```
 
 ### `base_oeste_enemy.png`
-**Archivo:** `base_oeste_enemy.png` → `public/assets/bases/` · **Tamaño final:** 256×320 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
+**Archivo:** `base_oeste_enemy.png` → `public/assets/bases/` · **Tamaño final:** 512×640 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
 
 > base enemiga
 
 ```text
-cute cartoon 2D game asset, thick clean dark-plum outline (#3b2a3f), flat two-tone shading with a small highlight, saturated warm colors, mobile game sticker style, friendly and humorous. Game building: a rickety outlaw hideout with wanted posters and a skull sign. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 256×320 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
+cute cartoon 2D game asset in a hand-inked storybook style, thick dark-brown outline (#2e2024), cel shading with soft highlights, saturated warm colors, prehistoric stone-and-wood mood, friendly and humorous. Game building: a rickety outlaw hideout with wanted posters and a skull sign. Front view, the whole building visible and centered, standing on a flat ground line at the bottom of the image, aspect ratio 4:5 (final 512×640 px). isolated on a plain, solid, flat magenta background (#FF00FF), no gradient, no shadow on the ground. No text, no watermark.
 ```
 
