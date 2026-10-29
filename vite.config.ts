@@ -1,6 +1,4 @@
 import { defineConfig } from 'vite';
 
-// En GitHub Pages el sitio vive en /<repo>/; en local, en /.
-export default defineConfig({
-  base: process.env.GITHUB_ACTIONS ? '/LoveNWormholes/' : '/',
-});
+// Rutas relativas: sirven igual en GitHub Pages (/<repo>/), en local y dentro de la app nativa (Capacitor).
+export default defineConfig({ base: './' });

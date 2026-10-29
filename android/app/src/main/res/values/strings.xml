@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Love N Wormholes</string>
+    <string name="title_activity_main">Love N Wormholes</string>
+    <string name="package_name">com.lovenwormholes.game</string>
+    <string name="custom_url_scheme">com.lovenwormholes.game</string>
+</resources>

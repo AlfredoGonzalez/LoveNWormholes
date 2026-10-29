@@ -16,6 +16,8 @@ export interface IAP {
   purchase(productId: string): Promise<PurchaseResult>;
   /** Ids de productos no consumibles que el usuario ya posee en la tienda. */
   restore(): Promise<string[]>;
+  /** Precios localizados de la tienda por id de producto (opcional; la tienda del juego usa los de referencia si falta). */
+  prices?(): Promise<Record<string, string>>;
 }
 
 export interface Consent {

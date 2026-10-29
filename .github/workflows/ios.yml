@@ -1,0 +1,25 @@
+name: iOS build
+
+# Compila para el simulador SIN firmar (verifica que el proyecto nativo y los plugins compilan).
+# La compilación firmada para TestFlight/App Store requiere la cuenta de Apple Developer (ver docs/RELEASE.md).
+on:
+  push:
+    branches: [main]
+    paths: ['src/**', 'ios/**', 'public/**', 'package*.json', 'capacitor.config.ts', 'vite.config.ts', '.github/workflows/ios.yml']
+  workflow_dispatch:
+
+jobs:
+  simulator-build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync ios
+      - name: Build for simulator (unsigned)
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build

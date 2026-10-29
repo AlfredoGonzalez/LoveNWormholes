@@ -10,10 +10,24 @@ import { getLang } from './i18n';
 
 initGame(getLang());
 
-new Phaser.Game({
-  type: Phaser.AUTO,
-  parent: 'game',
-  backgroundColor: '#1b1230',
-  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 540, height: 960 },
-  scene: [PreloadScene, MenuScene, EraMapScene, UpgradesScene, ShopScene, BattleScene],
-});
+import { Capacitor } from '@capacitor/core';
+import { setServices } from './services';
+
+async function boot() {
+  // En Android/iOS se usan los servicios reales (AdMob / RevenueCat); en el navegador, los simulados.
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const { createNativeServices } = await import('./services/native');
+      setServices(await createNativeServices());
+    } catch (e) { console.warn('[boot] servicios nativos no disponibles, uso simulados', e); }
+  }
+  new Phaser.Game({
+    type: Phaser.AUTO,
+    parent: 'game',
+    backgroundColor: '#1b1230',
+    scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 540, height: 960 },
+    scene: [PreloadScene, MenuScene, EraMapScene, UpgradesScene, ShopScene, BattleScene],
+  });
+}
+
+void boot();

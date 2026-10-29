@@ -5,6 +5,10 @@ import { EXCHANGE, PRODUCTS, applyPurchase, chestRemainingMs, exchangeGems, open
 import { t, tf } from '../i18n';
 import { W, H, button, title } from '../ui';
 
+/** Precios localizados de la tienda real (vacío en el navegador: se usan los de referencia). */
+let storePrices: Record<string, string> = {};
+let pricesRequested = false;
+
 export class ShopScene extends Phaser.Scene {
   private busy = false;
   private toast?: Phaser.GameObjects.Text;
@@ -16,6 +20,10 @@ export class ShopScene extends Phaser.Scene {
   create() {
     this.busy = false;
     this.toast = undefined;
+    if (!pricesRequested && services.iap.prices) {
+      pricesRequested = true;
+      services.iap.prices().then(p => { storePrices = p; if (Object.keys(p).length && this.scene.isActive('Shop')) this.scene.restart(); });
+    }
     this.cameras.main.setBackgroundColor(0x3a2268);
     title(this, t('shop'), 44);
     this.add.text(W - 20, 84, `🪙 ${game.save.coins}   💎 ${game.save.gems}`, { fontSize: '20px', color: '#ffe066', stroke: '#3b2a3f', strokeThickness: 4 }).setOrigin(1, 0);
@@ -35,7 +43,7 @@ export class ShopScene extends Phaser.Scene {
       const y = 240 + i * 82;
       const owned = p.nonConsumable && game.save.owned.includes(p.id);
       this.add.text(24, y, t(p.titleKey), { fontSize: '19px', color: '#fff', wordWrap: { width: 290 } }).setOrigin(0, 0.5);
-      button(this, W - 100, y, 160, 48, owned ? t('owned') : p.priceLabel, () => this.guard(async () => {
+      button(this, W - 100, y, 160, 48, owned ? t('owned') : (storePrices[p.id] ?? p.priceLabel), () => this.guard(async () => {
         const r = await services.iap.purchase(p.id);
         if (r === 'purchased' && applyPurchase(game.save, p.id)) {
           persist(); services.analytics.track('purchase', { product: p.id }); this.say(t('purchase_ok'));

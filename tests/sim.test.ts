@@ -229,3 +229,12 @@ describe('monetización', () => {
     expect(c.energy).toBeCloseTo(a.energy * 2, 5);
   });
 });
+
+import { toConsentState } from '../src/services/native/consent-map';
+describe('consentimiento nativo', () => {
+  it('personalizado solo si se pueden pedir anuncios y el seguimiento está autorizado', () => {
+    expect(toConsentState(true, true)).toBe('personalized');
+    expect(toConsentState(true, false)).toBe('limited');
+    expect(toConsentState(false, true)).toBe('limited');
+  });
+});
