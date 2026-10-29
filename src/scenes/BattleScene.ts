@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
 import { Battle, MAX_ENERGY } from '../game/sim';
-import { PLAYER_UNITS, LEVELS, levelById, type LevelDef } from '../game/data';
+import { LEVELS, eraById, levelById, type EraDef, type LevelDef } from '../game/data';
 import { applyWin, modsFrom, starsFor } from '../game/economy';
 import { game, persist } from '../services/save';
-import { t } from '../i18n';
+import { t, tf } from '../i18n';
 import { W, H, button } from '../ui';
 import { charKey } from './PreloadScene';
 
@@ -13,6 +13,10 @@ const GROUND = 400, LANE_X0 = 90, LANE_X1 = 870;
 export class BattleScene extends Phaser.Scene {
   private battle!: Battle;
   private level!: LevelDef;
+  private era!: EraDef;
+  private sand?: Phaser.GameObjects.Rectangle;
+  private alertText?: Phaser.GameObjects.Text;
+  private msgs: string[] = [];
   private gfx!: Phaser.GameObjects.Graphics;
   private energyText!: Phaser.GameObjects.Text;
   private wormholeBtn!: Phaser.GameObjects.Text;
@@ -24,21 +28,24 @@ export class BattleScene extends Phaser.Scene {
 
   constructor() { super('Battle'); }
 
-  init(data: { levelId?: string }) { this.level = levelById(data.levelId ?? LEVELS[0].id); }
+  init(data: { levelId?: string }) { this.level = levelById(data.levelId ?? LEVELS[0].id); this.era = eraById(this.level.eraId); }
 
   create() {
     this.battle = new Battle(this.level, modsFrom(game.save.upgrades));
     this.unitButtons = [];
     this.sprites.clear();
     this.ended = false;
-    this.cameras.main.setBackgroundColor(0x7fb8e6);
-    if (this.textures.exists('bg_prehistoria_far')) this.add.image(W / 2, 200, 'bg_prehistoria_far').setDisplaySize(W, 400);
-    this.add.rectangle(W / 2, GROUND + 80, W, 160, 0x6b8e4e);
-    this.add.text(W / 2, 14, `${t(this.level.nameKey)} — ${t('era_prehistoria')}`, { fontSize: '16px', color: '#1b1230' }).setOrigin(0.5, 0);
+    this.cameras.main.setBackgroundColor(this.era.sky);
+    const bgKey = `bg_${this.era.id}_far`;
+    if (this.textures.exists(bgKey)) this.add.image(W / 2, 200, bgKey).setDisplaySize(W, 400);
+    this.add.rectangle(W / 2, GROUND + 80, W, 160, this.era.ground);
+    this.sand = this.add.rectangle(W / 2, H / 2, W, H, 0xd9b36a, 0.35).setDepth(5).setVisible(false);
+    this.alertText = undefined;
+    this.add.text(W / 2, 14, `${t(this.level.nameKey)} — ${t(this.era.nameKey)}`, { fontSize: '16px', color: '#1b1230' }).setOrigin(0.5, 0);
     this.gfx = this.add.graphics();
     this.energyText = this.add.text(20, H - 130, '', { fontSize: '18px', color: '#fff', stroke: '#3b2a3f', strokeThickness: 3 });
 
-    PLAYER_UNITS.forEach((def, i) => {
+    this.era.units.forEach((def, i) => {
       const x = 80 + i * 150, y = H - 50;
       const bg = this.add.rectangle(x, y, 140, 70, def.color).setStrokeStyle(3, 0x3b2a3f).setInteractive({ useHandCursor: true });
       this.add.text(x, y - 15, t(def.nameKey), { fontSize: '13px', color: '#1b1230', align: 'center', wordWrap: { width: 130 } }).setOrigin(0.5);
@@ -54,21 +61,37 @@ export class BattleScene extends Phaser.Scene {
 
     this.tutorialStep = 0;
     this.tutorialBox = undefined;
-    if (!game.save.tutorialDone && this.level.id === LEVELS[0].id) this.showTutorial();
+    this.msgs = [];
+    const first = LEVELS[0].id === this.level.id;
+    if (first && !game.save.tutorialDone) this.msgs.push(t('tut1'), t('tut2'), t('tut3'));
+    if (this.era.levels[0].id === this.level.id && !game.save.stars[this.level.id]) this.msgs.unshift(t(this.era.introKey));
+    this.showMessages();
   }
 
-  private showTutorial() {
-    const steps = ['tut1', 'tut2', 'tut3'] as const;
-    if (this.tutorialStep >= steps.length) {
+  private showMessages() {
+    if (this.tutorialStep >= this.msgs.length) {
       this.tutorialBox?.destroy(); this.tutorialBox = undefined;
-      game.save.tutorialDone = true; persist();
+      if (!game.save.tutorialDone && this.msgs.length) { game.save.tutorialDone = true; persist(); }
       return;
     }
     this.tutorialBox?.destroy();
-    this.tutorialBox = this.add.text(W / 2, 200, `${t(steps[this.tutorialStep])}\n\n${t('tap_continue')}`, {
+    this.tutorialBox = this.add.text(W / 2, 200, `${this.msgs[this.tutorialStep]}\n\n${t('tap_continue')}`, {
       fontSize: '24px', color: '#fff', backgroundColor: '#000000dd', padding: { x: 24, y: 20 }, align: 'center', wordWrap: { width: 640 },
     }).setOrigin(0.5).setDepth(10).setInteractive();
-    this.tutorialBox.once('pointerdown', () => { this.tutorialStep++; this.showTutorial(); });
+    this.tutorialBox.once('pointerdown', () => { this.tutorialStep++; this.showMessages(); });
+  }
+
+  private onAnomaly(kind: string, x: number | undefined, px: (x: number) => number) {
+    const txt = tf('anomaly_alert', { name: t(this.era.anomaly.nameKey) });
+    this.alertText?.destroy();
+    this.alertText = this.add.text(W / 2, 60, `🌀 ${txt}`, { fontSize: '24px', color: '#fff', backgroundColor: '#6a2cdcdd', padding: { x: 14, y: 8 } }).setOrigin(0.5).setDepth(12);
+    this.time.delayedCall(2000, () => { this.alertText?.destroy(); this.alertText = undefined; });
+    if (kind === 'meteor' && x !== undefined) {
+      const m = this.add.circle(px(x), GROUND - 10, 50, 0xff7b00, 0.7).setDepth(6);
+      this.tweens.add({ targets: m, alpha: 0, scale: 1.6, duration: 600, onComplete: () => m.destroy() });
+      this.cameras.main.shake(250, 0.01);
+    } else if (kind === 'stampede') this.cameras.main.shake(400, 0.008);
+    else if (kind === 'ghost') this.cameras.main.flash(300, 207, 216, 255);
   }
 
   update(_: number, deltaMs: number) {
@@ -76,28 +99,32 @@ export class BattleScene extends Phaser.Scene {
     if (!this.tutorialBox) b.update(Math.min(deltaMs, 100) / 1000);
     const px = (x: number) => LANE_X0 + (x / b.level.laneLength) * (LANE_X1 - LANE_X0);
 
+    for (const e of b.drainEvents()) this.onAnomaly(e.kind, e.x, px);
+    this.sand?.setVisible(b.sandstormActive);
+
     const g = this.gfx;
     g.clear();
     g.fillStyle(0xff9ec4).fillRect(LANE_X0 - 60, GROUND - 80, 50, 80);
     g.fillStyle(0x4a3a5a).fillRect(LANE_X1 + 10, GROUND - 100, 60, 100);
     this.bar(g, LANE_X0 - 60, GROUND - 95, 50, b.playerBaseHp / b.playerBaseMax, 0x4ade80);
-    this.bar(g, LANE_X1 + 10, GROUND - 115, 60, b.enemyBaseHp / b.level.baseHp, 0xef4444);
+    this.bar(g, LANE_X1 + 10, GROUND - 115, 60, b.enemyBaseHp / b.level.enemyBaseHp, 0xef4444);
 
     const alive = new Set<number>();
     for (const u of b.units) {
       alive.add(u.uid);
-      const key = charKey(u.isHero ? 'hero' : u.def.id);
+      const heroKey = this.textures.exists(charKey(`hero_${this.era.id}`)) ? `hero_${this.era.id}` : 'hero';
+      const key = charKey(u.isHero ? heroKey : u.def.id);
       const y = GROUND - (u.isHero ? 0 : (u.uid % 3) * 6);
       const x = px(u.x);
       if (this.textures.exists(key)) {
         let s = this.sprites.get(u.uid);
         if (!s) { s = this.add.image(x, y, key).setOrigin(0.5, 1).setFlipX(u.side === 'enemy'); this.sprites.set(u.uid, s); }
         const h = u.def.size * 2.4;
-        s.setDisplaySize(h * (s.width / s.height), h).setPosition(x, y);
+        s.setDisplaySize(h * (s.width / s.height), h).setPosition(x, y).setAlpha(u.ttl !== undefined ? 0.6 : 1);
         this.bar(g, x - 12, y - h - 6, 24, u.hp / u.def.hp, u.side === 'player' ? 0x4ade80 : 0xef4444);
       } else {
         const cy = y - u.def.size / 2;
-        g.fillStyle(u.def.color).fillCircle(x, cy, u.def.size / 2);
+        g.fillStyle(u.def.color, u.ttl !== undefined ? 0.55 : 1).fillCircle(x, cy, u.def.size / 2);
         g.fillStyle(0x000000).fillCircle(x + (u.side === 'player' ? 4 : -4), cy - 3, 2);
         if (u.isHero) g.lineStyle(3, 0xffffff).strokeCircle(x, cy, u.def.size / 2 + 2);
         this.bar(g, x - 12, cy - u.def.size / 2 - 8, 24, u.hp / u.def.hp, u.side === 'player' ? 0x4ade80 : 0xef4444);

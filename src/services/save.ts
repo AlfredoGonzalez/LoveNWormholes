@@ -42,7 +42,7 @@ export function writeSave(kv: KV | null, data: SaveData) {
 const browserKv = (): KV | null => { try { return typeof localStorage !== 'undefined' ? localStorage : null; } catch { return null; } };
 
 /** Estado global del juego (singleton simple). */
-export const game = { save: defaultSave() };
+export const game = { save: defaultSave(), eraIdx: 0 };
 export function initGame(defaultLang: Lang) {
   game.save = loadSave(browserKv(), defaultLang);
   setLang(game.save.lang);

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { game } from '../services/save';
 import { isUnlocked } from '../game/economy';
-import { LEVELS } from '../game/data';
+import { ERAS } from '../game/data';
 import { t } from '../i18n';
 import { W, button, coinsText, title } from '../ui';
 
@@ -9,11 +9,16 @@ export class EraMapScene extends Phaser.Scene {
   constructor() { super('EraMap'); }
 
   create() {
-    this.cameras.main.setBackgroundColor(0x7fb8e6);
-    title(this, t('era_prehistoria'));
+    const era = ERAS[game.eraIdx];
+    const eraOpen = isUnlocked(game.save, era.levels[0]);
+    this.cameras.main.setBackgroundColor(era.sky);
+    title(this, t(era.nameKey));
+    if (game.eraIdx > 0) button(this, 60, 40, 60, 50, '◀', () => { game.eraIdx--; this.scene.restart(); }, { fontSize: 26, color: 0x555577 });
+    if (game.eraIdx < ERAS.length - 1) button(this, W - 60, 90, 60, 50, '▶', () => { game.eraIdx++; this.scene.restart(); }, { fontSize: 26, color: 0x555577 });
+    if (!eraOpen) this.add.text(W / 2, 100, t('era_locked'), { fontSize: '18px', color: '#3b2a3f' }).setOrigin(0.5);
     coinsText(this, `${t('coins')}: ${game.save.coins}`);
 
-    LEVELS.forEach((lvl, i) => {
+    era.levels.forEach((lvl, i) => {
       const x = 160 + i * 320, y = 270;
       const open = isUnlocked(game.save, lvl);
       const stars = game.save.stars[lvl.id] ?? 0;

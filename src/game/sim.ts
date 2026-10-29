@@ -1,4 +1,4 @@
-import { ENEMY_UNITS, HERO_DEF, type LevelDef, type UnitDef } from './data';
+import { ENEMY_UNITS, HERO_DEF, eraById, scaleUnit, type AnomalyKind, type EraDef, type LevelDef, type UnitDef } from './data';
 
 export type Side = 'player' | 'enemy';
 export type Outcome = 'playing' | 'win' | 'lose';
@@ -11,7 +11,11 @@ export interface Unit {
   hp: number;
   cd: number;
   isHero: boolean;
+  ttl?: number; // segundos de vida restantes (aliados fantasma)
 }
+
+/** Evento visual para la escena (se consume con `drainEvents`). */
+export interface BattleEvent { kind: AnomalyKind; x?: number }
 
 /** Multiplicadores que vienen de las mejoras permanentes. */
 export interface Mods { energyRegen: number; baseHp: number; heroDamage: number }
@@ -21,6 +25,24 @@ export const MAX_ENERGY = 100;
 export const ENERGY_REGEN = 10; // por segundo
 export const WORMHOLE_COOLDOWN = 20;
 export const WORMHOLE_DAMAGE = 60;
+
+export const SANDSTORM_DURATION = 8;
+export const SANDSTORM_SLOW = 0.6;
+export const GHOST_LIFETIME = 12;
+export const METEOR_RADIUS = 90;
+export const STAMPEDE_PUSH = 120;
+
+/** Generador pseudoaleatorio determinista (mulberry32) para poder probar las anomalías. */
+function rng(seed: number) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 /** Simulación pura (sin Phaser): fácil de probar y de balancear. */
 export class Battle {
@@ -32,17 +54,30 @@ export class Battle {
   readonly playerBaseMax: number;
   enemyBaseHp: number;
   outcome: Outcome = 'playing';
+  readonly era: EraDef;
+  sandUntil = 0;
+  private events: BattleEvent[] = [];
   private nextUid = 1;
   private waveIdx = 0;
+  private anomalyTimer: number;
+  private rand: () => number;
 
-  constructor(readonly level: LevelDef, private readonly mods: Mods = NO_MODS) {
+  constructor(readonly level: LevelDef, private readonly mods: Mods = NO_MODS, seed = 1234) {
+    this.era = eraById(level.eraId);
+    this.rand = rng(seed);
+    this.anomalyTimer = this.era.anomaly.interval;
     this.playerBaseMax = Math.round(level.baseHp * mods.baseHp);
     this.playerBaseHp = this.playerBaseMax;
-    this.enemyBaseHp = level.baseHp;
-    this.spawn({ ...HERO_DEF, damage: HERO_DEF.damage * mods.heroDamage }, 'player', true);
+    this.enemyBaseHp = level.enemyBaseHp;
+    const hero = scaleUnit(HERO_DEF, this.era.power);
+    this.spawn({ ...hero, damage: hero.damage * mods.heroDamage }, 'player', true);
   }
 
-  get enemyBaseX() { return this.level.laneLength; }
+  get sandstormActive() { return this.time < this.sandUntil; }
+
+  drainEvents(): BattleEvent[] {
+    const e = this.events; this.events = []; return e;
+  }
 
   summon(def: UnitDef): boolean {
     if (this.outcome !== 'playing' || this.energy < def.cost) return false;
@@ -54,18 +89,39 @@ export class Battle {
   castWormhole(): boolean {
     if (this.outcome !== 'playing' || this.wormholeCd > 0) return false;
     this.wormholeCd = WORMHOLE_COOLDOWN;
-    for (const u of this.units) if (u.side === 'enemy') u.hp -= WORMHOLE_DAMAGE;
-    this.cleanup();
+    for (const u of this.units) if (u.side === 'enemy') u.hp -= WORMHOLE_DAMAGE * this.era.power;
+    this.units = this.units.filter(u => u.hp > 0);
     return true;
   }
 
-  private spawn(def: UnitDef, side: Side, isHero = false) {
+  private spawn(def: UnitDef, side: Side, isHero = false, ttl?: number) {
     const x = side === 'player' ? 0 : this.level.laneLength;
-    this.units.push({ uid: this.nextUid++, def, side, x, hp: def.hp, cd: 0, isHero });
+    this.units.push({ uid: this.nextUid++, def, side, x, hp: def.hp, cd: 0, isHero, ttl });
   }
 
-  private cleanup() {
-    this.units = this.units.filter(u => u.hp > 0);
+  private triggerAnomaly() {
+    const kind = this.era.anomaly.kind;
+    const len = this.level.laneLength;
+    switch (kind) {
+      case 'meteor': {
+        const x = 150 + this.rand() * (len - 300);
+        for (const u of this.units) if (Math.abs(u.x - x) <= METEOR_RADIUS) u.hp -= 40 * this.era.power;
+        this.events.push({ kind, x });
+        break;
+      }
+      case 'sandstorm':
+        this.sandUntil = this.time + SANDSTORM_DURATION;
+        this.events.push({ kind });
+        break;
+      case 'ghost':
+        this.spawn(this.era.ghost, 'player', false, GHOST_LIFETIME);
+        this.events.push({ kind });
+        break;
+      case 'stampede':
+        for (const u of this.units) if (u.side === 'enemy') u.x = Math.min(len, u.x + STAMPEDE_PUSH);
+        this.events.push({ kind });
+        break;
+    }
   }
 
   update(dt: number) {
@@ -74,18 +130,22 @@ export class Battle {
     this.energy = Math.min(MAX_ENERGY, this.energy + ENERGY_REGEN * this.mods.energyRegen * dt);
     this.wormholeCd = Math.max(0, this.wormholeCd - dt);
 
+    this.anomalyTimer -= dt;
+    if (this.anomalyTimer <= 0) { this.anomalyTimer += this.era.anomaly.interval; this.triggerAnomaly(); }
+
     const waves = this.level.waves;
     while (this.waveIdx < waves.length && waves[this.waveIdx].at <= this.time) {
       const w = waves[this.waveIdx++];
       for (let i = 0; i < w.count; i++) {
-        const def = ENEMY_UNITS[w.enemy];
-        this.spawn(def, 'enemy');
+        this.spawn(scaleUnit(ENEMY_UNITS[w.enemy], this.level.enemyBoost), 'enemy');
         this.units[this.units.length - 1].x -= i * 25; // escalonar
       }
     }
 
+    const speedMult = this.sandstormActive ? SANDSTORM_SLOW : 1;
     for (const u of this.units) {
       u.cd = Math.max(0, u.cd - dt);
+      if (u.ttl !== undefined) { u.ttl -= dt; if (u.ttl <= 0) u.hp = 0; }
       const dir = u.side === 'player' ? 1 : -1;
       const target = this.findTarget(u);
       if (target) {
@@ -97,7 +157,7 @@ export class Battle {
           } else target.hp -= u.def.damage;
         }
       } else {
-        u.x += dir * u.def.speed * dt;
+        u.x += dir * u.def.speed * speedMult * dt;
       }
     }
 

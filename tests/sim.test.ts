@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Battle } from '../src/game/sim';
-import { LEVELS, PLAYER_UNITS } from '../src/game/data';
+import { ERAS, LEVELS, eraById } from '../src/game/data';
+const PLAYER_UNITS = ERAS[0].units;
 const LEVEL_PREHISTORIA_1 = LEVELS[0];
 import { dictionaries } from '../src/i18n';
 
@@ -62,7 +63,7 @@ import { applyWin, buyUpgrade, claimDaily, isUnlocked, modsFrom, starsFor } from
 import { defaultSave, loadSave, migrate, writeSave } from '../src/services/save';
 
 const bot = (b: Battle) => {
-  const cheap = PLAYER_UNITS[0], rock = PLAYER_UNITS[2];
+  const cheap = b.era.units[0], rock = b.era.units[2];
   for (let i = 0; i < 6000 && b.outcome === 'playing'; i++) {
     b.update(0.05);
     if (!b.summon(rock)) b.summon(cheap);
@@ -118,5 +119,54 @@ describe('guardado', () => {
     expect(loadSave(kv)).toEqual(s);
     expect(migrate({ coins: 7 }).stars).toEqual({});
     expect(loadSave({ getItem: () => '{roto', setItem: () => {} }).coins).toBe(0);
+  });
+});
+
+describe('eras y anomalías', () => {
+  it('hay 4 eras con 4 unidades y 3 enemigos únicos', () => {
+    expect(ERAS).toHaveLength(4);
+    const ids = ERAS.flatMap(e => [...e.units, ...e.enemies]).map(u => u.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const e of ERAS) { expect(e.units).toHaveLength(4); expect(e.enemies).toHaveLength(3); expect(e.levels).toHaveLength(3); }
+  });
+  it('todas las oleadas usan enemigos de su era', () => {
+    for (const l of LEVELS) {
+      const ids = eraById(l.eraId).enemies.map(e => e.id);
+      for (const w of l.waves) expect(ids).toContain(w.enemy);
+    }
+  });
+  const level = (era: string) => eraById(era).levels[0];
+  it('meteoros dañan unidades y avisan', () => {
+    const b = new Battle(level('prehistoria'));
+    let hit = false;
+    for (let t = 0; t < 30; t += 0.05) { b.update(0.05); if (b.drainEvents().some(e => e.kind === 'meteor')) hit = true; }
+    expect(hit).toBe(true);
+  });
+  it('la tormenta de arena frena a las unidades', () => {
+    const b = new Battle(level('egipto'));
+    for (let t = 0; t < 31; t += 0.05) b.update(0.05);
+    expect(b.sandstormActive).toBe(true);
+  });
+  it('el caballero fantasma aparece y expira', () => {
+    const b = new Battle(level('medieval'));
+    for (let t = 0; t < 31; t += 0.05) b.update(0.05);
+    expect(b.units.some(u => u.ttl !== undefined)).toBe(true);
+    for (let t = 0; t < 13; t += 0.05) b.update(0.05);
+    expect(b.units.some(u => u.ttl !== undefined && u.ttl > 0 && u.def.id.startsWith('ghost') && u.x === 0)).toBe(false);
+  });
+  it('la estampida empuja a los enemigos hacia su base', () => {
+    const b = new Battle(level('oeste'));
+    b.units = b.units.filter(u => u.isHero);
+    b.units.push({ uid: 99, def: eraById('oeste').enemies[0], side: 'enemy', x: 500, hp: 9999, cd: 99, isHero: false });
+    for (let t = 0; t < 28.1; t += 0.05) { b.update(0.05); const e = b.units.find(u => u.uid === 99)!; e.x = Math.max(e.x, 500); if (b.drainEvents().length) break; }
+    expect(b.units.find(u => u.uid === 99)!.x).toBeGreaterThanOrEqual(600);
+  });
+});
+
+describe('dificultad', () => {
+  it.each(LEVELS.map(l => [l.id, l] as const))('%s no se gana sin jugar', (_, l) => {
+    const b = new Battle(l);
+    for (let i = 0; i < 8000 && b.outcome === 'playing'; i++) b.update(0.05);
+    expect(b.outcome).toBe('lose');
   });
 });
