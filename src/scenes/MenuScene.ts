@@ -3,7 +3,7 @@ import { game, persist } from '../services/save';
 import { claimDaily } from '../game/economy';
 import { getLang, setLang, t, tf } from '../i18n';
 import { services } from '../services';
-import { W, button, coinsText, title } from '../ui';
+import { W, button, coinsText, hasIcon, title } from '../ui';
 
 export class MenuScene extends Phaser.Scene {
   constructor() { super('Menu'); }
@@ -15,9 +15,12 @@ export class MenuScene extends Phaser.Scene {
 
   create() {
     this.cameras.main.setBackgroundColor(0x3a2268);
-    title(this, t('title'), 200).setFontSize(42);
-    this.add.text(W / 2, 270, '🐛💜🌀💗🐛', { fontSize: '40px' }).setOrigin(0.5);
-    coinsText(this, `🪙 ${game.save.coins}  💎 ${game.save.gems}`);
+    if (hasIcon(this, 'logo')) this.add.image(W / 2, 230, 'ui_logo').setDisplaySize(440, 220);
+    else {
+      title(this, t('title'), 200).setFontSize(42);
+      this.add.text(W / 2, 270, '🐛💜🌀💗🐛', { fontSize: '40px' }).setOrigin(0.5);
+    }
+    coinsText(this);
 
     button(this, W / 2, 400, 320, 70, t('play'), () => this.scene.start('EraMap'), { color: 0x2ea043, fontSize: 26 });
     button(this, W / 2, 490, 320, 56, t('upgrades'), () => this.scene.start('Upgrades'));

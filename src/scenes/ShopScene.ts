@@ -3,7 +3,7 @@ import { game, persist } from '../services/save';
 import { services } from '../services';
 import { EXCHANGE, PRODUCTS, applyPurchase, chestRemainingMs, exchangeGems, openChest, restoreOwned } from '../game/economy';
 import { t, tf } from '../i18n';
-import { W, H, button, title } from '../ui';
+import { W, H, button, coinsText, hasIcon, title } from '../ui';
 
 /** Precios localizados de la tienda real (vacío en el navegador: se usan los de referencia). */
 let storePrices: Record<string, string> = {};
@@ -26,7 +26,7 @@ export class ShopScene extends Phaser.Scene {
     }
     this.cameras.main.setBackgroundColor(0x3a2268);
     title(this, t('shop'), 44);
-    this.add.text(W - 20, 84, `🪙 ${game.save.coins}   💎 ${game.save.gems}`, { fontSize: '20px', color: '#ffe066', stroke: '#3b2a3f', strokeThickness: 4 }).setOrigin(1, 0);
+    coinsText(this);
 
     // Cofre gratis (anuncio opcional con enfriamiento)
     const left = chestRemainingMs(game.save);
@@ -42,7 +42,9 @@ export class ShopScene extends Phaser.Scene {
     PRODUCTS.forEach((p, i) => {
       const y = 240 + i * 82;
       const owned = p.nonConsumable && game.save.owned.includes(p.id);
-      this.add.text(24, y, t(p.titleKey), { fontSize: '19px', color: '#fff', wordWrap: { width: 290 } }).setOrigin(0, 0.5);
+      const shopIcon = `shop_${p.id}`;
+      if (hasIcon(this, shopIcon)) this.add.image(50, y, `ui_${shopIcon}`).setDisplaySize(64, 64);
+      this.add.text(hasIcon(this, shopIcon) ? 96 : 24, y, t(p.titleKey), { fontSize: '19px', color: '#fff', wordWrap: { width: hasIcon(this, shopIcon) ? 220 : 290 } }).setOrigin(0, 0.5);
       button(this, W - 100, y, 160, 48, owned ? t('owned') : (storePrices[p.id] ?? p.priceLabel), () => this.guard(async () => {
         const r = await services.iap.purchase(p.id);
         if (r === 'purchased' && applyPurchase(game.save, p.id)) {

@@ -8,7 +8,7 @@ Cartoon 2D tierno y cómico, estilo "sticker" de juego móvil: contorno grueso y
 ## Los gusanos (personajes principales)
 - **Gusanito**: gusano rosa-salmón (`#ff8fa3`), cuerpo segmentado corto y regordete, ojos grandes con brillo, sonrisa valiente, una pequeña ceja decidida. Lleva un accesorio por era (taparrabos, tocado egipcio, casco, sombrero vaquero…).
 - **Gusanita**: gusano lila (`#c9a7ff`), mismas proporciones, pestañas, moño/flor en la cabeza. Siempre con expresión curiosa/traviesa.
-- Proporción: cabeza = ~40% del cuerpo, ojos = 1/3 de la cara. Cuerpo de 4-5 segmentos. Vista lateral (3/4 hacia la derecha para aliados, hacia la izquierda para enemigos — se puede espejar el sprite).
+- Proporción: cabeza = ~40% del cuerpo, ojos = 1/3 de la cara. Cuerpo de 4-5 segmentos. Vista lateral, **todos los personajes miran a la DERECHA** (aliados y enemigos); el juego voltea a los enemigos por código.
 
 ## Paletas por era
 | Era | Cielo | Suelo | Acentos |
@@ -29,14 +29,15 @@ mobile game sticker style, friendly and humorous, side view,
 isolated on a plain solid magenta (#ff00ff) background, centered, full body visible,
 no text, no watermark, no shadow on the ground
 ```
+(Los prompts de los demás documentos ya traen esta plantilla incorporada y adaptada a cada archivo.)
+
 **Negativos** (si la herramienta los admite): `photorealistic, 3d render, blurry, text, watermark, extra limbs, background scene, cropped, gradient mesh, noisy texture`.
 
 ## Flujo para consistencia
-1. Genera primero la **hoja de referencia** de Gusanito y Gusanita (vista frontal + lateral). Guarda la mejor.
-2. Para cada pose/variante usa esa imagen como **referencia de personaje/estilo** (image-to-image, "character reference" o IP-Adapter según la herramienta) y fija el **seed** cuando se pueda.
-3. Genera de 4 en 4 y elige la mejor. Quita el fondo magenta (chroma key) o usa una herramienta de "remove background".
-4. Exporta **PNG transparente**, lado más largo 512 px para personajes (se reducen en el juego).
+1. Genera primero las **hojas de referencia** de Gusanito y Gusanita (prompts en `04-extras.md`). Guarda las mejores.
+2. Para cada personaje nuevo usa esa imagen como **referencia de personaje/estilo** (image-to-image, "character reference" o IP-Adapter según la herramienta) y fija el **seed** cuando se pueda.
+3. De cada personaje genera primero `<id>_idle`; ya aprobada, úsala como referencia para `_walk`, `_attack` y `_die`.
+4. Genera de 4 en 4 y elige la mejor. **No hace falta quitar el fondo ni recortar**: deja el fondo plano (magenta o blanco) y ejecuta `npm run art`.
 
-## Convenciones de archivos
-`assets/characters/<id>/<anim>_<NN>.png` — p. ej. `assets/characters/hero/walk_01.png`. Animaciones: `idle` (4), `walk` (6), `attack` (5), `die` (5). Luego `npm run pack-atlas` los junta en un atlas.
-Fondos: `assets/backgrounds/<era>/{far,mid,near}.png`. UI: `assets/ui/<nombre>.png`.
+## Nombres, tamaños y pipeline
+Todo está en [`README.md`](README.md) (nombres exactos de archivo, tamaños finales, reglas de fondo y prioridades). Los prompts por archivo ya incluyen este estilo.

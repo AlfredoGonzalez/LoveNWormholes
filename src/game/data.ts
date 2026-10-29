@@ -104,7 +104,7 @@ const prehistoria: EraDef = {
     mk('bird', 'enemy_bird', ENEMY.mid, 0x5aa9e6, 1),
     mk('mammoth', 'enemy_mammoth', ENEMY.boss, 0x6b4423, 1),
   ],
-  ghost: mk('ghost_prehistoria', 'unit_ghostknight', { cost: 0, hp: 150, damage: 25, range: 40, speed: 70, cooldown: 0.9, size: 22 }, 0xcfd8ff, 1),
+  ghost: mk('ghost', 'unit_ghostknight', { cost: 0, hp: 150, damage: 25, range: 40, speed: 70, cooldown: 0.9, size: 22 }, 0xcfd8ff, 1),
   anomaly: { kind: 'meteor', nameKey: 'anom_meteor', interval: 25 },
   levels: [],
 };
@@ -147,7 +147,7 @@ const egipto: EraDef = {
     mk('mummy', 'enemy_mummy', ENEMY.mid, 0xe9e2c8, 1.5),
     mk('scarabking', 'enemy_scarabking', ENEMY.boss, 0xc9a227, 1.5),
   ],
-  ghost: mk('ghost_egipto', 'unit_ghostknight', { cost: 0, hp: 150, damage: 25, range: 40, speed: 70, cooldown: 0.9, size: 22 }, 0xcfd8ff, 1.5),
+  ghost: mk('ghost', 'unit_ghostknight', { cost: 0, hp: 150, damage: 25, range: 40, speed: 70, cooldown: 0.9, size: 22 }, 0xcfd8ff, 1.5),
   anomaly: { kind: 'sandstorm', nameKey: 'anom_sandstorm', interval: 30 },
   levels: [],
 };
@@ -166,7 +166,7 @@ const medieval: EraDef = {
     mk('skeleton', 'enemy_skeleton', ENEMY.mid, 0xe0e0d1, 2.1),
     mk('dragon', 'enemy_dragon', ENEMY.boss, 0x7f5539, 2.1),
   ],
-  ghost: mk('ghost_medieval', 'unit_ghostknight', { cost: 0, hp: 150, damage: 25, range: 40, speed: 70, cooldown: 0.9, size: 22 }, 0xcfd8ff, 2.1),
+  ghost: mk('ghost', 'unit_ghostknight', { cost: 0, hp: 150, damage: 25, range: 40, speed: 70, cooldown: 0.9, size: 22 }, 0xcfd8ff, 2.1),
   anomaly: { kind: 'ghost', nameKey: 'anom_ghost', interval: 30 },
   levels: [],
 };
@@ -185,7 +185,7 @@ const oeste: EraDef = {
     mk('outlaw', 'enemy_outlaw', ENEMY.mid, 0x588157, 2.8),
     mk('scorpion', 'enemy_scorpion', ENEMY.boss, 0x6d2e46, 2.8),
   ],
-  ghost: mk('ghost_oeste', 'unit_ghostknight', { cost: 0, hp: 150, damage: 25, range: 40, speed: 70, cooldown: 0.9, size: 22 }, 0xcfd8ff, 2.8),
+  ghost: mk('ghost', 'unit_ghostknight', { cost: 0, hp: 150, damage: 25, range: 40, speed: 70, cooldown: 0.9, size: 22 }, 0xcfd8ff, 2.8),
   anomaly: { kind: 'stampede', nameKey: 'anom_stampede', interval: 28 },
   levels: [],
 };

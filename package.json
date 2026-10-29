@@ -9,8 +9,10 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "pack-atlas": "node tools/pack-atlas.mjs",
-    "cap:sync": "npm run build && cap sync"
+    "cap:sync": "npm run build && cap sync",
+    "art": "tsx tools/process-art.ts",
+    "art:status": "tsx tools/process-art.ts --status",
+    "art:docs": "tsx tools/gen-art-docs.ts"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",
@@ -23,6 +25,7 @@
   "devDependencies": {
     "@capacitor/cli": "^8.6.0",
     "sharp": "^0.35.5",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
     "vitest": "^5.0.5"

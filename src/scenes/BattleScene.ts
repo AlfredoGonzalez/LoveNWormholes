@@ -6,7 +6,9 @@ import { services } from '../services';
 import { game, persist } from '../services/save';
 import { t, tf } from '../i18n';
 import { W, H, button } from '../ui';
-import { charKey } from './PreloadScene';
+import { baseKey, bgKey, heroId, sheetKey, type AnimName } from './PreloadScene';
+
+interface Actor { sprite: Phaser.GameObjects.Sprite; lastX: number; anim: string; art: string }
 
 const GROUND = 560, LANE_X0 = 80, LANE_X1 = 455; // formato vertical (540×960)
 
@@ -22,12 +24,14 @@ export class BattleScene extends Phaser.Scene {
   private reviveUsed = false;
   private boostUsed = false;
   private busy = false;
+  private homeImg?: Phaser.GameObjects.Image;
+  private enemyImg?: Phaser.GameObjects.Image;
   private boostBtn?: Phaser.GameObjects.Container;
   private gfx!: Phaser.GameObjects.Graphics;
   private energyText!: Phaser.GameObjects.Text;
   private wormholeBtn!: Phaser.GameObjects.Text;
   private unitButtons: { bg: Phaser.GameObjects.Rectangle; cost: number }[] = [];
-  private sprites = new Map<number, Phaser.GameObjects.Image>();
+  private actors = new Map<number, Actor>();
   private ended = false;
   private tutorialStep = 0;
   private tutorialBox?: Phaser.GameObjects.Text;
@@ -39,18 +43,20 @@ export class BattleScene extends Phaser.Scene {
   create() {
     this.battle = new Battle(this.level, modsFrom(game.save.upgrades));
     this.unitButtons = [];
-    this.sprites.clear();
+    this.actors.clear();
     this.ended = false;
     this.reviveUsed = false;
     this.boostUsed = false;
     this.busy = false;
     this.resultObjs = [];
     this.cameras.main.setBackgroundColor(this.era.sky);
-    const bgKey = `bg_${this.era.id}_far`;
-    if (this.textures.exists(bgKey)) this.add.image(W / 2, GROUND / 2, bgKey).setDisplaySize(W, GROUND);
+    if (this.textures.exists(bgKey(this.era.id))) this.add.image(W / 2, GROUND / 2, bgKey(this.era.id)).setDisplaySize(W, GROUND);
     this.add.rectangle(W / 2, GROUND + (H - GROUND) / 2, W, H - GROUND, this.era.ground);
     this.sand = this.add.rectangle(W / 2, H / 2, W, H, 0xd9b36a, 0.35).setDepth(5).setVisible(false);
     this.alertText = undefined;
+    this.homeImg = this.enemyImg = undefined;
+    if (this.textures.exists(baseKey(this.era.id, 'home'))) this.homeImg = this.add.image(46, GROUND + 4, baseKey(this.era.id, 'home')).setOrigin(0.5, 1).setDisplaySize(96, 120);
+    if (this.textures.exists(baseKey(this.era.id, 'enemy'))) this.enemyImg = this.add.image(W - 46, GROUND + 4, baseKey(this.era.id, 'enemy')).setOrigin(0.5, 1).setDisplaySize(96, 120);
     this.add.text(W / 2, 14, `${t(this.level.nameKey)} — ${t(this.era.nameKey)}`, { fontSize: '18px', color: '#1b1230' }).setOrigin(0.5, 0);
     this.gfx = this.add.graphics();
     this.energyText = this.add.text(16, GROUND + 22, '', { fontSize: '18px', color: '#fff', stroke: '#3b2a3f', strokeThickness: 3 });
@@ -117,33 +123,49 @@ export class BattleScene extends Phaser.Scene {
 
     const g = this.gfx;
     g.clear();
-    g.fillStyle(0xff9ec4).fillRect(LANE_X0 - 65, GROUND - 80, 50, 80);
-    g.fillStyle(0x4a3a5a).fillRect(LANE_X1 + 15, GROUND - 100, 55, 100);
-    this.bar(g, LANE_X0 - 65, GROUND - 95, 50, b.playerBaseHp / b.playerBaseMax, 0x4ade80);
-    this.bar(g, LANE_X1 + 15, GROUND - 115, 55, b.enemyBaseHp / b.level.enemyBaseHp, 0xef4444);
+    if (!this.homeImg) g.fillStyle(0xff9ec4).fillRect(LANE_X0 - 65, GROUND - 80, 50, 80);
+    if (!this.enemyImg) g.fillStyle(0x4a3a5a).fillRect(LANE_X1 + 15, GROUND - 100, 55, 100);
+    this.bar(g, LANE_X0 - 65, GROUND - (this.homeImg ? 130 : 95), 50, b.playerBaseHp / b.playerBaseMax, 0x4ade80);
+    this.bar(g, LANE_X1 + 15, GROUND - (this.enemyImg ? 130 : 115), 55, b.enemyBaseHp / b.level.enemyBaseHp, 0xef4444);
 
     const alive = new Set<number>();
     for (const u of b.units) {
       alive.add(u.uid);
-      const heroKey = this.textures.exists(charKey(`hero_${this.era.id}`)) ? `hero_${this.era.id}` : 'hero';
-      const key = charKey(u.isHero ? heroKey : u.def.id);
       const y = GROUND - (u.isHero ? 0 : (u.uid % 3) * 6);
       const x = px(u.x);
-      if (this.textures.exists(key)) {
-        let s = this.sprites.get(u.uid);
-        if (!s) { s = this.add.image(x, y, key).setOrigin(0.5, 1).setFlipX(u.side === 'enemy'); this.sprites.set(u.uid, s); }
-        const h = u.def.size * 2.4;
-        s.setDisplaySize(h * (s.width / s.height), h).setPosition(x, y).setAlpha(u.ttl !== undefined ? 0.6 : 1);
-        this.bar(g, x - 12, y - h - 6, 24, u.hp / u.def.hp, u.side === 'player' ? 0x4ade80 : 0xef4444);
+      const art = this.artFor(u);
+      const barColor = u.side === 'player' ? 0x4ade80 : 0xef4444;
+      if (art) {
+        let a = this.actors.get(u.uid);
+        if (!a) {
+          const sprite = this.add.sprite(x, y, sheetKey(art, 'idle')).setOrigin(0.5, 1).setFlipX(u.side === 'enemy');
+          a = { sprite, lastX: u.x, anim: '', art };
+          this.actors.set(u.uid, a);
+        }
+        const h = u.def.size * 2.6;
+        const wanted: AnimName = u.cd > u.def.cooldown - 0.35 ? 'attack' : Math.abs(u.x - a.lastX) > 0.01 ? 'walk' : 'idle';
+        const anim: AnimName = this.textures.exists(sheetKey(art, wanted)) ? wanted : 'idle';
+        if (a.anim !== anim) { a.sprite.play(sheetKey(art, anim)); a.anim = anim; }
+        a.lastX = u.x;
+        a.sprite.setDisplaySize(h, h).setPosition(x, y + h * 0.03).setAlpha(u.ttl !== undefined ? 0.6 : 1);
+        this.bar(g, x - 12, y - h - 2, 24, u.hp / u.def.hp, barColor);
       } else {
         const cy = y - u.def.size / 2;
         g.fillStyle(u.def.color, u.ttl !== undefined ? 0.55 : 1).fillCircle(x, cy, u.def.size / 2);
         g.fillStyle(0x000000).fillCircle(x + (u.side === 'player' ? 4 : -4), cy - 3, 2);
         if (u.isHero) g.lineStyle(3, 0xffffff).strokeCircle(x, cy, u.def.size / 2 + 2);
-        this.bar(g, x - 12, cy - u.def.size / 2 - 8, 24, u.hp / u.def.hp, u.side === 'player' ? 0x4ade80 : 0xef4444);
+        this.bar(g, x - 12, cy - u.def.size / 2 - 8, 24, u.hp / u.def.hp, barColor);
       }
     }
-    for (const [uid, s] of this.sprites) if (!alive.has(uid)) { s.destroy(); this.sprites.delete(uid); }
+    for (const [uid, a] of this.actors) {
+      if (alive.has(uid)) continue;
+      this.actors.delete(uid);
+      const dieKey = sheetKey(a.art, 'die');
+      if (this.textures.exists(dieKey)) {
+        a.sprite.play(dieKey);
+        a.sprite.once('animationcomplete', () => this.tweens.add({ targets: a.sprite, alpha: 0, duration: 250, onComplete: () => a.sprite.destroy() }));
+      } else a.sprite.destroy();
+    }
 
     this.energyText.setText(`${t('energy')}: ${Math.floor(b.energy)}/${MAX_ENERGY}${b.boostActive ? '  ' + t('energy_boost_on') : ''}`);
     for (const ub of this.unitButtons) ub.bg.setAlpha(b.energy >= ub.cost ? 1 : 0.4);
@@ -152,6 +174,12 @@ export class BattleScene extends Phaser.Scene {
     this.wormholeBtn.setAlpha(b.wormholeCd > 0 ? 0.5 : 1);
 
     if (b.outcome !== 'playing' && !this.ended) { this.ended = true; this.showResult(); }
+  }
+
+  /** Id del arte de una unidad (con respaldo al héroe de la Prehistoria), o null si no hay hoja idle → placeholder. */
+  private artFor(u: { isHero: boolean; ttl?: number; def: { id: string } }): string | null {
+    const candidates = u.isHero ? [heroId(this.era.id), heroId('prehistoria')] : u.ttl !== undefined ? ['ghost'] : [u.def.id];
+    return candidates.find(id => this.textures.exists(sheetKey(id, 'idle'))) ?? null;
   }
 
   private async watchBoost() {

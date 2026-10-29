@@ -1,3 +1,5 @@
 node_modules
 dist
 .DS_Store
+art-inbox/*
+!art-inbox/README.md

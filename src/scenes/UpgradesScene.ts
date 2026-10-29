@@ -10,7 +10,7 @@ export class UpgradesScene extends Phaser.Scene {
   create() {
     this.cameras.main.setBackgroundColor(0x3a2268);
     title(this, t('upgrades'), 44);
-    coinsText(this, `${t('coins')}: ${game.save.coins}`);
+    coinsText(this);
 
     UPGRADES.forEach((u, i) => {
       const y = 200 + i * 150;
