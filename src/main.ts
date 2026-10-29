@@ -1,7 +1,11 @@
 import Phaser from 'phaser';
 import { BattleScene } from './scenes/BattleScene';
 import { PreloadScene } from './scenes/PreloadScene';
-import { MenuScene } from './scenes/MenuScene';
+import { IntroScene } from './scenes/IntroScene';
+import { TitleScene } from './scenes/TitleScene';
+import { HomeScene } from './scenes/HomeScene';
+import { MemoriesScene } from './scenes/MemoriesScene';
+import { SettingsScene } from './scenes/SettingsScene';
 import { EraMapScene } from './scenes/EraMapScene';
 import { UpgradesScene } from './scenes/UpgradesScene';
 import { ShopScene } from './scenes/ShopScene';
@@ -26,7 +30,7 @@ async function boot() {
     parent: 'game',
     backgroundColor: '#1b1230',
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 540, height: 960 },
-    scene: [PreloadScene, MenuScene, EraMapScene, UpgradesScene, ShopScene, BattleScene],
+    scene: [PreloadScene, IntroScene, TitleScene, HomeScene, EraMapScene, MemoriesScene, UpgradesScene, ShopScene, SettingsScene, BattleScene],
   });
 }
 

@@ -48,3 +48,18 @@ export function starRow(scene: Phaser.Scene, x: number, y: number, stars: number
     else scene.add.text(x + (k - 1) * (size + 6), y, '★', { fontSize: `${size}px`, color: on ? '#ffe066' : '#5b6b80', stroke: '#3b2a3f', strokeThickness: 4 }).setOrigin(0.5);
   }
 }
+
+export const hasTex = (scene: Phaser.Scene, key: string) => scene.textures.exists(key);
+
+/** Botón grande de madera (arte `btn_wood`, sin texto) con el texto puesto por el juego; si falta el arte, un rectángulo naranja. */
+export function woodButton(scene: Phaser.Scene, x: number, y: number, w: number, h: number, label: string, onTap: () => void) {
+  const c = scene.add.container(x, y);
+  let hit: Phaser.GameObjects.Image | Phaser.GameObjects.Rectangle;
+  if (hasTex(scene, 'ui_btn_wood')) hit = scene.add.image(0, 0, 'ui_btn_wood').setDisplaySize(w, h);
+  else hit = scene.add.rectangle(0, 0, w, h, 0xd98324).setStrokeStyle(5, 0x6b3a12);
+  hit.setInteractive({ useHandCursor: true });
+  hit.on('pointerdown', () => { scene.tweens.add({ targets: c, scale: 0.94, duration: 70, yoyo: true }); onTap(); });
+  const txt = scene.add.text(0, -2, label, { fontSize: `${Math.round(h * 0.42)}px`, fontStyle: 'bold', color: '#fff3d6', stroke: '#6b3a12', strokeThickness: 6 }).setOrigin(0.5);
+  c.add([hit, txt]);
+  return c;
+}

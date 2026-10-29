@@ -77,7 +77,7 @@ writeFileSync(path.join(OUT, 'README.md'), `# Guía de arte — Love N Wormholes
 2. **Guarda** el resultado crudo en \`art-inbox/\` con el **nombre exacto** del archivo (p. ej. \`stick_idle.png\`, \`coin.png\`). Cada ícono y cada hoja de sprites va **por separado**.
 3. Ejecuta \`npm run art\`. El script **quita el fondo**, **corta los cuadros**, **unifica el tamaño** y deja el archivo final en \`public/assets/\`. \`npm run art:status\` muestra qué ya está y qué falta.
 
-El juego carga lo que exista y usa figuras de reemplazo para lo que falte: puedes ir entregando el arte poco a poco.
+El juego carga lo que exista y usa figuras de reemplazo para lo que falte: puedes ir entregando el arte poco a poco. Al compilar (`npm run build`) se genera solo `assets/manifest.json` con los archivos presentes, así que el juego únicamente pide lo que existe.
 
 ## Reglas del fondo
 - **Magenta plano** (\`#FF00FF\`) es el predeterminado. Para objetos rosas/violetas/magenta (gemas, corazón, portal, logo) los prompts piden **blanco plano** (\`#FFFFFF\`). Si tu herramienta no obedece el color, usa el otro: el script detecta el color de fondo por las esquinas.

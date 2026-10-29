@@ -3,7 +3,8 @@ import { game, persist } from '../services/save';
 import { services } from '../services';
 import { EXCHANGE, PRODUCTS, applyPurchase, chestRemainingMs, exchangeGems, openChest, restoreOwned } from '../game/economy';
 import { t, tf } from '../i18n';
-import { W, H, button, coinsText, hasIcon, title } from '../ui';
+import { CONTENT_TOP, addShell } from '../shell';
+import { W, button, hasIcon } from '../ui';
 
 /** Precios localizados de la tienda real (vacío en el navegador: se usan los de referencia). */
 let storePrices: Record<string, string> = {};
@@ -24,14 +25,13 @@ export class ShopScene extends Phaser.Scene {
       pricesRequested = true;
       services.iap.prices().then(p => { storePrices = p; if (Object.keys(p).length && this.scene.isActive('Shop')) this.scene.restart(); });
     }
-    this.cameras.main.setBackgroundColor(0x3a2268);
-    title(this, t('shop'), 44);
-    coinsText(this);
+    addShell(this, 'shop');
+    this.add.text(W / 2, CONTENT_TOP + 24, t('shop').toUpperCase(), { fontSize: '30px', fontStyle: 'bold', color: '#5a4630' }).setOrigin(0.5);
 
     // Cofre gratis (anuncio opcional con enfriamiento)
     const left = chestRemainingMs(game.save);
     const mins = Math.ceil(left / 60000);
-    button(this, W / 2, 150, 480, 56, left > 0 ? tf('chest_cooldown', { h: Math.floor(mins / 60), m: mins % 60 }) : t('free_chest'),
+    button(this, W / 2, CONTENT_TOP + 90, 480, 56, left > 0 ? tf('chest_cooldown', { h: Math.floor(mins / 60), m: mins % 60 }) : t('free_chest'),
       () => this.guard(async () => {
         if (!(await services.ads.showRewarded('free_chest'))) return;
         const r = openChest(game.save);
@@ -40,11 +40,11 @@ export class ShopScene extends Phaser.Scene {
 
     // Productos IAP
     PRODUCTS.forEach((p, i) => {
-      const y = 240 + i * 82;
+      const y = CONTENT_TOP + 175 + i * 72;
       const owned = p.nonConsumable && game.save.owned.includes(p.id);
       const shopIcon = `shop_${p.id}`;
       if (hasIcon(this, shopIcon)) this.add.image(50, y, `ui_${shopIcon}`).setDisplaySize(64, 64);
-      this.add.text(hasIcon(this, shopIcon) ? 96 : 24, y, t(p.titleKey), { fontSize: '19px', color: '#fff', wordWrap: { width: hasIcon(this, shopIcon) ? 220 : 290 } }).setOrigin(0, 0.5);
+      this.add.text(hasIcon(this, shopIcon) ? 96 : 24, y, t(p.titleKey), { fontSize: '19px', color: '#5a4630', fontStyle: 'bold', wordWrap: { width: hasIcon(this, shopIcon) ? 220 : 290 } }).setOrigin(0, 0.5);
       button(this, W - 100, y, 160, 48, owned ? t('owned') : (storePrices[p.id] ?? p.priceLabel), () => this.guard(async () => {
         const r = await services.iap.purchase(p.id);
         if (r === 'purchased' && applyPurchase(game.save, p.id)) {
@@ -54,13 +54,12 @@ export class ShopScene extends Phaser.Scene {
     });
 
     // Cambio de gemas por monedas
-    button(this, W / 2, 240 + PRODUCTS.length * 82, 480, 48, tf('exchange', { g: EXCHANGE.gems, c: EXCHANGE.coins }),
+    button(this, W / 2, CONTENT_TOP + 175 + PRODUCTS.length * 72, 480, 48, tf('exchange', { g: EXCHANGE.gems, c: EXCHANGE.coins }),
       () => { if (exchangeGems(game.save)) { persist(); this.scene.restart(); } else this.say(t('not_enough_gems')); },
       { color: 0x2a7fb8, fontSize: 18 });
 
     if (this.pending) this.say(this.pending);
-    button(this, 90, H - 50, 150, 48, t('back'), () => this.scene.start('Menu'), { color: 0x555577, fontSize: 18 });
-    button(this, W - 160, H - 50, 290, 48, t('restore'), () => this.guard(async () => {
+    button(this, W / 2, CONTENT_TOP + 595, 300, 44, t('restore'), () => this.guard(async () => {
       restoreOwned(game.save, await services.iap.restore()); persist(); this.say(t('restored'));
     }), { color: 0x555577, fontSize: 16 });
   }
@@ -75,7 +74,7 @@ export class ShopScene extends Phaser.Scene {
   private say(msg: string) {
     this.lastMsg = msg;
     this.toast?.destroy();
-    this.toast = this.add.text(W / 2, 780, msg, { fontSize: '20px', color: '#fff', backgroundColor: '#000000cc', padding: { x: 12, y: 6 }, wordWrap: { width: 500 }, align: 'center' }).setOrigin(0.5).setDepth(30);
+    this.toast = this.add.text(W / 2, CONTENT_TOP + 645, msg, { fontSize: '20px', color: '#fff', backgroundColor: '#000000cc', padding: { x: 12, y: 6 }, wordWrap: { width: 500 }, align: 'center' }).setOrigin(0.5).setDepth(30);
   }
 
   init(data: { toast?: string }) { this.pending = data?.toast; this.lastMsg = undefined; }

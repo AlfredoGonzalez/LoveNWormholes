@@ -58,25 +58,25 @@ ABRIR APP
 ## 4. Pantallas
 Leyenda de estado: ✅ ya existe · 🔧 existe y hay que rediseñar · 🆕 no existe.
 
-### 4.1 Intro (cómic) 🆕
+### 4.1 Intro (cómic) ✅ (Hito 6a; con piezas de reemplazo hasta tener `story_01..03`)
 - Fondo `intro_bg` (papel con garabatos). Tres paneles `story_01..03` aparecen uno tras otro, ligeramente inclinados, con animación de «caer y rebotar». Texto fijo «TOCA PARA CONTINUAR…» (localizado).
 - Se guarda `introSeen`; se puede revisar desde Ajustes → «Ver historia».
 
-### 4.2 Título 🔧 (hoy `Menu`)
+### 4.2 Título ✅ (Hito 6a; `TitleScene`)
 - Capas: `title_bg` (selva) + `logo` (arriba) + `title_hero` (centro) + botón de madera `btn_wood` con texto «JUGAR / PLAY».
 - Toque en JUGAR → Hub. En la primera ejecución, antes de entrar, se muestra el consentimiento de privacidad.
 
-### 4.3 Hub / Batalla (pestaña central) 🆕
+### 4.3 Hub / Batalla (pestaña central) ✅ (Hito 6a; `HomeScene`, sin ☰ ni 📜 todavía)
 - **Barra superior:** píldora de premium (izq.), título «PREHISTORIA I-1» (era + nivel actual, localizado) al centro, píldora de monedas (der.).
 - Debajo: ⚙ **Ajustes** (izq.), ☰ **Menú** y 📜 **Misiones diarias** (der.).
 - **Centro:** casa de piedra de la era (`base_<era>_home`) con Gusanito en su animación `idle` y armas decorativas en el suelo.
 - **JUGAR** (madera): lanza el **siguiente nivel sin terminar** de la era actual.
 - Fondo de papel con patrón por era (`hub_bg_<era>`).
 
-### 4.4 Navegación inferior (5 pestañas) 🆕
+### 4.4 Navegación inferior (5 pestañas) ✅ (Hito 6a; `src/shell.ts`)
 Mapa · Recuerdos · **Batalla** (centro, elevada) · Mejoras · Tienda. Las pestañas muestran un **punto de aviso** cuando hay algo nuevo (recuerdo desbloqueado, oferta diaria sin ver, cofre listo, carta nueva).
 
-### 4.5 Mapa de niveles 🔧 (hoy `EraMap`)
+### 4.5 Mapa de niveles ✅🔧 (Hito 6a: zigzag con jefe y estrellas; faltan eventos y el arte de pergamino)
 - Pergamino con camino punteado, nodos con forma de cueva (`map_node_<era>`), estrellas (0-3), **jefe final** de la era arriba (`map_boss_<era>`).
 - Nodos bloqueados con candado. Cambiar de era: deslizar o botones ◀ ▶ en el encabezado (las eras bloqueadas se ven en gris).
 - Abajo, **Eventos activos** (4 ranuras con cronómetro) — fase posterior; mientras tanto la franja no aparece.
@@ -87,7 +87,7 @@ Ya implementada la economía de §5.0: 3 botones de soldado (los 2 últimos con 
 ### 4.7 Resultados 🔧
 Ventana `popup_frame` con estrellas, monedas ganadas, progreso del Medidor de Amor, botón **«Duplicar 📺»** (opcional), y **Revivir** en derrota. Botones: Reintentar · Mapa · Siguiente.
 
-### 4.8 Recuerdos 🆕
+### 4.8 Recuerdos 🔧 (Hito 6a: pantalla con polaroids bloqueadas; la lógica llega en 6d)
 - Rejilla de 2×3 polaroids (`memory_01..06`): Encuentro, Primera cita, Pequeña pelea, Reencuentro, Tour por la madriguera, Cacería en pareja. Bloqueados con `memory_locked`.
 - **Medidor de Amor** (barra con gusano y corazón) abajo; sube al ganar niveles y estrellas. Cada umbral desbloquea un recuerdo (brillo + sello «NUEVO»). Tocar un recuerdo desbloqueado lo muestra en grande.
 
@@ -104,7 +104,7 @@ Ventana `popup_frame` con estrellas, monedas ganadas, progreso del Medidor de Am
 - **Paquetes de gemas:** Bolsita · Canasta · Montón (los de `docs/MONETIZATION.md`).
 - Cofre gratis con anuncio opcional, Restaurar compras, productos únicos (Pack inicial, Monedas x2).
 
-### 4.11 Ajustes / Menú / Misiones 🆕
+### 4.11 Ajustes / Menú / Misiones 🔧 (Hito 6a: Ajustes con idioma, privacidad y «Ver historia»; faltan sonido, menú y misiones)
 - **Ajustes:** sonido, música, vibración, idioma, privacidad (reabre el consentimiento), ver historia, créditos.
 - **Menú ☰:** logros (más adelante), soporte, política de privacidad.
 - **Misiones diarias 📜:** 3 misiones por día (ganar N niveles, invocar N unidades, usar el agujero de gusano) con recompensa de monedas/gemas.
@@ -151,7 +151,7 @@ Nuevos campos (con migración desde v1): `introSeen`, `chaptersSeen[]`, `lastLev
 | Hito | Contenido | Depende de arte |
 |---|---|---|
 | 1-5 ✅ | Prototipo, meta-juego, 4 eras, monetización, apps nativas | — |
-| **6a** | Shell + Hub + Título + Intro (con el kit de interfaz y respaldos) | Sí, pero funciona con placeholders |
+| **6a ✅** | Shell + Hub + Título + Intro + Ajustes (con respaldos hasta tener el arte) | Sí, pero funciona con placeholders |
 | **6b** | Mapa de niveles en pergamino + Resultados rediseñados | Sí |
 | **6c** | Worm Mart (ofertas diarias + paquetes) | Sí |
 | **6d** | Recuerdos + Medidor de Amor | Sí |
@@ -166,9 +166,13 @@ Nuevos campos (con migración desde v1): `introSeen`, `chaptersSeen[]`, `lastLev
 - **Soldados:** 3 por era con economía de huesos como WeAreWarriors (§5.0).
 - **La «A» de la gorra:** parte del arte final; no se especifica en el código.
 
-### Pendientes (con propuesta por defecto)
-1. **Ofertas diarias:** propuesta en §5.3. ¿Te gusta o cambias algo?
-2. **Reroll de cartas** (el botón del video): ¿qué rerolleaba? Si no lo tenías claro, lo omitimos.
-3. **Eventos temporales:** ¿los dejamos para después? (propuesta: sí).
-4. **Nombre de la moneda de batalla:** propuse «huesos» 🦴 para no confundirla con las monedas del hub; ¿te parece?
-5. **Soldados «por nivel»:** entendí que son **por era** (3 soldados por cada una de las 4 eras). Si querías 3 soldados distintos **en cada uno de los niveles**, sería mucho más arte; dime.
+### Confirmadas en la ronda 2
+- **Ofertas diarias:** se aprueba la propuesta de §5.3.
+- **Eventos temporales:** se dejan para después (el mapa no muestra la franja).
+- **Moneda de batalla:** «huesos» 🦴.
+- **Soldados:** 3 por **era** (MVP).
+- **Reroll de cartas:** se omite.
+
+### Pendientes menores
+- Reglas exactas de las cartas de soldado (§5.2): cómo se consiguen y cuánto cuestan sus mejoras.
+- Texto y recompensas de las misiones diarias (§4.11).

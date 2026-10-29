@@ -53,6 +53,7 @@ describe('i18n', () => {
   });
 });
 
+import { formatAmount, levelLabel, nextLevel } from '../src/game/economy';
 import { CHEST_COOLDOWN_MS, applyPurchase, applyWin, buyUpgrade, chestRemainingMs, claimDaily, doubleReward, exchangeGems, hasDoubleCoins, isUnlocked, modsFrom, openChest, restoreOwned, spendGems, starsFor } from '../src/game/economy';
 import { defaultSave, loadSave, migrate, writeSave } from '../src/services/save';
 
@@ -280,5 +281,28 @@ describe('economía de batalla (estilo WeAreWarriors)', () => {
   it('las monedas de batalla no se arrastran entre niveles', () => {
     const a = lvl(); a.coins = 500;
     expect(new Battle(LEVELS[1]).coins).toBe(0);
+  });
+});
+
+describe('hub', () => {
+  it('JUGAR lanza el primer nivel sin ganar y, al terminar todo, el último', () => {
+    const s = defaultSave();
+    expect(nextLevel(s).id).toBe(LEVELS[0].id);
+    applyWin(s, LEVELS[0], 1); applyWin(s, LEVELS[1], 2);
+    expect(nextLevel(s).id).toBe(LEVELS[2].id);
+    for (const l of LEVELS) applyWin(s, l, 3);
+    expect(nextLevel(s).id).toBe(LEVELS[LEVELS.length - 1].id);
+  });
+  it('rotula el nivel como en la barra superior (era-nivel)', () => {
+    expect(levelLabel(LEVELS[0])).toBe('I-1');
+    expect(levelLabel(LEVELS[4])).toBe('II-2');
+    expect(levelLabel(LEVELS[11])).toBe('IV-3');
+  });
+  it('abrevia saldos', () => {
+    expect([formatAmount(950), formatAmount(1500), formatAmount(12000), formatAmount(2_500_000)]).toEqual(['950', '1.5K', '12K', '2.5M']);
+  });
+  it('el guardado nuevo trae introSeen en falso y migra guardados viejos', () => {
+    expect(defaultSave().introSeen).toBe(false);
+    expect(migrate({ coins: 5 }).introSeen).toBe(false);
   });
 });

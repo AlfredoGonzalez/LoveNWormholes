@@ -1,6 +1,6 @@
 import type { Key } from '../i18n';
 import type { Mods } from './sim';
-import { LEVELS, type LevelDef } from './data';
+import { ERAS, LEVELS, type LevelDef } from './data';
 import type { SaveData } from '../services/save';
 
 export interface UpgradeDef { id: string; nameKey: Key; max: number; baseCost: number; perLevel: number; mod: keyof Mods }
@@ -124,4 +124,23 @@ export function openChest(save: SaveData, now = Date.now(), rand = Math.random()
   save.coins += coins; save.gems += gems;
   save.chestReadyAt = now + CHEST_COOLDOWN_MS;
   return { coins, gems };
+}
+
+/** Primer nivel que aún no se ha ganado (el que pone el botón JUGAR del hub); si ya se ganaron todos, el último. */
+export function nextLevel(save: SaveData): LevelDef {
+  return LEVELS.find(l => !(save.stars[l.id] > 0)) ?? LEVELS[LEVELS.length - 1];
+}
+
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+/** «I-1» = era I, nivel 1 (como en el título de la barra superior). */
+export function levelLabel(level: LevelDef): string {
+  const era = ERAS.find(e => e.id === level.eraId) ?? ERAS[0];
+  return `${ROMAN[ERAS.indexOf(era)]}-${era.levels.indexOf(level) + 1}`;
+}
+
+/** Texto compacto para saldos: 1500 → «1.5K». */
+export function formatAmount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, '')}K`;
+  return String(n);
 }

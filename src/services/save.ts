@@ -13,6 +13,7 @@ export interface SaveData {
   owned: string[];                    // compras no consumibles
   chestReadyAt: number;               // ms epoch en que el cofre gratis vuelve a estar listo
   consent: ConsentState;
+  introSeen: boolean;
 }
 
 export const SAVE_VERSION = 1;
@@ -21,7 +22,7 @@ const KEY = 'lnw.save';
 export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void }
 
 export const defaultSave = (lang: Lang = 'es'): SaveData => ({
-  v: SAVE_VERSION, coins: 0, gems: 0, lang, stars: {}, upgrades: {}, lastDaily: '', tutorialDone: false, owned: [], chestReadyAt: 0, consent: 'unknown',
+  v: SAVE_VERSION, coins: 0, gems: 0, lang, stars: {}, upgrades: {}, lastDaily: '', tutorialDone: false, owned: [], chestReadyAt: 0, consent: 'unknown', introSeen: false,
 });
 
 /** Rellena campos faltantes y migra versiones antiguas. */
