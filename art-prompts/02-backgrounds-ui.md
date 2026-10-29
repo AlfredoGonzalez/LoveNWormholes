@@ -1,9 +1,10 @@
 # Fondos, bases y UI — Prehistoria
 
-## Fondos parallax (3 capas, 2560×720 px, horizontales y *seamless* en X)
-- `far.png` — `distant prehistoric landscape, soft blue sky with big fluffy clouds, distant smoking volcano and faint mountains, flat colors, pastel, seamless horizontal tile, no characters` (con cielo)
-- `mid.png` — `mid-distance jungle: giant ferns, prehistoric trees, rocks, flat two-tone shading, transparent background above the treeline, seamless horizontal tile`
-- `near.png` — `foreground strip of grass, small stones and bones along the bottom, transparent background, seamless horizontal tile, 2560×300`
+## Fondos (el juego es **vertical / portrait**)
+Por ahora el juego usa **solo `far.png`** como fondo de pantalla completa de la zona de combate, con proporción ~ 540:560 (casi cuadrada; pide **1080×1120 px**). Composición: cielo y elementos lejanos arriba, el horizonte/suelo al ~85 % de la altura (el juego dibuja el suelo debajo). `mid`/`near` (parallax) quedan opcionales para más adelante.
+- `far.png` (1080×1120, vertical) — `distant prehistoric landscape, soft blue sky with big fluffy clouds, distant smoking volcano and faint mountains, flat colors, pastel, no characters, portrait composition` (con cielo)
+- `mid.png` (opcional) — `mid-distance jungle: giant ferns, prehistoric trees, rocks, flat two-tone shading, transparent background above the treeline, seamless horizontal tile`
+- `near.png` (opcional) — `foreground strip of grass, small stones and bones along the bottom, transparent background, seamless horizontal tile, 2560×300`
 
 ## Suelo (carril)
 `ground.png` — `side-view grassy dirt path with stones, tileable horizontally, 512×160`
@@ -24,4 +25,4 @@
 - Ícono de app 1024×1024 sin transparencia ni esquinas redondeadas (las tiendas las aplican): cara de Gusanito + portal.
 
 ## Para las tiendas (más adelante)
-Capturas 1290×2796 (iOS) y 1080×1920 (Android) en horizontal/vertical según el juego, gráfico destacado de Google Play 1024×500.
+Capturas 1290×2796 (iOS) y 1080×1920 (Android) en **vertical**, gráfico destacado de Google Play 1024×500.

@@ -69,7 +69,7 @@ Un caballero del futuro que aparece por 12 s. Se usa uno por era (`ghost_prehist
 | Archivo | Sujeto |
 |---|---|
 | `assets/fx/meteor.png` | `flaming meteor falling diagonally with fire trail, cartoon, 256×256` + `assets/fx/explosion.png` `cartoon impact explosion` 256×256 |
-| `assets/fx/sandstorm.png` | `swirling sand gusts overlay, semi-transparent, horizontal, 1920×540, seamless` |
+| `assets/fx/sandstorm.png` | `swirling sand gusts overlay, semi-transparent, vertical, 1080×1920` |
 | `assets/fx/tumbleweed.png` | `rolling tumbleweed, cute, 128×128` |
 | `assets/fx/ghost_portal.png` | `small purple-cyan wormhole opening, sparkles, 256×256` |
 

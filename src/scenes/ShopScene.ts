@@ -3,7 +3,7 @@ import { game, persist } from '../services/save';
 import { services } from '../services';
 import { EXCHANGE, PRODUCTS, applyPurchase, chestRemainingMs, exchangeGems, openChest, restoreOwned } from '../game/economy';
 import { t, tf } from '../i18n';
-import { W, button, title } from '../ui';
+import { W, H, button, title } from '../ui';
 
 export class ShopScene extends Phaser.Scene {
   private busy = false;
@@ -17,13 +17,13 @@ export class ShopScene extends Phaser.Scene {
     this.busy = false;
     this.toast = undefined;
     this.cameras.main.setBackgroundColor(0x3a2268);
-    title(this, t('shop'), 36);
-    this.add.text(W - 20, 16, `🪙 ${game.save.coins}   💎 ${game.save.gems}`, { fontSize: '20px', color: '#ffe066', stroke: '#3b2a3f', strokeThickness: 4 }).setOrigin(1, 0);
+    title(this, t('shop'), 44);
+    this.add.text(W - 20, 84, `🪙 ${game.save.coins}   💎 ${game.save.gems}`, { fontSize: '20px', color: '#ffe066', stroke: '#3b2a3f', strokeThickness: 4 }).setOrigin(1, 0);
 
     // Cofre gratis (anuncio opcional con enfriamiento)
     const left = chestRemainingMs(game.save);
     const mins = Math.ceil(left / 60000);
-    button(this, 230, 110, 400, 52, left > 0 ? tf('chest_cooldown', { h: Math.floor(mins / 60), m: mins % 60 }) : t('free_chest'),
+    button(this, W / 2, 150, 480, 56, left > 0 ? tf('chest_cooldown', { h: Math.floor(mins / 60), m: mins % 60 }) : t('free_chest'),
       () => this.guard(async () => {
         if (!(await services.ads.showRewarded('free_chest'))) return;
         const r = openChest(game.save);
@@ -32,10 +32,10 @@ export class ShopScene extends Phaser.Scene {
 
     // Productos IAP
     PRODUCTS.forEach((p, i) => {
-      const y = 180 + i * 56;
+      const y = 240 + i * 82;
       const owned = p.nonConsumable && game.save.owned.includes(p.id);
-      this.add.text(40, y, t(p.titleKey), { fontSize: '20px', color: '#fff' }).setOrigin(0, 0.5);
-      button(this, W - 130, y, 180, 44, owned ? t('owned') : p.priceLabel, () => this.guard(async () => {
+      this.add.text(24, y, t(p.titleKey), { fontSize: '19px', color: '#fff', wordWrap: { width: 290 } }).setOrigin(0, 0.5);
+      button(this, W - 100, y, 160, 48, owned ? t('owned') : p.priceLabel, () => this.guard(async () => {
         const r = await services.iap.purchase(p.id);
         if (r === 'purchased' && applyPurchase(game.save, p.id)) {
           persist(); services.analytics.track('purchase', { product: p.id }); this.say(t('purchase_ok'));
@@ -44,13 +44,13 @@ export class ShopScene extends Phaser.Scene {
     });
 
     // Cambio de gemas por monedas
-    button(this, 230, 180 + PRODUCTS.length * 56 + 6, 400, 44, tf('exchange', { g: EXCHANGE.gems, c: EXCHANGE.coins }),
+    button(this, W / 2, 240 + PRODUCTS.length * 82, 480, 48, tf('exchange', { g: EXCHANGE.gems, c: EXCHANGE.coins }),
       () => { if (exchangeGems(game.save)) { persist(); this.scene.restart(); } else this.say(t('not_enough_gems')); },
       { color: 0x2a7fb8, fontSize: 18 });
 
     if (this.pending) this.say(this.pending);
-    button(this, 100, 505, 160, 40, t('back'), () => this.scene.start('Menu'), { color: 0x555577, fontSize: 18 });
-    button(this, W - 150, 505, 260, 40, t('restore'), () => this.guard(async () => {
+    button(this, 90, H - 50, 150, 48, t('back'), () => this.scene.start('Menu'), { color: 0x555577, fontSize: 18 });
+    button(this, W - 160, H - 50, 290, 48, t('restore'), () => this.guard(async () => {
       restoreOwned(game.save, await services.iap.restore()); persist(); this.say(t('restored'));
     }), { color: 0x555577, fontSize: 16 });
   }
@@ -65,7 +65,7 @@ export class ShopScene extends Phaser.Scene {
   private say(msg: string) {
     this.lastMsg = msg;
     this.toast?.destroy();
-    this.toast = this.add.text(W / 2, 470, msg, { fontSize: '20px', color: '#fff', backgroundColor: '#000000cc', padding: { x: 12, y: 6 } }).setOrigin(0.5).setDepth(30);
+    this.toast = this.add.text(W / 2, 780, msg, { fontSize: '20px', color: '#fff', backgroundColor: '#000000cc', padding: { x: 12, y: 6 }, wordWrap: { width: 500 }, align: 'center' }).setOrigin(0.5).setDepth(30);
   }
 
   init(data: { toast?: string }) { this.pending = data?.toast; this.lastMsg = undefined; }

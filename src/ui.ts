@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-export const W = 960, H = 540;
+export const W = 540, H = 960; // vertical (portrait)
 
 export interface BtnOpts { color?: number; fontSize?: number; disabled?: boolean }
 
@@ -15,7 +15,7 @@ export function button(scene: Phaser.Scene, x: number, y: number, w: number, h: 
 }
 
 export const title = (scene: Phaser.Scene, text: string, y = 40) =>
-  scene.add.text(W / 2, y, text, { fontSize: '34px', color: '#fff', stroke: '#3b2a3f', strokeThickness: 6 }).setOrigin(0.5);
+  scene.add.text(W / 2, y, text, { fontSize: '32px', color: '#fff', stroke: '#3b2a3f', strokeThickness: 6 }).setOrigin(0.5);
 
 export const coinsText = (scene: Phaser.Scene, text: string) =>
-  scene.add.text(W - 20, 16, text, { fontSize: '20px', color: '#ffe066', stroke: '#3b2a3f', strokeThickness: 4 }).setOrigin(1, 0);
+  scene.add.text(W - 20, 84, text, { fontSize: '20px', color: '#ffe066', stroke: '#3b2a3f', strokeThickness: 4 }).setOrigin(1, 0);

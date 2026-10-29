@@ -14,6 +14,6 @@ new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
   backgroundColor: '#1b1230',
-  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 960, height: 540 },
+  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 540, height: 960 },
   scene: [PreloadScene, MenuScene, EraMapScene, UpgradesScene, ShopScene, BattleScene],
 });

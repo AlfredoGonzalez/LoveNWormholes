@@ -8,7 +8,7 @@ import { t, tf } from '../i18n';
 import { W, H, button } from '../ui';
 import { charKey } from './PreloadScene';
 
-const GROUND = 400, LANE_X0 = 90, LANE_X1 = 870;
+const GROUND = 560, LANE_X0 = 80, LANE_X1 = 455; // formato vertical (540×960)
 
 /** Escena de render: toda la lógica vive en Battle (sim.ts). Usa arte si existe, si no formas placeholder. */
 export class BattleScene extends Phaser.Scene {
@@ -47,29 +47,29 @@ export class BattleScene extends Phaser.Scene {
     this.resultObjs = [];
     this.cameras.main.setBackgroundColor(this.era.sky);
     const bgKey = `bg_${this.era.id}_far`;
-    if (this.textures.exists(bgKey)) this.add.image(W / 2, 200, bgKey).setDisplaySize(W, 400);
-    this.add.rectangle(W / 2, GROUND + 80, W, 160, this.era.ground);
+    if (this.textures.exists(bgKey)) this.add.image(W / 2, GROUND / 2, bgKey).setDisplaySize(W, GROUND);
+    this.add.rectangle(W / 2, GROUND + (H - GROUND) / 2, W, H - GROUND, this.era.ground);
     this.sand = this.add.rectangle(W / 2, H / 2, W, H, 0xd9b36a, 0.35).setDepth(5).setVisible(false);
     this.alertText = undefined;
-    this.add.text(W / 2, 14, `${t(this.level.nameKey)} — ${t(this.era.nameKey)}`, { fontSize: '16px', color: '#1b1230' }).setOrigin(0.5, 0);
+    this.add.text(W / 2, 14, `${t(this.level.nameKey)} — ${t(this.era.nameKey)}`, { fontSize: '18px', color: '#1b1230' }).setOrigin(0.5, 0);
     this.gfx = this.add.graphics();
-    this.energyText = this.add.text(20, H - 130, '', { fontSize: '18px', color: '#fff', stroke: '#3b2a3f', strokeThickness: 3 });
+    this.energyText = this.add.text(16, GROUND + 22, '', { fontSize: '18px', color: '#fff', stroke: '#3b2a3f', strokeThickness: 3 });
 
     this.era.units.forEach((def, i) => {
-      const x = 80 + i * 150, y = H - 50;
-      const bg = this.add.rectangle(x, y, 140, 70, def.color).setStrokeStyle(3, 0x3b2a3f).setInteractive({ useHandCursor: true });
-      this.add.text(x, y - 15, t(def.nameKey), { fontSize: '13px', color: '#1b1230', align: 'center', wordWrap: { width: 130 } }).setOrigin(0.5);
-      this.add.text(x, y + 20, `⚡${def.cost}`, { fontSize: '16px', color: '#1b1230' }).setOrigin(0.5);
+      const x = 69 + i * 134, y = H - 70;
+      const bg = this.add.rectangle(x, y, 126, 100, def.color).setStrokeStyle(3, 0x3b2a3f).setInteractive({ useHandCursor: true });
+      this.add.text(x, y - 22, t(def.nameKey), { fontSize: '14px', color: '#1b1230', align: 'center', wordWrap: { width: 116 } }).setOrigin(0.5);
+      this.add.text(x, y + 28, `⚡${def.cost}`, { fontSize: '16px', color: '#1b1230' }).setOrigin(0.5);
       bg.on('pointerdown', () => { if (!this.tutorialBox) this.battle.summon(def); });
       this.unitButtons.push({ bg, cost: def.cost });
     });
 
-    this.wormholeBtn = this.add.text(W - 120, H - 50, '', {
-      fontSize: '16px', color: '#fff', backgroundColor: '#6a2cdc', padding: { x: 12, y: 18 }, align: 'center',
+    this.wormholeBtn = this.add.text(W / 2, GROUND + 190, '', {
+      fontSize: '20px', color: '#fff', backgroundColor: '#6a2cdc', padding: { x: 12, y: 12 }, align: 'center', fixedWidth: 480,
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     this.wormholeBtn.on('pointerdown', () => { if (!this.tutorialBox) this.battle.castWormhole(); });
 
-    this.boostBtn = button(this, W - 120, H - 125, 170, 34, t('boost_energy'), () => this.watchBoost(), { color: 0xd98324, fontSize: 15 });
+    this.boostBtn = button(this, W - 120, GROUND + 38, 200, 40, t('boost_energy'), () => this.watchBoost(), { color: 0xd98324, fontSize: 15 });
     services.analytics.track('level_start', { level: this.level.id });
 
     this.tutorialStep = 0;
@@ -88,8 +88,8 @@ export class BattleScene extends Phaser.Scene {
       return;
     }
     this.tutorialBox?.destroy();
-    this.tutorialBox = this.add.text(W / 2, 200, `${this.msgs[this.tutorialStep]}\n\n${t('tap_continue')}`, {
-      fontSize: '24px', color: '#fff', backgroundColor: '#000000dd', padding: { x: 24, y: 20 }, align: 'center', wordWrap: { width: 640 },
+    this.tutorialBox = this.add.text(W / 2, 300, `${this.msgs[this.tutorialStep]}\n\n${t('tap_continue')}`, {
+      fontSize: '24px', color: '#fff', backgroundColor: '#000000dd', padding: { x: 24, y: 20 }, align: 'center', wordWrap: { width: 440 },
     }).setOrigin(0.5).setDepth(10).setInteractive();
     this.tutorialBox.once('pointerdown', () => { this.tutorialStep++; this.showMessages(); });
   }
@@ -97,7 +97,7 @@ export class BattleScene extends Phaser.Scene {
   private onAnomaly(kind: string, x: number | undefined, px: (x: number) => number) {
     const txt = tf('anomaly_alert', { name: t(this.era.anomaly.nameKey) });
     this.alertText?.destroy();
-    this.alertText = this.add.text(W / 2, 60, `🌀 ${txt}`, { fontSize: '24px', color: '#fff', backgroundColor: '#6a2cdcdd', padding: { x: 14, y: 8 } }).setOrigin(0.5).setDepth(12);
+    this.alertText = this.add.text(W / 2, 90, `🌀 ${txt}`, { fontSize: '22px', color: '#fff', backgroundColor: '#6a2cdcdd', padding: { x: 14, y: 8 }, wordWrap: { width: 480 }, align: 'center' }).setOrigin(0.5).setDepth(12);
     this.time.delayedCall(2000, () => { this.alertText?.destroy(); this.alertText = undefined; });
     if (kind === 'meteor' && x !== undefined) {
       const m = this.add.circle(px(x), GROUND - 10, 50, 0xff7b00, 0.7).setDepth(6);
@@ -117,10 +117,10 @@ export class BattleScene extends Phaser.Scene {
 
     const g = this.gfx;
     g.clear();
-    g.fillStyle(0xff9ec4).fillRect(LANE_X0 - 60, GROUND - 80, 50, 80);
-    g.fillStyle(0x4a3a5a).fillRect(LANE_X1 + 10, GROUND - 100, 60, 100);
-    this.bar(g, LANE_X0 - 60, GROUND - 95, 50, b.playerBaseHp / b.playerBaseMax, 0x4ade80);
-    this.bar(g, LANE_X1 + 10, GROUND - 115, 60, b.enemyBaseHp / b.level.enemyBaseHp, 0xef4444);
+    g.fillStyle(0xff9ec4).fillRect(LANE_X0 - 65, GROUND - 80, 50, 80);
+    g.fillStyle(0x4a3a5a).fillRect(LANE_X1 + 15, GROUND - 100, 55, 100);
+    this.bar(g, LANE_X0 - 65, GROUND - 95, 50, b.playerBaseHp / b.playerBaseMax, 0x4ade80);
+    this.bar(g, LANE_X1 + 15, GROUND - 115, 55, b.enemyBaseHp / b.level.enemyBaseHp, 0xef4444);
 
     const alive = new Set<number>();
     for (const u of b.units) {
@@ -182,23 +182,23 @@ export class BattleScene extends Phaser.Scene {
     }
     services.analytics.track('level_end', { level: this.level.id, win: win ? 1 : 0, revived: this.reviveUsed ? 1 : 0 });
     this.addResult(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.65).setDepth(20));
-    this.addResult(this.add.text(W / 2, 140, msg, { fontSize: '30px', color: '#fff', align: 'center', lineSpacing: 10 }).setOrigin(0.5).setDepth(21));
+    this.addResult(this.add.text(W / 2, 230, msg, { fontSize: '30px', color: '#fff', align: 'center', lineSpacing: 10, wordWrap: { width: 480 } }).setOrigin(0.5).setDepth(21));
 
     // Extras OPCIONALES: nunca se muestra un anuncio sin que el jugador toque el botón.
     if (win && coins > 0) {
-      const dbl = this.addResult(button(this, W / 2, 255, 320, 50, tf('double_reward', { n: coins }), async () => {
+      const dbl = this.addResult(button(this, W / 2, 400, 440, 56, tf('double_reward', { n: coins }), async () => {
         if (this.busy) return; this.busy = true;
         try {
           if (await services.ads.showRewarded('double_reward')) {
             doubleReward(game.save, coins); persist(); dbl.destroy();
             services.analytics.track('ad_rewarded', { placement: 'double_reward' });
-            this.addResult(this.add.text(W / 2, 255, `🪙 +${coins}`, { fontSize: '26px', color: '#ffe066' }).setOrigin(0.5).setDepth(21));
+            this.addResult(this.add.text(W / 2, 400, `🪙 +${coins}`, { fontSize: '26px', color: '#ffe066' }).setOrigin(0.5).setDepth(21));
           }
         } finally { this.busy = false; }
       }, { color: 0xd98324, fontSize: 18 }).setDepth(21));
     }
     if (!win && !this.reviveUsed) {
-      this.addResult(button(this, W / 2 - 170, 255, 300, 50, t('revive'), async () => {
+      this.addResult(button(this, W / 2, 400, 440, 56, t('revive'), async () => {
         if (this.busy) return; this.busy = true;
         try {
           if (await services.ads.showRewarded('revive')) {
@@ -206,7 +206,7 @@ export class BattleScene extends Phaser.Scene {
           }
         } finally { this.busy = false; }
       }, { color: 0xd98324, fontSize: 18 }).setDepth(21));
-      this.addResult(button(this, W / 2 + 170, 255, 300, 50, tf('revive_gems', { n: REVIVE_GEMS }), () => {
+      this.addResult(button(this, W / 2, 470, 440, 56, tf('revive_gems', { n: REVIVE_GEMS }), () => {
         if (spendGems(game.save, REVIVE_GEMS)) { persist(); this.doRevive(); }
       }, { color: 0x2a7fb8, fontSize: 18, disabled: game.save.gems < REVIVE_GEMS }).setDepth(21));
     }
@@ -214,7 +214,7 @@ export class BattleScene extends Phaser.Scene {
     const idx = LEVELS.indexOf(this.level), next = LEVELS[idx + 1];
     const btns: [string, () => void][] = [[t('retry'), () => this.scene.restart({ levelId: this.level.id })], [t('map'), () => this.scene.start('EraMap')]];
     if (win && next) btns.splice(1, 0, [t('next'), () => this.scene.start('Battle', { levelId: next.id })]);
-    btns.forEach(([label, cb], i) => this.addResult(button(this, W / 2 + (i - (btns.length - 1) / 2) * 180, 360, 160, 56, label, cb).setDepth(21)));
+    btns.forEach(([label, cb], i) => this.addResult(button(this, W / 2 + (i - (btns.length - 1) / 2) * 170, 580, 150, 56, label, cb).setDepth(21)));
   }
 
   private doRevive() {
