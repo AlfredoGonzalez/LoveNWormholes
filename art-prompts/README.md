@@ -1,5 +1,7 @@
 # Guía de arte — Love N Wormholes
 
+> 👉 **¿Empiezas ahora?** Ve directo a [`LANDING.md`](LANDING.md): intro y pantalla de título, en orden y con cada prompt listo para copiar.
+
 > Documento generado por `npm run art:docs` desde `tools/art-spec.ts`. Si cambian los personajes del juego, regenera.
 
 ## Cómo funciona (3 pasos)
@@ -32,15 +34,10 @@ El juego carga lo que exista y usa figuras de reemplazo para lo que falte: puede
 | 4 | Hojas **die**, efectos y candado | 35 |
 | 5 | **Rediseño de interfaz (Hito 6)**: historia, título, hub, navegación, mapa, recuerdos, cartas y tienda (ver `05-screens.md`) | 71 |
 
-Total: **222** archivos, de los cuales **60** aparecen ya en el video de tu prototipo de Unity (📦, solo hay que exportarlos y renombrarlos). Desglose: (116 hojas de sprites de 29 personajes, 68 íconos/logo, 4 fondos, 8 bases, 4 efectos). Sugerencia: trabaja **por era** (Prehistoria completa primero).
+Total: **222** archivos. Desglose: (116 hojas de sprites de 29 personajes, 68 íconos/logo, 4 fondos, 8 bases, 4 efectos). Sugerencia: trabaja **por era** (Prehistoria completa primero).
 
-## Reutilizar el arte de tu prototipo de Unity (📦)
-Todo lo marcado con 📦 se ve en tu video, así que ya lo tienes hecho. Para usarlo:
-1. En tu proyecto de Unity busca cada sprite (carpeta `Assets/`; son los PNG originales, no capturas de pantalla).
-2. **Cópialo a `art-inbox/` con el nombre exacto** de la lista (p. ej. `story_01.png`, `nav_shop.png`, `btn_wood.png`).
-3. Ejecuta `npm run art`. Si el PNG ya trae transparencia se respeta; si trae fondo plano se quita; los fondos y paneles solo se ajustan al tamaño.
-4. Si en Unity una pantalla estaba "horneada" (p. ej. el título con logo, personaje y botón en una sola imagen), necesitamos las **capas por separado** (fondo, logo, personaje, botón en blanco) porque el juego pone el texto en español/inglés y anima cada capa; si no tienes las capas, los prompts de `05-screens.md` las generan.
-5. Lo que en el video tenía **texto de ejemplo** (`Dungeon Map`, `The Worm Mart`, `concept: simplify icon`, `Placeholder Item`…) debe venir **sin texto**: el juego escribe los textos en ES/EN.
+## Si recuperas tu prototipo de Unity
+Los sprites originales (PNG, no capturas de pantalla) se pueden copiar a `art-inbox/` con el nombre exacto de la lista y procesar con `npm run art`. Lo que tenga texto de ejemplo («Dungeon Map», «Worm Mart»…) debe venir **sin texto**: el juego escribe los textos en ES/EN.
 
 ## Documentos
 | Archivo | Contenido |

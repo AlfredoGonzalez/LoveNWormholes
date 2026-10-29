@@ -23,6 +23,8 @@ const [sw, sh] = [CELL * FRAMES_PER_ANIM, CELL];
 function sheetPrompt(a: Asset, anim: (typeof ANIMS)[number]) {
   return `${STYLE}. Sprite sheet of ${a.subject}. ${poseText(anim)}. ${FRAMES_PER_ANIM} frames arranged in a single horizontal row (aspect ratio 4:1, final ${sw}×${sh} px, each frame ${CELL}×${CELL} px). The SAME character in every frame with identical proportions, colors and scale, side view FACING RIGHT, full body visible and nothing cut off, all feet on the same ground line, frames evenly spaced with empty background between them. ${BG[a.bg]}. No text, no watermark.`;
 }
+const REF_GUSANITO = `${STYLE}. Character reference sheet of Gusanito, a cute chubby bright-green (#7ccf5a) worm hero with 5 body segments, big shiny eyes, small determined eyebrows, a brave smile, and his signature black baseball cap with a white letter "A" on the front, no other clothes. Three views side by side: front view, side view facing right, and a 3/4 view, same size, standing on the same ground line. ${BG.magenta}. No text.`;
+const REF_GUSANITA = `${STYLE}. Character reference sheet of ${GUSANITA_SUBJECT}, no other clothes. Three views side by side: front view, side view facing right, and a 3/4 view, same size, same ground line. ${BG.magenta}. No text.`;
 const gcd = (x: number, y: number): number => (y ? gcd(y, x % y) : x);
 const ratio = (a: Asset) => { const g = gcd(a.size[0], a.size[1]); return `${a.size[0] / g}:${a.size[1] / g}`; };
 const iconPrompt = (a: Asset) => `${STYLE}. Game icon: ${a.subject}. A single object centered and filling about 85% of the frame, ${a.size[0] === a.size[1] ? 'square image (1:1' : `aspect ratio ${ratio(a)} (`}final ${a.size[0]}×${a.size[1]} px). ${BG[a.bg]}. No text, no watermark.`;
@@ -51,7 +53,7 @@ function prompt(a: Asset): string {
 
 const meta = (a: Asset) =>
   `**Archivo:** \`${a.file}\` → \`public/assets/${a.dir}/\` · **Tamaño final:** ${a.size[0]}×${a.size[1]} px` +
-  (['background', 'screen', 'panel'].includes(a.kind) ? '' : ` · **Fondo al generar:** ${bgName(a)}`) + ` · ${a.wired ? '✅ el juego ya lo usa' : '🕓 aún no integrado'}${a.have ? ' · 📦 probablemente ya lo tienes (video de Unity)' : ''}` +
+  (['background', 'screen', 'panel'].includes(a.kind) ? '' : ` · **Fondo al generar:** ${bgName(a)}`) + ` · ${a.wired ? '✅ el juego ya lo usa' : '🕓 aún no integrado'}` +
   (a.note && a.kind !== 'sheet' ? `\n\n> ${a.note}` : '');
 
 const block = (a: Asset, extra = '') => `${meta(a)}\n${extra}\n\`\`\`text\n${prompt(a)}\n\`\`\`\n`;
@@ -69,6 +71,8 @@ const count = (f: (a: Asset) => boolean) => assets.filter(f).length;
 const tierLine = (n: number, text: string, c: number) => `| ${n} | ${text} | ${c} |`;
 
 writeFileSync(path.join(OUT, 'README.md'), `# Guía de arte — Love N Wormholes
+
+> 👉 **¿Empiezas ahora?** Ve directo a [\`LANDING.md\`](LANDING.md): intro y pantalla de título, en orden y con cada prompt listo para copiar.
 
 > Documento generado por \`npm run art:docs\` desde \`tools/art-spec.ts\`. Si cambian los personajes del juego, regenera.
 
@@ -102,15 +106,10 @@ ${tierLine(3, 'Hojas **attack** e íconos extra (energía, portal, cofres…)', 
 ${tierLine(4, 'Hojas **die**, efectos y candado', count(a => a.tier === 4))}
 ${tierLine(5, '**Rediseño de interfaz (Hito 6)**: historia, título, hub, navegación, mapa, recuerdos, cartas y tienda (ver `05-screens.md`)', count(a => a.tier === 5))}
 
-Total: **${assets.length}** archivos, de los cuales **${count(a => !!a.have)}** aparecen ya en el video de tu prototipo de Unity (📦, solo hay que exportarlos y renombrarlos). Desglose: (${sheets.length} hojas de sprites de ${chars.size} personajes, ${count(a => a.kind === 'icon' || a.kind === 'logo')} íconos/logo, ${count(a => a.kind === 'background')} fondos, ${count(a => a.kind === 'base')} bases, ${count(a => a.kind === 'fx')} efectos). Sugerencia: trabaja **por era** (Prehistoria completa primero).
+Total: **${assets.length}** archivos. Desglose: (${sheets.length} hojas de sprites de ${chars.size} personajes, ${count(a => a.kind === 'icon' || a.kind === 'logo')} íconos/logo, ${count(a => a.kind === 'background')} fondos, ${count(a => a.kind === 'base')} bases, ${count(a => a.kind === 'fx')} efectos). Sugerencia: trabaja **por era** (Prehistoria completa primero).
 
-## Reutilizar el arte de tu prototipo de Unity (📦)
-Todo lo marcado con 📦 se ve en tu video, así que ya lo tienes hecho. Para usarlo:
-1. En tu proyecto de Unity busca cada sprite (carpeta \`Assets/\`; son los PNG originales, no capturas de pantalla).
-2. **Cópialo a \`art-inbox/\` con el nombre exacto** de la lista (p. ej. \`story_01.png\`, \`nav_shop.png\`, \`btn_wood.png\`).
-3. Ejecuta \`npm run art\`. Si el PNG ya trae transparencia se respeta; si trae fondo plano se quita; los fondos y paneles solo se ajustan al tamaño.
-4. Si en Unity una pantalla estaba "horneada" (p. ej. el título con logo, personaje y botón en una sola imagen), necesitamos las **capas por separado** (fondo, logo, personaje, botón en blanco) porque el juego pone el texto en español/inglés y anima cada capa; si no tienes las capas, los prompts de \`05-screens.md\` las generan.
-5. Lo que en el video tenía **texto de ejemplo** (\`Dungeon Map\`, \`The Worm Mart\`, \`concept: simplify icon\`, \`Placeholder Item\`…) debe venir **sin texto**: el juego escribe los textos en ES/EN.
+## Si recuperas tu prototipo de Unity
+Los sprites originales (PNG, no capturas de pantalla) se pueden copiar a \`art-inbox/\` con el nombre exacto de la lista y procesar con \`npm run art\`. Lo que tenga texto de ejemplo («Dungeon Map», «Worm Mart»…) debe venir **sin texto**: el juego escribe los textos en ES/EN.
 
 ## Documentos
 | Archivo | Contenido |
@@ -202,12 +201,12 @@ Genera estas dos primero y úsalas como imagen de referencia en todo lo demás. 
 
 ### \`ref_gusanito.png\`
 \`\`\`text
-${STYLE}. Character reference sheet of Gusanito, a cute chubby bright-green (#7ccf5a) worm hero with 5 body segments, big shiny eyes, small determined eyebrows, a brave smile, and his signature black baseball cap with a white letter "A" on the front, no other clothes. Three views side by side: front view, side view facing right, and a 3/4 view, same size, standing on the same ground line. ${BG.magenta}. No text.
+${REF_GUSANITO}
 \`\`\`
 
 ### \`ref_gusanita.png\`
 \`\`\`text
-${STYLE}. Character reference sheet of ${GUSANITA_SUBJECT}, no other clothes. Three views side by side: front view, side view facing right, and a 3/4 view, same size, same ground line. ${BG.magenta}. No text.
+${REF_GUSANITA}
 \`\`\`
 
 ## Efectos (aún no integrados en el juego)
@@ -233,8 +232,7 @@ const SECTIONS: [string, (a: Asset) => boolean, string][] = [
 ];
 md = `# 05 · Rediseño de interfaz (Hito 6)
 
-Basado en tu prototipo de Unity. Detalle del recorrido y las pantallas: [\`docs/DESIGN.md\`](../docs/DESIGN.md). Todo lo marcado con 📦 se ve en tu video.
-**Importante:** nada de esto lleva texto incrustado (los textos los pone el juego en español e inglés).
+Basado en tu prototipo de Unity. Detalle del recorrido y las pantallas: [\`docs/DESIGN.md\`](../docs/DESIGN.md). **Importante:** nada de esto lleva texto incrustado (los textos los pone el juego en español e inglés).
 `;
 const used = new Set<string>();
 for (const [title, pick, intro] of SECTIONS) {
@@ -244,4 +242,70 @@ for (const [title, pick, intro] of SECTIONS) {
   for (const a of list) { used.add(a.file); md += `### \`${a.file}\`\n${block(a)}\n`; }
 }
 writeFileSync(path.join(OUT, '05-screens.md'), md);
-console.log(`Generados 6 documentos en art-prompts/ (${assets.length} archivos de arte).`);
+// ================= LANDING =================
+const byName = (f: string) => assets.find(a => a.file === f)!;
+const gen = (a: Asset, mult = 2) => `${a.size[0] * mult}×${a.size[1] * mult}`;
+const LANDING: { file: string; title: string; refs: string; tips: string; mult?: number }[] = [
+  { file: 'title_hero.png', title: 'Gusanito en pose de título', refs: '`ref_gusanito`', tips: 'Debe verse **enojado-decidido pero tierno**, con el garrote de hueso al hombro. El fondo plano (magenta) no debe tocar los bordes de la imagen con sombras.', mult: 2 },
+  { file: 'logo.png', title: 'Logo', refs: '`ref_gusanito` y `ref_gusanita` (para los dos retratos pequeños)', tips: 'La IA suele escribir mal el texto. Revisa que diga exactamente **Love n\' Wormholes**; si no sale, genera varias veces o pide solo el **letrero de piedra sin letras** y avísame: puedo hacer que el juego escriba el nombre encima.', mult: 2 },
+  { file: 'title_bg.png', title: 'Fondo del título (selva al anochecer)', refs: 'ninguna', tips: 'Deja **vacío** el espacio superior (logo) y el inferior (botón). La cueva debe quedar abajo al centro, porque Gusanito se coloca delante.', mult: 2 },
+  { file: 'btn_wood.png', title: 'Botón de madera en blanco', refs: 'ninguna', tips: 'Sin texto: el juego escribe «JUGAR» o «PLAY». Debe ser casi un rectángulo ancho y bajo.', mult: 4 },
+  { file: 'intro_bg.png', title: 'Fondo de papel de la intro', refs: 'ninguna', tips: 'Los garabatos deben ser **muy tenues** para que los paneles se lean encima.', mult: 2 },
+  { file: 'story_01.png', title: 'Intro 1/3 — la pareja feliz', refs: '`ref_gusanito` y `ref_gusanita`', tips: 'Los dos gusanos juntos, felices, en su casita de manzana. Sin globos de texto.', mult: 2 },
+  { file: 'story_02.png', title: 'Intro 2/3 — el aparato misterioso', refs: '`ref_gusanito` y `ref_gusanita`', tips: 'Gusanita enseña el aparato y Gusanito pone cara de confusión (signo «?»).', mult: 2 },
+  { file: 'story_03.png', title: 'Intro 3/3 — el portal se la lleva', refs: '`ref_gusanito` y `ref_gusanita`', tips: 'El agujero de gusano (azul-morado) jala a Gusanita; Gusanito intenta alcanzarla. Es el momento más dramático.', mult: 2 },
+];
+md = `# Empieza aquí: arte del landing (intro + título)
+
+Objetivo: que lo primero que vea el jugador (la **intro en cómic** y la **pantalla de título**) ya tenga el arte final. El juego ya está programado para usar estas imágenes: en cuanto las proceses, aparecen.
+
+## Antes de empezar
+1. Abre [\`00-style-bible.md\`](00-style-bible.md) (estilo y cómo son Gusanito y Gusanita).
+2. Usa **la misma herramienta de IA** para todo el landing (cambiar de herramienta cambia el estilo).
+3. Pide siempre **el doble del tamaño final** (ya va indicado) y **formato PNG**.
+
+## Orden recomendado
+**Paso 0 — Referencias (no se suben al juego).** Genera y guarda las mejores; las **adjuntarás** a los demás prompts.
+- \`ref_gusanito\`
+\`\`\`text
+${REF_GUSANITO}
+\`\`\`
+- \`ref_gusanita\`
+\`\`\`text
+${REF_GUSANITA}
+\`\`\`
+Revisa que Gusanito tenga: **verde, gorra negra con una «A» blanca**; y Gusanita: **rosa, cabello largo ondulado, lentes redondos y margarita blanca**.
+
+`;
+LANDING.forEach((l, i) => {
+  const a = byName(l.file);
+  md += `## Paso ${i + 1} — \`${a.file}\` · ${l.title}
+**Tamaño final:** ${a.size[0]}×${a.size[1]} px · **Pídelo en:** ${gen(a, l.mult)} (relación ${ratio(a)}) · ${['screen', 'panel'].includes(a.kind) ? '**Fondo:** escena completa' : '**Fondo al generar:** ' + bgName(a)} · **Adjunta como referencia:** ${l.refs}
+
+\`\`\`text
+${prompt(a)}
+\`\`\`
+> ${l.tips}
+
+`;
+});
+md += `## Cuando tengas las imágenes
+1. Guárdalas **crudas** en \`art-inbox/\` con el nombre exacto (\`title_hero.png\`, \`logo.png\`, \`title_bg.png\`, \`btn_wood.png\`, \`intro_bg.png\`, \`story_01.png\`, \`story_02.png\`, \`story_03.png\`).
+2. Ejecuta \`npm run art\` (quita fondos y ajusta tamaños) y luego \`npm run art:status\`.
+3. Mírala en el juego: \`npm run dev\`. La intro se repite desde **⚙ Ajustes → Ver historia**; el título aparece al terminarla.
+4. Si algo se ve mal, cámbialo y vuelve a correr \`npm run art\`; **no hay que tocar código**.
+
+## Problemas típicos
+| Síntoma | Qué hacer |
+|---|---|
+| Gusanito se ve distinto en cada imagen | Adjunta \`ref_gusanito\` en **todas** y repite el detalle «black cap with a white A» en el prompt |
+| Los ojos o la gorra quedan transparentes | El fondo no era plano; vuelve a generar con fondo liso (o cambia entre magenta y blanco) |
+| Quedó un borde rosa/blanco alrededor | Pide la imagen con fondo **magenta puro**; si el personaje es muy rosa usa **blanco** |
+| La IA agrega texto o globos | Añade «no text, no speech bubbles» y vuelve a generar |
+| El panel de cómic sale con proporción rara | Se recorta/ajusta solo a 1024×640; deja margen alrededor de lo importante |
+
+## Lo que sigue después del landing
+El **hub** necesita: \`gusanito_prehistoria_idle\`, \`base_prehistoria_home\`, \`hub_bg_prehistoria\`, la barra superior/inferior y los íconos (ver [\`05-screens.md\`](05-screens.md)).
+`;
+writeFileSync(path.join(OUT, 'LANDING.md'), md);
+console.log(`Generados 7 documentos en art-prompts/ (${assets.length} archivos de arte).`);

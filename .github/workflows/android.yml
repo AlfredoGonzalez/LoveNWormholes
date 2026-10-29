@@ -1,9 +1,7 @@
 name: Android build
 
 on:
-  push:
-    branches: [main]
-    paths: ['src/**', 'android/**', 'public/**', 'package*.json', 'capacitor.config.ts', 'vite.config.ts', '.github/workflows/android.yml']
+  # Solo manual (pestaña Actions → Run workflow). Se reactivará al acercarnos a las pruebas en dispositivo.
   workflow_dispatch:
 
 jobs:

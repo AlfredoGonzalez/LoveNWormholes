@@ -264,5 +264,14 @@ fx('explosion.png', 'a cartoon impact explosion burst, orange and yellow, comic 
 fx('tumbleweed.png', 'a cute rolling tumbleweed with tiny eyes', [128, 128]);
 fx('ghost_portal.png', 'a small purple-cyan wormhole opening with sparkles', [256, 256], 'white');
 
+// Archivos que el juego ya carga (Hito 6a): título, intro, hub y navegación.
+const WIRED = new Set([
+  'story_01.png', 'story_02.png', 'story_03.png', 'intro_bg.png', 'title_bg.png', 'title_hero.png', 'btn_wood.png', 'btn_stone.png',
+  'topbar.png', 'pill.png', 'btn_round.png', 'icon_gear.png', 'navbar.png', 'nav_tile.png', 'nav_tile_active.png',
+  'nav_map.png', 'nav_memories.png', 'nav_battle.png', 'nav_upgrades.png', 'nav_shop.png', 'bone_coin.png',
+  ...ERAS.flatMap(e => [`hub_bg_${e.id}.png`, `map_boss_${e.id}.png`]),
+]);
+for (const a of assets) if (WIRED.has(a.file)) a.wired = true;
+
 export const byFile = new Map(assets.map(a => [`${a.dir}/${a.file}`, a]));
 export const spec = { assets };

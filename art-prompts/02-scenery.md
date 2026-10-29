@@ -16,7 +16,7 @@ cute cartoon 2D game background, flat two-tone shading, saturated warm colors, s
 ```
 
 ### `base_prehistoria_home.png`
-**Archivo:** `base_prehistoria_home.png` → `public/assets/bases/` · **Tamaño final:** 512×640 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa · 📦 probablemente ya lo tienes (video de Unity)
+**Archivo:** `base_prehistoria_home.png` → `public/assets/bases/` · **Tamaño final:** 512×640 px · **Fondo al generar:** magenta #FF00FF · ✅ el juego ya lo usa
 
 > hogar del jugador: se usa en la batalla Y como casa del hub (por eso es grande)
 
