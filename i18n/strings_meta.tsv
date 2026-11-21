@@ -1,0 +1,25 @@
+key	en	es
+meta.coming_soon	Coming soon	Próximamente
+meta.video_icon	▶	▶
+meta.reward_received	Reward received!	¡Recompensa recibida!
+meta.consent_options_saved	Privacy options saved.	Opciones de privacidad guardadas.
+title.tagline	Squirmy and Wormina, lost in time	Squirmy y Wormina, perdidos en el tiempo
+map.play_stage	Play {0}-{1}	Jugar {0}-{1}
+map.era_empty	This era is coming soon.	Esta era llegará pronto.
+map.current	You are here	Estás aquí
+map.stage_locked	Locked stage	Etapa bloqueada
+prebattle.stage_title	Era {0} · Stage {1}	Era {0} · Etapa {1}
+prebattle.scout_row	{0} x {1}	{0} x {1}
+prebattle.scout_boss	Boss	Jefe
+prebattle.unit_cost	{0} Food	{0} Comida
+prebattle.slot_n	Slot {0}	Espacio {0}
+prebattle.food_boost_on	Food Boost ready: +{0}% Food	Impulso de Comida listo: +{0}% de Comida
+prebattle.back	Back	Atrás
+result.time	Time {0}	Tiempo {0}
+result.stars	Stars: {0} / 3	Estrellas: {0} / 3
+result.coins	+{0} Coins	+{0} Monedas
+result.gems	+{0} Gems	+{0} Gemas
+result.capsules	+{0} Time Capsule	+{0} Cápsula del Tiempo
+result.doubled	Coins doubled!	¡Monedas dobladas!
+result.underdog_none	Lose again and the Underdog bonus will help you.	Si pierdes otra vez, la Remontada te ayudará.
+result.second_wind_btn	Second Wind: {0}% base HP	Segundo Aire: {0}% de vida de la base
