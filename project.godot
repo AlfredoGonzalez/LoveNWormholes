@@ -1,0 +1,27 @@
+; Engine configuration file. Hand-written (code-only workflow, spec 8.11).
+config_version=5
+
+[application]
+config/name="Love 'n Wormholes"
+config/name_localized={}
+run/main_scene="res://src/main.tscn"
+config/features=PackedStringArray("4.6", "Mobile")
+boot_splash/show_image=false
+
+[display]
+window/size/viewport_width=540
+window/size/viewport_height=960
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
+
+[rendering]
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
+
+[physics]
+common/physics_ticks_per_second=30
+
+[debug]
+gdscript/warnings/exclude_addons=true

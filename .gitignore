@@ -1,3 +1,8 @@
-node_modules
-dist
+.godot/
+*.import
+build/
+export_presets.cfg.bak
+config/ads.prod.json
+*.keystore
+*.jks
 .DS_Store

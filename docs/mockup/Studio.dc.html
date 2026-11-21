@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Studio intro video</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@600;800&display=swap">
+<style>
+
+body{margin:0}
+.scr{position:relative;width:405px;height:900px;overflow:hidden;font-family:'Nunito',system-ui,sans-serif;font-weight:600;color:#3B2A1E;background:#F6EBD3}
+.abs{position:absolute;box-sizing:border-box}
+.disp{font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;line-height:1.05}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:24px;border:3px solid #5B3A22;background:#F28C28;color:#3B2A1E;font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;font-size:18px;text-decoration:none;cursor:pointer;box-shadow:0 4px 0 #5B3A22;box-sizing:border-box}
+.btn.teal{background:#15707A;color:#FFFFFF}
+.btn.ghost{background:#FFF7E6}
+.btn.off{background:#D9CDB4;color:#6B5A48;box-shadow:0 4px 0 #8C7A63;border-color:#8C7A63}
+.btn.sm{min-height:44px;padding:0 14px;font-size:15px}
+.panel{background:#FFF7E6;border:3px solid #5B3A22;border-radius:16px;box-shadow:0 4px 0 rgba(91,58,34,.35);box-sizing:border-box}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px 0 6px;border-radius:18px;background:#FFF7E6;border:2px solid #5B3A22;font-weight:800;font-size:15px;box-sizing:border-box}
+.row{display:flex;align-items:center}
+.nav{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:56px;flex:1;text-decoration:none;color:#3B2A1E;font-weight:800;font-size:13px;border-radius:12px}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:800;background:#E9DCC0;border:2px solid #5B3A22}
+.round{border-radius:50%;border:3px solid #5B3A22;box-sizing:border-box;display:flex;align-items:center;justify-content:center}
+.lbl{font-size:13px;font-weight:800}
+.small{font-size:12px;font-weight:700;color:#5B3A22}
+
+</style>
+</helmet>
+<div class="scr">
+<div class="abs " style="left:0px;top:0px;width:405px;height:900px;background:radial-gradient(#3A2A44,#15101C);"></div><div class="abs " style="left:52px;top:230px;width:301px;height:170px;border:3px dashed #E9DCC0;border-radius:18px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;"><svg width="54" height="54" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="#E9DCC0" stroke-width="1.6"/><path d="M10 8 L16 12 L10 16 Z" fill="#E9DCC0"/></svg><span class="small" style="color:#E9DCC0;text-align:center;padding:0 16px">Full-screen studio video plays here</span></div><div class="abs disp" style="left:0px;top:420px;width:405px;height:40px;font-size:30px;text-align:center;color:#F6EBD3;letter-spacing:1px;">am23studios</div><div class="abs " style="left:0px;top:464px;width:405px;height:20px;text-align:center;font-size:13px;color:#C9B58A;">presents</div><div class="abs " style="left:52px;top:780px;width:301px;height:8px;background:rgba(255,255,255,.2);border-radius:4px;overflow:hidden;"><div class="abs" style="left:0;top:0;width:40%;height:100%;background:#E0A526;border-radius:4px"></div></div><a class="abs small" href="Main.dc.html" style="left:0;top:810px;width:405px;text-align:center;color:#E9DCC0;text-decoration:underline;font-weight:800;font-size:14px">Tap anywhere to skip</a><a class="abs" href="Main.dc.html" aria-label="Skip studio video" style="left:0;top:0;width:405px;height:900px;opacity:0"></a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":405,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

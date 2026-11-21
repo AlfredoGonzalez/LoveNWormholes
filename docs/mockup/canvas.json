@@ -1,0 +1,153 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-17T00:10:00Z"
+ },
+ "title": "Worm Warriors: Lost in Time \u2014 UI Mockup",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Studio.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 405,
+   "h": 900,
+   "title": "Studio intro video"
+  },
+  "Main.dc.html": {
+   "x": 460,
+   "y": 0,
+   "w": 405,
+   "h": 900,
+   "title": "Title"
+  },
+  "Home.dc.html": {
+   "x": 920,
+   "y": 0,
+   "w": 405,
+   "h": 900,
+   "title": "Home"
+  },
+  "HomeOffline.dc.html": {
+   "x": 1380,
+   "y": 0,
+   "w": 405,
+   "h": 900,
+   "title": "Home with offline claim"
+  },
+  "WorldMap.dc.html": {
+   "x": 1840,
+   "y": 0,
+   "w": 405,
+   "h": 900,
+   "title": "World Map"
+  },
+  "PreBattle.dc.html": {
+   "x": 2300,
+   "y": 0,
+   "w": 405,
+   "h": 900,
+   "title": "Pre-battle"
+  },
+  "Battle.dc.html": {
+   "x": 0,
+   "y": 1020,
+   "w": 405,
+   "h": 900,
+   "title": "Battle HUD"
+  },
+  "Pause.dc.html": {
+   "x": 460,
+   "y": 1020,
+   "w": 405,
+   "h": 900,
+   "title": "Pause"
+  },
+  "Victory.dc.html": {
+   "x": 920,
+   "y": 1020,
+   "w": 405,
+   "h": 900,
+   "title": "Victory"
+  },
+  "Defeat.dc.html": {
+   "x": 1380,
+   "y": 1020,
+   "w": 405,
+   "h": 900,
+   "title": "Defeat"
+  },
+  "Upgrades.dc.html": {
+   "x": 1840,
+   "y": 1020,
+   "w": 405,
+   "h": 900,
+   "title": "Upgrades"
+  },
+  "Squad.dc.html": {
+   "x": 2300,
+   "y": 1020,
+   "w": 405,
+   "h": 900,
+   "title": "Squad and Collection"
+  },
+  "Shop.dc.html": {
+   "x": 0,
+   "y": 2040,
+   "w": 405,
+   "h": 900,
+   "title": "Shop"
+  },
+  "Capsules.dc.html": {
+   "x": 460,
+   "y": 2040,
+   "w": 405,
+   "h": 900,
+   "title": "Time Capsules"
+  },
+  "Settings.dc.html": {
+   "x": 920,
+   "y": 2040,
+   "w": 405,
+   "h": 900,
+   "title": "Settings"
+  }
+ },
+ "order": [
+  "Studio.dc.html",
+  "Main.dc.html",
+  "Home.dc.html",
+  "HomeOffline.dc.html",
+  "WorldMap.dc.html",
+  "PreBattle.dc.html",
+  "Battle.dc.html",
+  "Pause.dc.html",
+  "Victory.dc.html",
+  "Defeat.dc.html",
+  "Upgrades.dc.html",
+  "Squad.dc.html",
+  "Shop.dc.html",
+  "Capsules.dc.html",
+  "Settings.dc.html"
+ ],
+ "notes": {
+  "title": {
+   "x": 0,
+   "y": -260,
+   "text": "Worm Warriors: Lost in Time \u2014 UI mockup (portrait 9:16, 405 x 900)",
+   "kind": "title1",
+   "maxW": 2840
+  },
+  "legend": {
+   "x": 0,
+   "y": -140,
+   "w": 520,
+   "text": "Boot order: Studio intro video, then Title. Buttons with a video icon are optional rewarded ads. Placeholder art stands in for the Gemini sprites. Layout and hierarchy are the reference; game rules live in the design doc.",
+   "fill": "teal"
+  }
+ },
+ "designSystems": []
+}

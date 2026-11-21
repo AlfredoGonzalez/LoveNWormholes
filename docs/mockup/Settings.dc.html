@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@600;800&display=swap">
+<style>
+
+body{margin:0}
+.scr{position:relative;width:405px;height:900px;overflow:hidden;font-family:'Nunito',system-ui,sans-serif;font-weight:600;color:#3B2A1E;background:#F6EBD3}
+.abs{position:absolute;box-sizing:border-box}
+.disp{font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;line-height:1.05}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:24px;border:3px solid #5B3A22;background:#F28C28;color:#3B2A1E;font-family:'Baloo 2','Nunito',system-ui,sans-serif;font-weight:800;font-size:18px;text-decoration:none;cursor:pointer;box-shadow:0 4px 0 #5B3A22;box-sizing:border-box}
+.btn.teal{background:#15707A;color:#FFFFFF}
+.btn.ghost{background:#FFF7E6}
+.btn.off{background:#D9CDB4;color:#6B5A48;box-shadow:0 4px 0 #8C7A63;border-color:#8C7A63}
+.btn.sm{min-height:44px;padding:0 14px;font-size:15px}
+.panel{background:#FFF7E6;border:3px solid #5B3A22;border-radius:16px;box-shadow:0 4px 0 rgba(91,58,34,.35);box-sizing:border-box}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px 0 6px;border-radius:18px;background:#FFF7E6;border:2px solid #5B3A22;font-weight:800;font-size:15px;box-sizing:border-box}
+.row{display:flex;align-items:center}
+.nav{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:56px;flex:1;text-decoration:none;color:#3B2A1E;font-weight:800;font-size:13px;border-radius:12px}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:800;background:#E9DCC0;border:2px solid #5B3A22}
+.round{border-radius:50%;border:3px solid #5B3A22;box-sizing:border-box;display:flex;align-items:center;justify-content:center}
+.lbl{font-size:13px;font-weight:800}
+.small{font-size:12px;font-weight:700;color:#5B3A22}
+
+</style>
+</helmet>
+<div class="scr">
+<div class="abs " style="left:0px;top:0px;width:405px;height:900px;background:#F6EBD3;"></div><a class="abs btn ghost" href="Home.dc.html" aria-label="Back to Home" style="left:12px;top:10px;width:44px;padding:0;border-radius:22px"><svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M15 5 L8 12 L15 19" fill="none" stroke="#3B2A1E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="abs disp" style="left:64px;top:12px;width:330px;height:40px;font-size:26px;white-space:nowrap;">Settings</div><div class="abs panel" style="left:12px;top:64px;width:381px;height:280px;padding:14px 18px;"><div class="lbl">Language / Idioma</div><div class="row" style="gap:8px;margin:6px 0 10px"><a class="btn sm" href="Settings.dc.html" style="flex:1">English</a><a class="btn ghost sm" href="Settings.dc.html" style="flex:1">Español</a></div><div style="margin:8px 0"><div class="lbl">Music</div><div style="position:relative;height:16px;border:3px solid #5B3A22;border-radius:10px;background:#EFE3C8;margin-top:4px"><div class="abs" style="left:0;top:0;width:70%;height:100%;background:#15707A;border-radius:7px"></div><span class="abs round" style="left:calc(70% - 14px);top:-9px;width:28px;height:28px;background:#FFF7E6"></span></div></div><div style="margin:8px 0"><div class="lbl">Sound effects</div><div style="position:relative;height:16px;border:3px solid #5B3A22;border-radius:10px;background:#EFE3C8;margin-top:4px"><div class="abs" style="left:0;top:0;width:85%;height:100%;background:#15707A;border-radius:7px"></div><span class="abs round" style="left:calc(85% - 14px);top:-9px;width:28px;height:28px;background:#FFF7E6"></span></div></div><div class="row" style="justify-content:space-between;margin-top:10px"><span class="lbl">Vibration</span><span class="tag" style="font-size:14px;padding:6px 14px;background:#6BA368">On</span></div></div><div class="abs panel" style="left:12px;top:356px;width:381px;height:270px;padding:14px 18px;"><a class="btn ghost" href="Settings.dc.html" style="width:100%;justify-content:space-between;color:#3B2A1E;margin-bottom:10px">Privacy options<span aria-hidden="true">&gt;</span></a><a class="btn ghost" href="Settings.dc.html" style="width:100%;justify-content:space-between;color:#3B2A1E;margin-bottom:10px">Restore purchases<span aria-hidden="true">&gt;</span></a><a class="btn ghost" href="Settings.dc.html" style="width:100%;justify-content:space-between;color:#3B2A1E;margin-bottom:10px">Credits and licenses<span aria-hidden="true">&gt;</span></a><a class="btn ghost" href="Settings.dc.html" style="width:100%;justify-content:space-between;color:#C8453B;margin-bottom:10px">Delete my local data<span aria-hidden="true">&gt;</span></a><div class="small" style="text-align:center;margin-top:8px">Worm Warriors v0.1.0 · am23studios</div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":405,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
