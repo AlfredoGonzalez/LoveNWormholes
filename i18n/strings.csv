@@ -1,0 +1,444 @@
+key,en,es
+app.title,Love 'n Wormholes,Love 'n Wormholes
+app.subtitle,Lost in Time,Perdidos en el Tiempo
+app.studio,am23studios,am23studios
+studio.presents,presents,presenta
+studio.tap_skip,Tap anywhere to skip,Toca en cualquier lugar para saltar
+title.play,Play,Jugar
+title.version,v{0} · am23studios,v{0} · am23studios
+title.language,Language,Idioma
+title.settings,Settings,Ajustes
+consent.title,"Your privacy, your choice","Tu privacidad, tu decisión"
+consent.body,We show optional video ads to keep the game free. Tell us how we may use your data for them.,Mostramos anuncios en video opcionales para mantener el juego gratis. Dinos cómo podemos usar tus datos para ellos.
+consent.accept,Accept,Aceptar
+consent.manage,Manage options,Administrar opciones
+consent.decline,Decline,Rechazar
+currency.food,Food,Comida
+currency.coins,Coins,Monedas
+currency.gems,Gems,Gemas
+currency.dust,Chrono Dust,Polvo Crono
+currency.capsule,Time Capsule,Cápsula del Tiempo
+currency.capsules,Time Capsules,Cápsulas del Tiempo
+currency.relic,Relic,Reliquia
+currency.relics,Relics,Reliquias
+glossary.worm,Worm,Gusano
+glossary.squad,Squad,Escuadrón
+glossary.power,Power,Poder
+glossary.boss,Boss,Jefe
+glossary.era,Era,Era
+glossary.stage,Stage,Etapa
+glossary.shard,Shard,Fragmento
+ui.back,Back,Atrás
+ui.ok,OK,Vale
+ui.cancel,Cancel,Cancelar
+ui.close,Close,Cerrar
+ui.claim,Claim,Reclamar
+ui.skip,Skip,Saltar
+ui.next,Next,Siguiente
+ui.continue,Continue,Continuar
+ui.on,On,Activado
+ui.off,Off,Desactivado
+ui.locked,Locked,Bloqueado
+ui.free,Free,Gratis
+ui.max,MAX,MÁX
+ui.upgrade,Upgrade,Mejorar
+ui.equip,Equip,Equipar
+ui.equipped,Equipped,Equipado
+ui.buy,Buy,Comprar
+ui.owned,Owned,Obtenido
+ui.loading,Loading...,Cargando...
+ui.not_available,Not available right now,No disponible por ahora
+ui.watch_video,Watch video,Ver video
+ui.one_time,One time,Una sola vez
+ui.best_value,Best value,Mejor valor
+ui.confirm,Are you sure?,¿Seguro?
+ui.yes,Yes,Sí
+ui.no,No,No
+ui.error_generic,Something went wrong. Please try again.,Algo salió mal. Inténtalo de nuevo.
+ui.claim_n,Claim {0},Reclamar {0}
+ui.double_n,Double: {0},Doble: {0}
+ui.level_short,Lv {0},Nv {0}
+ui.level_n_to_m,Lv {0} to {1},Nv {0} a {1}
+ui.need_more,Need {0} more,Faltan {0}
+ui.unlocks_level,Unlocks at level {0},Se desbloquea en el nivel {0}
+ui.unlocks_stage,Unlocks after stage {0},Se desbloquea tras la etapa {0}
+ui.unlocks_boss,Unlocks after the Era {0} boss,Se desbloquea tras el jefe de la Era {0}
+ui.unlocks_start,Available from the start,Disponible desde el inicio
+ui.amount,{0},{0}
+ui.plus_amount,+{0},+{0}
+ui.times,x{0},x{0}
+ui.seconds_short,{0}s,{0}s
+ui.percent,{0}%,{0}%
+ui.price_usd,${0},US${0}
+ui.hours_minutes,{0}h {1}m,{0}h {1}m
+nav.home,Home,Inicio
+nav.map,Map,Mapa
+nav.squad,Squad,Escuadrón
+nav.upgrades,Upgrades,Mejoras
+nav.capsules,Capsules,Cápsulas
+nav.shop,Shop,Tienda
+role.fighter,Fighter,Luchador
+role.fighter.plural,Fighters,Luchadores
+role.shooter,Shooter,Tirador
+role.shooter.plural,Shooters,Tiradores
+role.heavy,Heavy,Pesado
+role.heavy.plural,Heavies,Pesados
+role.support,Support,Apoyo
+role.support.plural,Supports,Apoyos
+role.air,Air,Aéreo
+role.air.plural,Air,Aéreos
+role.fighter.desc,Melee. Cheap and quick to spawn.,Cuerpo a cuerpo. Barato y rápido de lanzar.
+role.shooter.desc,Ranged. Fragile with high damage.,A distancia. Frágil y con mucho daño.
+role.heavy.desc,Tank or mount. Slow with lots of HP.,Tanque o montura. Lento y con mucha vida.
+role.support.desc,Heals or slows nearby units. Low HP.,Cura o ralentiza a los cercanos. Poca vida.
+role.air.desc,Flies. Only Shooters can hit it.,Vuela. Solo los Tiradores lo alcanzan.
+era.1.name,Stone Age: Dino Valley,Edad de Piedra: Valle de los Dinos
+era.1.short,Dino Valley,Valle de los Dinos
+era.1.enemy_base,Anthill,Hormiguero
+era.1.faction,Ant tribe,Tribu de hormigas
+era.1.rule,No special rule,Sin regla especial
+era.2.name,Ancient Egypt: Scarab Sands,Antiguo Egipto: Arenas Escarabajo
+era.2.short,Scarab Sands,Arenas Escarabajo
+era.2.enemy_base,Scarab Mound,Montículo Escarabajo
+era.2.faction,Scarab legion and locusts,Legión de escarabajos y langostas
+era.2.rule,Sand patches slow all units,Los parches de arena ralentizan a todos
+era.3.name,Medieval: Kingdom of Crumbs,Medieval: Reino de las Migajas
+era.3.short,Kingdom of Crumbs,Reino de las Migajas
+era.3.enemy_base,Beetle Castle,Castillo Escarabajo
+era.3.faction,Beetle knights,Caballeros escarabajo
+era.3.rule,Walls: the first hit on each base is reduced,Murallas: el primer golpe a cada base se reduce
+era.4.name,Industrial: Steam City,Industrial: Ciudad de Vapor
+era.4.short,Steam City,Ciudad de Vapor
+era.4.enemy_base,Roach Foundry,Fundición Cucaracha
+era.4.faction,Clockwork roaches,Cucarachas mecánicas
+era.4.rule,Steam vents boost units that stand on them,Las salidas de vapor impulsan a quien se pare encima
+era.5.name,Far Future: Neon Orbit,Futuro Lejano: Órbita Neón
+era.5.short,Neon Orbit,Órbita Neón
+era.5.enemy_base,Mecha Hive,Colmena Mecha
+era.5.faction,Robot beetles and drones,Escarabajos robot y drones
+era.5.rule,Gravity wells pull projectiles off course,Los pozos de gravedad desvían los proyectiles
+era.label,Era {0},Era {0}
+hero.squirmy,Squirmy,Squirmy
+hero.wormina,Wormina,Wormina
+hero.count_magpie,Count Magpie,Count Magpie
+hero.chrono_core,Chrono Core,Núcleo Crono
+hero.player_base,Burrow,Madriguera
+home.shards,Shards {0} / {1},Fragmentos {0} / {1}
+home.era_line,Era {0} · {1},Era {0} · {1}
+home.stage_line,Stage {0}: {1},Etapa {0}: {1}
+home.scout_item,{0} x{1},{0} x{1}
+home.play,Play,Jugar
+home.daily_badge,Daily reward,Recompensa diaria
+home.daily_login,Daily login: {0} Gems and {1} Time Capsule,Entrada diaria: {0} Gemas y {1} Cápsula del Tiempo
+home.streak,Day {0} streak,Racha de {0} días
+home.streak_bonus,Day {0} streak bonus!,¡Bono de racha del día {0}!
+home.daily_quests,Daily quests,Misiones diarias
+home.worm_farm,Worm Farm,Granja de Gusanos
+offline.title,Welcome back!,¡Bienvenido de vuelta!
+offline.body,Your Worm Farm worked for,Tu Granja de Gusanos trabajó durante
+offline.cap,Farm cap: {0} hours. Beat bosses to raise it.,Límite de la granja: {0} horas. Vence jefes para subirlo.
+offline.claim,Claim {0},Reclamar {0}
+offline.double,Double: {0},Doble: {0}
+map.title,World Map,Mapa del Mundo
+map.era_tab,Era {0},Era {0}
+map.boss,BOSS: {0},JEFE: {0}
+map.stage,Stage {0},Etapa {0}
+map.echo,hides a Wormina echo,esconde un eco de Wormina
+map.locked_era,Beat the Era {0} boss to unlock,Vence al jefe de la Era {0} para desbloquear
+map.stars,{0} / {1} stars,{0} / {1} estrellas
+prebattle.title,Pre-battle,Antes de la batalla
+prebattle.scout,Scout report,Informe de exploración
+prebattle.tip,"Tip: Shooters beat Heavies, Heavies beat Fighters.",Consejo: los Tiradores vencen a los Pesados y los Pesados vencen a los Luchadores.
+prebattle.squad,Time Squad {0} / {1},Escuadrón del Tiempo {0} / {1}
+prebattle.slot_locked,After Era {0} boss,Tras el jefe de la Era {0}
+prebattle.all_units,"All unlocked units, any era","Todas las unidades desbloqueadas, de cualquier era"
+prebattle.powers,Powers,Poderes
+prebattle.power_slot_locked,Third slot unlocks after the Era {0} boss.,El tercer espacio se desbloquea tras el jefe de la Era {0}.
+prebattle.food_boost,Optional: start with +{0}% Food,Opcional: empieza con +{0}% de Comida
+prebattle.start,Start Battle,Empezar batalla
+prebattle.need_squad,Pick at least one unit,Elige al menos una unidad
+battle.title,Battle,Batalla
+battle.base_player,Burrow {0} / {1},Madriguera {0} / {1}
+battle.base_enemy,{0} {1} / {2},{0} {1} / {2}
+battle.food,{0}/{1},{0}/{1}
+battle.income,+{0}/s,+{0}/s
+battle.speed,x{0},x{0}
+battle.cooldown,{0}s,{0}s
+battle.power_ready,Ready,Listo
+battle.boss_warning,Boss attack incoming!,¡Ataque del jefe en camino!
+battle.overtime,Overtime! Enemies hit harder.,¡Tiempo extra! Los enemigos pegan más fuerte.
+battle.pop_cap,Unit limit reached,Límite de unidades alcanzado
+battle.not_enough_food,Not enough Food,No hay suficiente Comida
+battle.underdog_badge,Underdog x{0},Remontada x{0}
+battle.tutorial_spawn,Tap a card to spawn a Club Worm!,¡Toca una carta para lanzar un Gusano Garrote!
+battle.tutorial_power,Use Squirm Slam!,¡Usa Golpe Gusano!
+battle.tutorial_base,Destroy the base!,¡Destruye la base!
+pause.title,Paused,En pausa
+pause.resume,Resume,Continuar
+pause.restart,Restart,Reiniciar
+pause.quit,Quit to Home,Salir al inicio
+pause.music_on,Music on,Música activa
+pause.music_off,Music off,Música apagada
+pause.sound_on,Sound on,Sonido activo
+pause.sound_off,Sound off,Sonido apagado
+pause.quit_confirm,Leaving counts as a loss. Leave anyway?,Salir cuenta como derrota. ¿Salir de todos modos?
+pause.stay,Stay,Quedarme
+pause.leave,Leave,Salir
+victory.title,Victory!,¡Victoria!
+victory.first_clear,First clear bonus: x{0} Coins and {1} Gems,Bono de primera victoria: x{0} Monedas y {1} Gemas
+victory.boss_first_clear,Boss first clear: {0} Gems and {1} Time Capsule,Primera victoria contra un jefe: {0} Gemas y {1} Cápsula del Tiempo
+victory.double_coins,Optional: double Coins (+{0}),Opcional: duplica las Monedas (+{0})
+victory.home,Home,Inicio
+victory.next,Next stage,Siguiente etapa
+victory.shard,Shard recovered!,¡Fragmento recuperado!
+victory.echo,Wormina echo found!,¡Eco de Wormina encontrado!
+victory.rewards,Rewards,Recompensas
+defeat.title,Defeat,Derrota
+defeat.flavor,The enemy held the line. Squirmy dusts off his cap.,El enemigo resistió. Squirmy se sacude la gorra.
+defeat.mercy,Mercy reward: {0}% of the Coins.,Recompensa de consuelo: {0}% de las Monedas.
+defeat.underdog,Underdog x{0},Remontada x{0}
+defeat.underdog_desc,Next try: +{0}% starting Food and +{1}% base HP.,Próximo intento: +{0}% de Comida inicial y +{1}% de vida de la base.
+defeat.second_wind,Optional: Second Wind ({0}% HP),Opcional: Segundo Aire ({0}% de vida)
+defeat.change_squad,Change squad,Cambiar escuadrón
+defeat.retry,Retry,Reintentar
+upgrades.title,Upgrades,Mejoras
+upgrades.tab_units,Units,Unidades
+upgrades.tab_burrow,Food Burrow,Madriguera de Comida
+upgrades.tab_base,Base,Base
+upgrades.tab_powers,Powers,Poderes
+upgrades.unit_gain,Lv {0} to {1} · +{2}% HP and damage,Nv {0} a {1} · +{2}% de vida y daño
+upgrades.hp,HP,Vida
+upgrades.damage,Damage,Daño
+upgrades.food_cost,Food cost,Costo de Comida
+upgrades.interval,Attack interval,Intervalo de ataque
+upgrades.range,Range,Alcance
+upgrades.speed,Speed,Velocidad
+upgrades.cooldown,Cooldown,Enfriamiento
+upgrades.time_sync,Time Sync,Sincronía Temporal
+upgrades.time_sync_in_era,{0} in Era {1},{0} en la Era {1}
+upgrades.time_sync_desc,Older units grow stronger as you reach new eras.,Las unidades antiguas se fortalecen al llegar a nuevas eras.
+upgrades.burrow_desc,+{0} Food per second and +{1} Food cap per level,+{0} de Comida por segundo y +{1} al límite de Comida por nivel
+upgrades.base_desc,+{0}% base HP per level,+{0}% de vida de la base por nivel
+upgrades.power_desc,+{0}% effect and -{1}% cooldown per level,+{0}% de efecto y -{1}% de enfriamiento por nivel
+upgrades.income,Food income,Ingreso de Comida
+upgrades.food_cap,Food cap,Límite de Comida
+upgrades.base_hp,Base HP,Vida de la base
+upgrades.max_reached,Max level reached,Nivel máximo alcanzado
+upgrades.not_enough_coins,Not enough Coins,No hay suficientes Monedas
+squad.title,Squad and Collection,Escuadrón y Colección
+squad.role_era,{0} · Era {1},{0} · Era {1}
+squad.counters,Counters,Contrarrestos
+squad.beats,{0} beats {1},{0} vence a {1}
+squad.air_note,Air: only Shooters hit it,Aéreo: solo los Tiradores lo alcanzan
+squad.counter_note,Counter hits deal x{0} damage.,Los golpes de contra hacen x{0} de daño.
+squad.presets,Presets,Preajustes
+squad.preset_n,Squad {0},Escuadrón {0}
+squad.add_preset,Add preset slot,Añadir espacio de preajuste
+squad.empty_slot,Empty,Vacío
+squad.pick,Pick up to {0} units,Elige hasta {0} unidades
+squad.collection,Collection,Colección
+shop.title,Shop,Tienda
+shop.section_gems,Gems,Gemas
+shop.section_skins,Hero skins,Disfraces del héroe
+shop.section_free,Free,Gratis
+shop.daily_gift,Daily gift: {0} Gems,Regalo diario: {0} Gemas
+shop.restore,Restore purchases,Restaurar compras
+shop.purchased,Purchased,Comprado
+shop.squad_preset_slot,Extra squad preset slot,Espacio extra de preajuste de escuadrón
+shop.bonus_capsule,Free capsule: watch a video,Cápsula gratis: mira un video
+shop.purchase_failed,The purchase did not go through. You were not charged.,La compra no se completó. No se te cobró.
+shop.purchase_pending,Purchase pending...,Compra pendiente...
+product.gems_80.name,80 Gems,80 Gemas
+product.gems_80.desc,A handful of shiny Gems,Un puñado de Gemas brillantes
+product.gems_450.name,450 Gems,450 Gemas
+product.gems_450.desc,A pouch of Gems,Una bolsita de Gemas
+product.gems_1000.name,1000 Gems,1000 Gemas
+product.gems_1000.desc,A big sack of Gems,Un costal de Gemas
+product.gems_2200.name,2200 Gems,2200 Gemas
+product.gems_2200.desc,A treasure chest of Gems,Un cofre del tesoro de Gemas
+product.starter_pack.name,Starter Pack,Paquete Inicial
+product.starter_pack.desc,300 Gems · 3 Time Capsules · Cosmetic cap,300 Gemas · 3 Cápsulas del Tiempo · Gorra cosmética
+product.golden_pass.name,Golden Pass,Pase Dorado
+product.golden_pass.desc,"Ad bonuses always on, no watching needed","Bonos de anuncios siempre activos, sin ver nada"
+product.skin_pirate.name,Pirate,Pirata
+product.skin_pirate.desc,Squirmy sets sail. Cosmetic only.,Squirmy zarpa. Solo cosmético.
+product.skin_knight.name,Knight,Caballero
+product.skin_knight.desc,Squirmy in shining armor. Cosmetic only.,Squirmy con armadura brillante. Solo cosmético.
+product.skin_astronaut.name,Astronaut,Astronauta
+product.skin_astronaut.desc,Squirmy goes to orbit. Cosmetic only.,Squirmy viaja a la órbita. Solo cosmético.
+product.golden_pass.extra,+{0} hours Worm Farm cap · Golden cap,+{0} horas al límite de la Granja de Gusanos · Gorra dorada
+capsules.title,Time Capsules,Cápsulas del Tiempo
+capsules.pity,Guarantee counters,Contadores de garantía
+capsules.pity_rare,Rare or better in {0} capsules,Rara o mejor en {0} cápsulas
+capsules.pity_epic,Epic guaranteed in {0} capsules,Épica garantizada en {0} cápsulas
+capsules.odds,Odds: Common {0}% · Rare {1}% · Epic {2}%. Duplicates at max level become Chrono Dust.,Probabilidades: Común {0}% · Rara {1}% · Épica {2}%. Los duplicados en nivel máximo se convierten en Polvo Crono.
+capsules.dust_gain,"Duplicate at max level gives Dust: Common {0}, Rare {1}, Epic {2}.","Un duplicado en nivel máximo da Polvo: Común {0}, Rara {1}, Épica {2}."
+capsules.dust_prices,"Buy a relic with Dust: Common {0}, Rare {1}, Epic {2}.","Compra una reliquia con Polvo: Común {0}, Rara {1}, Épica {2}."
+capsules.open_1,Open 1,Abrir 1
+capsules.open_10,Open 10,Abrir 10
+capsules.free_capsule,Free capsule x{0},Cápsula gratis x{0}
+capsules.relics_count,Relics {0} / {1},Reliquias {0} / {1}
+capsules.buy_with_dust,Buy a relic with Dust,Compra una reliquia con Polvo
+capsules.opened,You got {0}!,¡Obtuviste {0}!
+capsules.new_relic,New relic!,¡Reliquia nueva!
+capsules.level_up,Relic level {0}!,¡Reliquia a nivel {0}!
+capsules.dust_converted,Duplicate converted to {0} Chrono Dust,Duplicado convertido en {0} de Polvo Crono
+capsules.cap_note,Total relic bonus per stat is capped at +{0}%.,El bono total de reliquias por atributo tiene un tope de +{0}%.
+capsules.not_enough_gems,Not enough Gems,No hay suficientes Gemas
+capsules.not_enough_dust,Not enough Chrono Dust,No hay suficiente Polvo Crono
+capsules.no_capsules,No capsules left,No quedan cápsulas
+rarity.common,Common,Común
+rarity.rare,Rare,Rara
+rarity.epic,Epic,Épica
+relic.sticky_seed.name,Sticky Seed,Semilla Pegajosa
+relic.sticky_seed.desc,+{0}% Food income,+{0}% de ingreso de Comida
+relic.lucky_clover.name,Lucky Clover,Trébol de la Suerte
+relic.lucky_clover.desc,+{0}% Coins,+{0}% de Monedas
+relic.tough_pebble.name,Tough Pebble,Guijarro Duro
+relic.tough_pebble.desc,+{0}% base HP,+{0}% de vida de la base
+relic.sharp_thorn.name,Sharp Thorn,Espina Afilada
+relic.sharp_thorn.desc,+{0}% unit damage,+{0}% de daño de las unidades
+relic.quick_sprout.name,Quick Sprout,Brote Veloz
+relic.quick_sprout.desc,-{0}% spawn cooldown,-{0}% de enfriamiento de lanzamiento
+relic.cozy_mushroom.name,Cozy Mushroom,Hongo Acogedor
+relic.cozy_mushroom.desc,+{0}% unit HP,+{0}% de vida de las unidades
+relic.golden_dewdrop.name,Golden Dewdrop,Gota de Rocío Dorada
+relic.golden_dewdrop.desc,+{0}% Coins,+{0}% de Monedas
+relic.echo_seashell.name,Echo Seashell,Caracola del Eco
+relic.echo_seashell.desc,+{0}% Food income,+{0}% de ingreso de Comida
+relic.mini_hourglass.name,Mini Hourglass,Mini Reloj de Arena
+relic.mini_hourglass.desc,-{0}% power cooldowns,-{0}% de enfriamiento de los poderes
+relic.wormina_daisy.name,Wormina's Daisy,La Margarita de Wormina
+relic.wormina_daisy.desc,+{0}% unit HP,+{0}% de vida de las unidades
+relic.chrono_gear.name,Chrono Gear,Engranaje Crono
+relic.chrono_gear.desc,+{0}% Food income,+{0}% de ingreso de Comida
+relic.time_crown.name,Time Crown,Corona del Tiempo
+relic.time_crown.desc,+{0}% unit damage,+{0}% de daño de las unidades
+settings.title,Settings,Ajustes
+settings.language,Language / Idioma,Language / Idioma
+settings.lang_en,English,English
+settings.lang_es,Español,Español
+settings.music,Music,Música
+settings.sfx,Sound effects,Efectos de sonido
+settings.vibration,Vibration,Vibración
+settings.text_size,Text size,Tamaño del texto
+settings.privacy_options,Privacy options,Opciones de privacidad
+settings.privacy_policy,Privacy policy,Política de privacidad
+settings.restore,Restore purchases,Restaurar compras
+settings.credits,Credits and licenses,Créditos y licencias
+settings.delete_data,Delete my local data,Borrar mis datos locales
+settings.delete_confirm,This erases your progress on this device. Are you sure?,Esto borra tu progreso en este dispositivo. ¿Seguro?
+settings.version,Love 'n Wormholes v{0} · am23studios,Love 'n Wormholes v{0} · am23studios
+story.skip,Skip,Saltar
+story.prologue.1,Squirmy and Wormina find a glowing clockwork orb in the garden.,Squirmy y Wormina encuentran una esfera de relojería brillante en el jardín.
+story.prologue.2,Wormina pokes it. FLASH! She is gone and the Core cracks into five shards.,Wormina la toca. ¡FLASH! Desaparece y el Núcleo se rompe en cinco fragmentos.
+story.prologue.3,A time portal opens. Squirmy adjusts his cap and jumps in.,Se abre un portal del tiempo. Squirmy se ajusta la gorra y salta.
+story.era.1.intro,Dino Valley! The ants have never seen a worm this brave.,¡Valle de los Dinos! Las hormigas nunca vieron un gusano tan valiente.
+story.era.2.intro,Scarab Sands. Something shiny glints behind the pyramids.,Arenas Escarabajo. Algo brilla detrás de las pirámides.
+story.era.3.intro,The Kingdom of Crumbs. The beetle knights guard every crumb.,El Reino de las Migajas. Los caballeros escarabajo guardan cada miga.
+story.era.4.intro,"Steam City. Gears everywhere, and a very busy queen.",Ciudad de Vapor. Engranajes por todos lados y una reina muy ocupada.
+story.era.5.intro,Neon Orbit. Count Magpie 3000 is waiting with a monocle and a plan.,Órbita Neón. Count Magpie 3000 espera con monóculo y un plan.
+story.era.1.outro,Rexy sulks. A shard glows and a daisy petal floats by.,Rexy se enfurruña. Un fragmento brilla y flota un pétalo de margarita.
+story.era.2.outro,The Pharaoh bows. A scribbled note from Wormina: 'Hurry!',El Faraón se inclina. Una nota garabateada de Wormina: «¡Apúrate!»
+story.era.3.outro,Sir Sizzle hiccups a tiny flame. Another shard is yours.,Sir Sizzle hipa una llamita. Otro fragmento es tuyo.
+story.era.4.outro,The Clockwork Queen winds down. Wormina's voice echoes through the pipes.,La Reina Mecánica se detiene. La voz de Wormina resuena por las tuberías.
+story.era.5.outro,The Core is whole again. Wormina hugs Squirmy and asks to touch one more shiny thing. No.,El Núcleo vuelve a estar completo. Wormina abraza a Squirmy y pide tocar una cosa brillante más. No.
+story.epilogue,Wormina keeps the daisy. A sixth era blinks in the distance...,Wormina se queda con la margarita. Una sexta era parpadea a lo lejos...
+power.squirm_slam.name,Squirm Slam,Golpe Gusano
+power.squirm_slam.desc,Ground slam: {0} damage in radius {1} and a {2} s stun,Golpe al suelo: {0} de daño en radio {1} y {2} s de aturdimiento
+power.apple_rain.name,Apple Rain,Lluvia de Manzanas
+power.apple_rain.desc,Apples fall and add {0} Food over {1} s,Caen manzanas y suman {0} de Comida en {1} s
+power.time_freeze.name,Time Freeze,Congelar el Tiempo
+power.time_freeze.desc,Enemies freeze for {0} s (bosses {1} s),Los enemigos se congelan {0} s (jefes {1} s)
+power.rewind.name,Rewind,Rebobinar
+power.rewind.desc,Allies that died in the last {0} s return with {1}% HP at no cost,Los aliados caídos en los últimos {0} s regresan con {1}% de vida sin costo
+power.dirt_shield.name,Dirt Shield,Escudo de Tierra
+power.dirt_shield.desc,Base shield absorbs {0}% of max base HP for {1} s,El escudo de la base absorbe {0}% de su vida máxima durante {1} s
+power.fast_forward.name,Fast-Forward,Avance Rápido
+power.fast_forward.desc,Allies get +{0}% move and attack speed for {1} s,Los aliados ganan +{0}% de velocidad de movimiento y ataque durante {1} s
+unit.p1_club_worm.name,Club Worm,Gusano Garrote
+unit.p1_club_worm.desc,Cheap swarm unit with a fur tunic and a wooden club,Unidad barata de enjambre con túnica de piel y garrote
+unit.p1_slinger_worm.name,Slinger Worm,Gusano Hondero
+unit.p1_slinger_worm.desc,Throws stones from a distance,Lanza piedras desde lejos
+unit.p1_dino_rider_worm.name,Dino Rider Worm,Gusano Jinete de Dino
+unit.p1_dino_rider_worm.desc,Rides a baby triceratops. Slow and tough,Monta un triceratops bebé. Lento y duro
+unit.p2_shield_bearer_worm.name,Shield Bearer Worm,Gusano Escudero
+unit.p2_shield_bearer_worm.desc,Scarab shield blocks {0}% of ranged damage,El escudo escarabajo bloquea {0}% del daño a distancia
+unit.p2_bow_worm.name,Bow Worm,Gusano Arquero
+unit.p2_bow_worm.desc,"Fast arrows, but fragile","Flechas veloces, pero frágil"
+unit.p2_cobra_charmer_worm.name,Cobra Charmer Worm,Gusano Encantador de Cobras
+unit.p2_cobra_charmer_worm.desc,Flute and cobra slow enemies in range by {0}%,La flauta y la cobra ralentizan {0}% a los enemigos en alcance
+unit.p3_knight_worm.name,Knight Worm,Gusano Caballero
+unit.p3_knight_worm.desc,Charges: the first hit deals +{0}%,Carga: el primer golpe hace +{0}%
+unit.p3_crossbow_worm.name,Crossbow Worm,Gusano Ballestero
+unit.p3_crossbow_worm.desc,"Slow shot, high damage, can hit air","Disparo lento, mucho daño, alcanza el aire"
+unit.p3_wizard_worm.name,Wizard Worm,Gusano Mago
+unit.p3_wizard_worm.desc,Star wand gives nearby allies +{0}% damage,La varita estelar da +{0}% de daño a los aliados cercanos
+unit.p4_gear_gunner_worm.name,Gear Gunner Worm,Gusano Artillero de Engranes
+unit.p4_gear_gunner_worm.desc,"Rapid steam rifle, can hit air","Rifle de vapor rápido, alcanza el aire"
+unit.p4_boiler_tank_worm.name,Boiler Tank Worm,Gusano Tanque de Vapor
+unit.p4_boiler_tank_worm.desc,Steam tank with splash damage on hit,Tanque de vapor con daño en área al golpear
+unit.p4_balloon_bomber_worm.name,Balloon Bomber Worm,Gusano Bombardero Globo
+unit.p4_balloon_bomber_worm.desc,Drops bombs on ground units. Only Shooters can hit it,Suelta bombas sobre unidades terrestres. Solo los Tiradores lo alcanzan
+unit.p5_laser_blade_worm.name,Laser Blade Worm,Gusano Espada Láser
+unit.p5_laser_blade_worm.desc,Fast dash and laser sword,Carrera veloz y espada láser
+unit.p5_mecha_worm.name,Mecha Worm,Gusano Mecha
+unit.p5_mecha_worm.desc,Piloted mech walker with the highest HP,Mecha caminante pilotado con la mayor vida
+unit.p5_time_medic_worm.name,Time Medic Worm,Gusano Médico del Tiempo
+unit.p5_time_medic_worm.desc,Hover drone heals nearby allies {0}% max HP per second,Un dron flotante cura {0}% de la vida máxima por segundo a los aliados cercanos
+enemy.e1_ant_clubber.name,Ant Clubber,Hormiga Garrotera
+enemy.e1_ant_clubber.desc,Rushes the nearest unit,Embiste a la unidad más cercana
+enemy.e1_ant_spitter.name,Ant Spitter,Hormiga Escupidora
+enemy.e1_ant_spitter.desc,Spits acid from range,Escupe ácido desde lejos
+enemy.e1_stone_beetle.name,Stone Beetle,Escarabajo de Piedra
+enemy.e1_stone_beetle.desc,"Rock shell, slow","Caparazón de roca, lento"
+enemy.e2_scarab_soldier.name,Scarab Soldier,Soldado Escarabajo
+enemy.e2_scarab_soldier.desc,Gold armor and a curved blade,Armadura dorada y hoja curva
+enemy.e2_locust_archer.name,Locust Archer,Langosta Arquera
+enemy.e2_locust_archer.desc,Jumps back after shooting,Salta hacia atrás tras disparar
+enemy.e2_mummy_moth.name,Mummy Moth,Polilla Momia
+enemy.e2_mummy_moth.desc,Heals allies with bandage wraps,Cura a sus aliados con vendas
+enemy.e3_beetle_knight.name,Beetle Knight,Escarabajo Caballero
+enemy.e3_beetle_knight.desc,Lance charge,Carga con lanza
+enemy.e3_dung_catapult.name,Dung Catapult,Catapulta de Estiércol
+enemy.e3_dung_catapult.desc,"Long range, targets the highest-HP unit","Largo alcance, apunta a la unidad con más vida"
+enemy.e3_hornet_scout.name,Hornet Scout,Avispón Explorador
+enemy.e3_hornet_scout.desc,Flies over fighters,Vuela sobre los luchadores
+enemy.e4_cog_roach.name,Cog Roach,Cucaracha Engranaje
+enemy.e4_cog_roach.desc,Fast clockwork rusher,Embestidor mecánico veloz
+enemy.e4_spark_fly.name,Spark Fly,Mosca Chispa
+enemy.e4_spark_fly.desc,Shock hits chain to 2 nearby units,Las descargas saltan a 2 unidades cercanas
+enemy.e4_clank_crab.name,Clank Crab,Cangrejo Clank
+enemy.e4_clank_crab.desc,Steam shell with frontal armor,Caparazón de vapor con armadura frontal
+enemy.e5_laser_bug.name,Laser Bug,Bicho Láser
+enemy.e5_laser_bug.desc,Piercing beam,Rayo penetrante
+enemy.e5_drone_fly.name,Drone Fly,Mosca Dron
+enemy.e5_drone_fly.desc,"Fast, low HP, targets Support units","Veloz, poca vida, ataca a las unidades de Apoyo"
+enemy.e5_mecha_beetle.name,Mecha Beetle,Escarabajo Mecha
+enemy.e5_mecha_beetle.desc,The toughest of all enemies,El más duro de todos los enemigos
+boss.b1_rexy.name,Rexy the T-Rex,Rexy el T-Rex
+boss.b1_rexy.desc,Stomp stuns allies in front. Roars at half HP,Su pisotón aturde a los aliados de enfrente. Ruge a media vida
+boss.b2_pharaoh_scarab.name,Pharaoh Scarab,Faraón Escarabajo
+boss.b2_pharaoh_scarab.desc,Summons Scarab Soldiers. Sandstorm at half HP,Invoca Soldados Escarabajo. Tormenta de arena a media vida
+boss.b3_sir_sizzle.name,Sir Sizzle the Dragon,Sir Sizzle el Dragón
+boss.b3_sir_sizzle.desc,Fire breath over the lane. Takes flight at half HP,Aliento de fuego sobre el carril. Alza el vuelo a media vida
+boss.b4_clockwork_queen.name,The Clockwork Queen,La Reina Mecánica
+boss.b4_clockwork_queen.desc,Steam bursts slow and damage. Spawns Cog Roaches at half HP,Ráfagas de vapor ralentizan y dañan. Crea Cucarachas Engranaje a media vida
+boss.b5_count_magpie_3000.name,Count Magpie 3000,Count Magpie 3000
+boss.b5_count_magpie_3000.desc,Steals a hero power. Teleports and drops shiny bombs at half HP,Roba un poder del héroe. Se teletransporta y suelta bombas brillantes a media vida
+quest.win_battles.name,Win {0} battles,Gana {0} batallas
+quest.use_power.name,Use a hero power {0} times,Usa un poder del héroe {0} veces
+quest.spawn_units.name,Spawn {0} units,Lanza {0} unidades
+quest.progress,{0} / {1},{0} / {1}
+quest.done,Done!,¡Listo!
+ads.double_coins.name,Double Coins,Monedas Dobles
+ads.double_coins.desc,x{0} Coins from this battle,x{0} Monedas de esta batalla
+ads.food_boost.name,Food Boost,Impulso de Comida
+ads.food_boost.desc,Start the battle with +{0}% Food,Empieza la batalla con +{0}% de Comida
+ads.second_wind.name,Second Wind,Segundo Aire
+ads.second_wind.desc,Retry from where you lost with base HP restored to {0}%,Reintenta desde donde perdiste con la vida de la base al {0}%
+ads.bonus_capsule.name,Bonus Capsule,Cápsula Extra
+ads.bonus_capsule.desc,{0} extra Time Capsule,{0} Cápsula del Tiempo extra
+ads.double_farm.name,Double Farm,Granja Doble
+ads.double_farm.desc,x{0} on this Worm Farm claim,x{0} en este cobro de la Granja de Gusanos
+ads.reward_granted,Reward received!,¡Recompensa recibida!

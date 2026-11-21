@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "rewarded_only": true,
+  "_comment": "Remote-config style switches (spec 7.1). Reward amounts are in balance.json ads. Production ids go in the untracked ads.prod.json.",
+  "placements": [
+    {
+      "id": "double_coins",
+      "enabled": true,
+      "where": "victory",
+      "name_key": "ads.double_coins.name",
+      "desc_key": "ads.double_coins.desc",
+      "desc_args": [["balance.ads.double_coins_mult", 1]]
+    },
+    {
+      "id": "food_boost",
+      "enabled": true,
+      "where": "prebattle",
+      "name_key": "ads.food_boost.name",
+      "desc_key": "ads.food_boost.desc",
+      "desc_args": [["balance.ads.food_boost_fraction", 100]]
+    },
+    {
+      "id": "second_wind",
+      "enabled": true,
+      "where": "defeat",
+      "name_key": "ads.second_wind.name",
+      "desc_key": "ads.second_wind.desc",
+      "desc_args": [["balance.ads.second_wind_base_hp_fraction", 100]]
+    },
+    {
+      "id": "bonus_capsule",
+      "enabled": true,
+      "where": "shop_home",
+      "name_key": "ads.bonus_capsule.name",
+      "desc_key": "ads.bonus_capsule.desc",
+      "desc_args": [["balance.ads.bonus_capsule_count", 1]]
+    },
+    {
+      "id": "double_farm",
+      "enabled": true,
+      "where": "offline_claim",
+      "name_key": "ads.double_farm.name",
+      "desc_key": "ads.double_farm.desc",
+      "desc_args": [["balance.ads.double_farm_mult", 1]]
+    }
+  ],
+  "debug_test_ids": {
+    "verify_at_build_time": true,
+    "app_id_android": "ca-app-pub-3940256099942544~3347511713",
+    "rewarded_android": "ca-app-pub-3940256099942544/5224354917"
+  }
+}
