@@ -57,17 +57,19 @@ ROLE_ENEMY2 = {"fighter": "e2_scarab_soldier", "shooter": "e2_locust_archer", "s
 TUNING2 = {
     "duration_base": 50.0,
     "duration_step": 5.0,
-    "rate_base": 1.5,
-    "rate_step": 0.1,
+    "rate_base": 6.5,
+    "rate_step": -0.3,
     "first_t": 6.0,
     # Role shares per stage (fighter, shooter, support). Era 2 has no enemy heavy; the Mummy Moth heals, so it
     # shows up from stage 3 in small numbers.
     "mix": {1: (0.7, 0.3, 0.0), 2: (0.6, 0.4, 0.0), 3: (0.5, 0.35, 0.15), 4: (0.45, 0.35, 0.2), 5: (0.45, 0.35, 0.2),
             6: (0.4, 0.4, 0.2), 7: (0.4, 0.4, 0.2), 8: (0.4, 0.35, 0.25), 9: (0.4, 0.35, 0.25)},
-    "boss_extra_budget": 400.0,
-    "boss_extra_t": 40.0,
+    "boss_t": 41.0,            # when the Pharaoh enters (main difficulty lever of stage 10)
+    "boss_pre_budget": 300.0,  # Food spent on the two opening bursts before the boss
+    "boss_extra_budget": 0.0,
+    "boss_extra_dt": 25.0,     # seconds after the boss for the first late burst
     # Per-stage budget multiplier (fine tuning knob, same idea as Era 1 TUNING["scale"]).
-    "scale": {"1": 1.0, "2": 1.0, "3": 1.0, "4": 1.0, "5": 1.0, "6": 1.0, "7": 1.0, "8": 1.0, "9": 1.0},
+    "scale": {"1": 0.84, "2": 0.94, "3": 0.787, "4": 0.78, "5": 1.15, "6": 0.702, "7": 0.787, "8": 1.238, "9": 1.387},
     # Sand patches (rule from stage 3): list of (x, width) in lane px (lane = 1000). Placement knob: patches sit in
     # the middle of the lane where the armies meet, so they slow the front lines of both sides.
     "patches": {3: [(420, 160)], 4: [(380, 140), (600, 140)], 5: [(330, 150), (560, 150)],
@@ -215,10 +217,20 @@ def make_waves2(s):
     duration = TUNING2["duration_base"] + TUNING2["duration_step"] * (s - 1)
     rate = TUNING2["rate_base"] + TUNING2["rate_step"] * (s - 1)
     if s == 10:
-        waves = [{"t": 3.0, "boss": "b2_pharaoh_scarab"}]
+        # Opening bursts first (the Pharaoh's summons never stop, so the player needs time to build an army),
+        # then the Pharaoh at boss_t with its escorts, then late bursts. boss_t is the main difficulty lever.
+        waves = []
+        pre = TUNING2["boss_pre_budget"]
+        for t, role, share in ((6.0, "fighter", 0.5), (6.0 + TUNING2["boss_t"] / 2.0, "shooter", 0.5)):
+            e = ROLE_ENEMY2[role]
+            cnt = max(1, int(round(pre * share / ENEMIES2[e]["cost"])))
+            waves.append({"t": round(t, 1), "enemy": e, "count": cnt, "interval": 1.5})
+        waves.append({"t": TUNING2["boss_t"], "boss": "b2_pharaoh_scarab"})
         extra = TUNING2["boss_extra_budget"]
-        t = TUNING2["boss_extra_t"]
+        t = TUNING2["boss_t"] + TUNING2["boss_extra_dt"]
         for role, share in (("fighter", 0.4), ("shooter", 0.3), ("fighter", 0.3)):
+            if extra <= 0.0:
+                break
             e = ROLE_ENEMY2[role]
             cnt = max(1, int(round(extra * share / ENEMIES2[e]["cost"])))
             waves.append({"t": round(t, 1), "enemy": e, "count": cnt, "interval": 2.0})

@@ -639,42 +639,42 @@
    "era": 2,
    "index": 1,
    "enemy_base_hp": 2500.0,
-   "food_budget": 600,
+   "food_budget": 2175,
    "waves": [
     {
      "t": 6.0,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 4,
      "interval": 1.5
     },
     {
      "t": 14.8,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 3,
      "interval": 2.0
     },
     {
      "t": 23.6,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 4,
      "interval": 1.5
     },
     {
      "t": 32.4,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 6,
      "interval": 1.5
     },
     {
      "t": 41.2,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 3,
      "interval": 2.0
     },
     {
      "t": 50.0,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 6,
      "interval": 1.5
     }
    ],
@@ -694,48 +694,48 @@
    "era": 2,
    "index": 2,
    "enemy_base_hp": 2650.0,
-   "food_budget": 712,
+   "food_budget": 2512,
    "waves": [
     {
      "t": 6.0,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 4,
      "interval": 1.5
     },
     {
      "t": 14.2,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 3,
      "interval": 2.0
     },
     {
      "t": 22.3,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 4,
      "interval": 1.5
     },
     {
      "t": 30.5,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 6,
      "interval": 1.5
     },
     {
      "t": 38.7,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 3,
      "interval": 2.0
     },
     {
      "t": 46.8,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 6,
      "interval": 1.5
     },
     {
      "t": 55.0,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 3,
      "interval": 2.0
     }
    ],
@@ -755,48 +755,48 @@
    "era": 2,
    "index": 3,
    "enemy_base_hp": 2800.0,
-   "food_budget": 825,
+   "food_budget": 2212,
    "waves": [
     {
      "t": 6.0,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 3,
      "interval": 1.5
     },
     {
      "t": 15.0,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 3,
      "interval": 2.0
     },
     {
      "t": 24.0,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 3,
      "interval": 1.5
     },
     {
      "t": 33.0,
      "enemy": "e2_mummy_moth",
-     "count": 1,
+     "count": 2,
      "interval": 3.0
     },
     {
      "t": 42.0,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 5,
      "interval": 1.5
     },
     {
      "t": 51.0,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 4,
      "interval": 2.0
     },
     {
      "t": 60.0,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 4,
      "interval": 1.5
     }
    ],
@@ -822,54 +822,54 @@
    "era": 2,
    "index": 4,
    "enemy_base_hp": 2950.0,
-   "food_budget": 937,
+   "food_budget": 2287,
    "waves": [
     {
      "t": 6.0,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 3,
      "interval": 1.5
     },
     {
      "t": 14.4,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 2,
      "interval": 2.0
     },
     {
      "t": 22.9,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 3,
      "interval": 1.5
     },
     {
      "t": 31.3,
      "enemy": "e2_mummy_moth",
-     "count": 1,
+     "count": 3,
      "interval": 3.0
     },
     {
      "t": 39.7,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 4,
      "interval": 1.5
     },
     {
      "t": 48.1,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 2,
      "interval": 2.0
     },
     {
      "t": 56.6,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 4,
      "interval": 1.5
     },
     {
      "t": 65.0,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 3,
      "interval": 2.0
     }
    ],
@@ -899,54 +899,54 @@
    "era": 2,
    "index": 5,
    "enemy_base_hp": 3100.0,
-   "food_budget": 1012,
+   "food_budget": 3412,
    "waves": [
     {
      "t": 6.0,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 4,
      "interval": 1.5
     },
     {
      "t": 15.1,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 3,
      "interval": 2.0
     },
     {
      "t": 24.3,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 5,
      "interval": 1.5
     },
     {
      "t": 33.4,
      "enemy": "e2_mummy_moth",
-     "count": 1,
+     "count": 4,
      "interval": 3.0
     },
     {
      "t": 42.6,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 6,
      "interval": 1.5
     },
     {
      "t": 51.7,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 4,
      "interval": 2.0
     },
     {
      "t": 60.9,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 6,
      "interval": 1.5
     },
     {
      "t": 70.0,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 4,
      "interval": 2.0
     }
    ],
@@ -976,24 +976,24 @@
    "era": 2,
    "index": 6,
    "enemy_base_hp": 3250.0,
-   "food_budget": 1237,
+   "food_budget": 2062,
    "waves": [
     {
      "t": 6.0,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 2,
      "interval": 1.5
     },
     {
      "t": 14.6,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 2,
      "interval": 2.0
     },
     {
      "t": 23.2,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 3,
      "interval": 1.5
     },
     {
@@ -1005,7 +1005,7 @@
     {
      "t": 40.5,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 4,
      "interval": 1.5
     },
     {
@@ -1017,7 +1017,7 @@
     {
      "t": 57.8,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 4,
      "interval": 1.5
     },
     {
@@ -1029,7 +1029,7 @@
     {
      "t": 75.0,
      "enemy": "e2_locust_archer",
-     "count": 2,
+     "count": 3,
      "interval": 2.0
     }
    ],
@@ -1063,24 +1063,24 @@
    "era": 2,
    "index": 7,
    "enemy_base_hp": 3400.0,
-   "food_budget": 1387,
+   "food_budget": 2400,
    "waves": [
     {
      "t": 6.0,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 3,
      "interval": 1.5
     },
     {
      "t": 15.2,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 2,
      "interval": 2.0
     },
     {
      "t": 24.5,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 3,
      "interval": 1.5
     },
     {
@@ -1092,31 +1092,31 @@
     {
      "t": 43.0,
      "enemy": "e2_scarab_soldier",
-     "count": 1,
+     "count": 4,
      "interval": 1.5
     },
     {
      "t": 52.2,
      "enemy": "e2_locust_archer",
-     "count": 2,
+     "count": 3,
      "interval": 2.0
     },
     {
      "t": 61.5,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 4,
      "interval": 1.5
     },
     {
      "t": 70.8,
      "enemy": "e2_mummy_moth",
-     "count": 1,
+     "count": 2,
      "interval": 3.0
     },
     {
      "t": 80.0,
      "enemy": "e2_locust_archer",
-     "count": 2,
+     "count": 3,
      "interval": 2.0
     }
    ],
@@ -1150,66 +1150,66 @@
    "era": 2,
    "index": 8,
    "enemy_base_hp": 3550.0,
-   "food_budget": 1500,
+   "food_budget": 3750,
    "waves": [
     {
      "t": 6.0,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 4,
      "interval": 1.5
     },
     {
      "t": 14.8,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 2,
      "interval": 2.0
     },
     {
      "t": 23.6,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 5,
      "interval": 1.5
     },
     {
      "t": 32.3,
      "enemy": "e2_mummy_moth",
-     "count": 1,
+     "count": 3,
      "interval": 3.0
     },
     {
      "t": 41.1,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 5,
      "interval": 1.5
     },
     {
      "t": 49.9,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 3,
      "interval": 2.0
     },
     {
      "t": 58.7,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 6,
      "interval": 1.5
     },
     {
      "t": 67.4,
      "enemy": "e2_mummy_moth",
-     "count": 2,
+     "count": 3,
      "interval": 3.0
     },
     {
      "t": 76.2,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 3,
      "interval": 2.0
     },
     {
      "t": 85.0,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 4,
      "interval": 2.0
     }
    ],
@@ -1243,66 +1243,66 @@
    "era": 2,
    "index": 9,
    "enemy_base_hp": 3699.9999999999995,
-   "food_budget": 1612,
+   "food_budget": 4125,
    "waves": [
     {
      "t": 6.0,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 5,
      "interval": 1.5
     },
     {
      "t": 15.3,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 2,
      "interval": 2.0
     },
     {
      "t": 24.7,
      "enemy": "e2_scarab_soldier",
-     "count": 2,
+     "count": 6,
      "interval": 1.5
     },
     {
      "t": 34.0,
      "enemy": "e2_mummy_moth",
-     "count": 1,
+     "count": 3,
      "interval": 3.0
     },
     {
      "t": 43.3,
      "enemy": "e2_scarab_soldier",
-     "count": 3,
+     "count": 6,
      "interval": 1.5
     },
     {
      "t": 52.7,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 3,
      "interval": 2.0
     },
     {
      "t": 62.0,
      "enemy": "e2_scarab_soldier",
-     "count": 3,
+     "count": 6,
      "interval": 1.5
     },
     {
      "t": 71.3,
      "enemy": "e2_mummy_moth",
-     "count": 1,
+     "count": 4,
      "interval": 3.0
     },
     {
      "t": 80.7,
      "enemy": "e2_locust_archer",
-     "count": 2,
+     "count": 3,
      "interval": 2.0
     },
     {
      "t": 90.0,
      "enemy": "e2_locust_archer",
-     "count": 1,
+     "count": 4,
      "interval": 2.0
     }
    ],
@@ -1336,29 +1336,23 @@
    "era": 2,
    "index": 10,
    "enemy_base_hp": 3850.0,
-   "food_budget": 412,
+   "food_budget": 262,
    "waves": [
     {
-     "t": 3.0,
-     "boss": "b2_pharaoh_scarab"
-    },
-    {
-     "t": 40.0,
+     "t": 6.0,
      "enemy": "e2_scarab_soldier",
      "count": 2,
-     "interval": 2.0
+     "interval": 1.5
     },
     {
-     "t": 52.0,
+     "t": 26.5,
      "enemy": "e2_locust_archer",
      "count": 1,
-     "interval": 2.0
+     "interval": 1.5
     },
     {
-     "t": 64.0,
-     "enemy": "e2_scarab_soldier",
-     "count": 2,
-     "interval": 2.0
+     "t": 41.0,
+     "boss": "b2_pharaoh_scarab"
     }
    ],
    "rule": {

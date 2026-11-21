@@ -32,7 +32,7 @@
       "desc_args": [],
       "telegraph": {"id": "summon", "enemy": "e2_scarab_soldier", "count": 3},
       "phase2": {"id": "sandstorm", "slow_fraction": 0.3},
-      "escorts": [{"enemy": "e2_scarab_soldier", "count": 3}, {"enemy": "e2_locust_archer", "count": 2}],
+      "escorts": [{"enemy": "e2_scarab_soldier", "count": 1}, {"enemy": "e2_locust_archer", "count": 1}],
       "proposed": true,
       "proposed_fields": ["phase2.slow_fraction", "escorts", "base stats"]
     },

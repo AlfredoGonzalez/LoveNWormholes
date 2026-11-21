@@ -25,6 +25,13 @@ const TIME_LIMIT := 480.0   # seconds of sim time; a battle still running then c
 const SQUAD := ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"]
 const POWERS := ["squirm_slam", "apple_rain"]
 
+## Per-era overrides merged over PROFILES. In Era 2 the cards cost 1.5x (Bow Worm 112, Shield Bearer 225): a bot that
+## spends every Food on the cheapest card (Club Worm) never fields them, which is not how a normal player plays, so
+## the normal profile now sometimes waits for its best card (`save` = probability, `save_window` = seconds of income).
+const ERA_PROFILE_OVERRIDES := {
+	2: {"normal": {"save": 0.0}, "optimized": {"save_window": 2.5}},
+}
+
 ## Squad policy by era and profile (card order). Era 1: the three starting units. Era 2 (4 slots out of 6 units):
 ##   normal    fighter + shooter + heavy + support: cheap Club Worm, Bow Worm (Era 2 shooter, 0.8 s interval),
 ##             Shield Bearer (heavy, blocks 20% of ranged = counter to Locust Archers), Cobra Charmer (slow aura).
@@ -48,11 +55,11 @@ const ERA_POWERS := {
 ## uses the smart choice instead of a random affordable card.
 const PROFILES := {
 	"casual": {"progress": 0.5, "burrow_step": 0.15, "base_step": 0.15, "power_step": 0.0,
-			"react": 1.6, "jitter": 1.0, "skill": 0.45, "slam_min": 3, "slam_prob": 0.5, "rain_prob": 0.25, "save": false},
+			"react": 1.6, "jitter": 1.0, "skill": 0.45, "slam_min": 3, "slam_prob": 0.5, "rain_prob": 0.25, "save": 0.0},
 	"normal": {"progress": 1.0, "burrow_step": 0.30, "base_step": 0.30, "power_step": 0.25,
-			"react": 0.8, "jitter": 0.5, "skill": 0.85, "slam_min": 2, "slam_prob": 0.9, "rain_prob": 0.9, "save": false},
+			"react": 0.8, "jitter": 0.5, "skill": 0.85, "slam_min": 2, "slam_prob": 0.9, "rain_prob": 0.9, "save": 0.0},
 	"optimized": {"progress": 1.5, "burrow_step": 0.50, "base_step": 0.50, "power_step": 0.45,
-			"react": 0.35, "jitter": 0.2, "skill": 1.0, "slam_min": 2, "slam_prob": 1.0, "rain_prob": 1.0, "save": true},
+			"react": 0.35, "jitter": 0.2, "skill": 1.0, "slam_min": 2, "slam_prob": 1.0, "rain_prob": 1.0, "save": 1.0},
 }
 
 
@@ -140,6 +147,7 @@ class Bot extends RefCounted:
 			return -1
 		if rng.randf() > float(p["skill"]):
 			return ready[rng.randi() % ready.size()]
+		var short_window := float(p.get("save_window", 1.5))
 		var best := -1
 		var best_score := -1.0e9
 		var best_all := -1
@@ -173,12 +181,13 @@ class Bot extends RefCounted:
 			if i in ready and s > best_score:
 				best_score = s
 				best = i
-		if bool(p["save"]) and best != best_all and best_all >= 0:
-			# Wait for the best card when it is almost ready and food is nearly there.
+		if float(p["save"]) > 0.0 and best != best_all and best_all >= 0:
+			# Wait for the best card when it is almost ready and food is nearly there (with probability `save`).
 			var c: Dictionary = sim.cards[best_all]
 			var short := float(c["stats"]["cost"]) - sim.food
-			if float(c["cd"]) <= 1.5 and short <= sim.food_income * 1.5 and sim.food < sim.food_cap * 0.9:
-				return -1
+			if float(c["cd"]) <= 1.5 and short <= sim.food_income * short_window and sim.food < sim.food_cap * 0.9:
+				if float(p["save"]) >= 1.0 or rng.randf() < float(p["save"]):
+					return -1
 		return best
 
 
@@ -274,7 +283,7 @@ func _play_stage(era: int, stage_index: int, prof: String, runs: int, base_seed:
 	for r in runs:
 		var seed_value := base_seed * 1000003 + n * 7919 + r * 104729 + prof.hash() % 9973
 		var sim := BattleSim.new(setup)
-		var bot := Bot.new(PROFILES[prof], seed_value)
+		var bot := Bot.new(_profile(era, prof), seed_value)
 		while sim.result == "" and sim.time < TIME_LIMIT:
 			bot.act(sim)
 			sim.tick()
@@ -284,6 +293,12 @@ func _play_stage(era: int, stage_index: int, prof: String, runs: int, base_seed:
 			res["dur"] += sim.time
 			res["hp"] += sim.player_base_hp / sim.player_base_max
 	return res
+
+
+static func _profile(era: int, prof: String) -> Dictionary:
+	var p: Dictionary = (PROFILES[prof] as Dictionary).duplicate()
+	p.merge((ERA_PROFILE_OVERRIDES.get(era, {}) as Dictionary).get(prof, {}), true)
+	return p
 
 
 static func _rate(r: Dictionary) -> float:
