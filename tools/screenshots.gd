@@ -30,6 +30,11 @@ func _initialize() -> void:
 		["capsules", {"from": "home"}, 4],
 		["relics", {}, 4, "relics"],
 		["consent", {}, 3],
+		["story", {"seq": "intro", "next": "home"}, 3],
+		["story", {"seq": "era_5_open", "next": "home"}, 3],
+		["credits", {"from": "home"}, 3],
+		["battle", {"era": 1, "stage": 1, "squad": ["p1_club_worm", "p1_slinger_worm"], "powers": ["squirm_slam", "apple_rain"]}, 3, "tutorial_food"],
+		["battle", {"era": 1, "stage": 1, "squad": ["p1_club_worm", "p1_slinger_worm"], "powers": ["squirm_slam", "apple_rain"]}, 3, "tutorial_spawn"],
 	]
 	var n := 0
 	for sh in shots:
@@ -39,11 +44,22 @@ func _initialize() -> void:
 					Game.economy.settle_battle(1, st, true, 2, 1)
 				Game.economy.add("gems", 300)
 				Game.economy.add("capsules", 12)
+			elif str(sh[3]).begins_with("tutorial"):   # arm the first-battle tutorial (the intro does it in the game)
+				Game.save.profile["progress"]["highest_stage_cleared"] = {}   # earlier shots cleared the campaign
+				Story.mark_seen(Game.save.profile, "intro")
 			elif sh[3] == "relics":
 				Capsules.new(Game.economy).open_many(12)
 				Game.economy.add("chrono_dust", 80)
 		Game.nav.go(sh[0], sh[1])
-		if sh[0] == "battle":
+		if sh[0] == "battle" and sh.size() > 3 and str(sh[3]).begins_with("tutorial"):
+			var tb = Game.nav.current
+			tb.step(0.0)
+			tb.tutorial.overlay.advance.emit()   # welcome -> food
+			tb.step(0.0)
+			if sh[3] == "tutorial_spawn":
+				tb.tutorial.overlay.advance.emit()
+				tb.step(0.0)
+		elif sh[0] == "battle":
 			var b = Game.nav.current
 			for i in 3:
 				b.press_card(i)

@@ -44,6 +44,10 @@ func _now() -> float:
 
 func _ready() -> void:
 	_profile = Game.save.profile
+	if Story.ending_pending(_profile):   # game_completed and the ending comic not seen yet: play it, then back here
+		var r := Story.route(_profile, "ending", "home")
+		Game.nav.go.call_deferred(r[0], r[1])
+		return
 	next_stage = Progress.next_stage(_profile)
 	_build()
 	_connect_signals()

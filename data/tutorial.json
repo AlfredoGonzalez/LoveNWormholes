@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "_comment": "Guided first battles (spec 9.2), stages 1-1..1-3. Presentation only: the overlay never touches BattleSim. kind: info (tap to continue) | tap_card (wait for a spawn) | tap_power (wait for a cast). target: none | card0 | power0 | cards | powers | food | enemy_base | speed | pause. hold: freeze the sim clock while shown. needs: card_ready | power_ready_enemy.",
+  "steps": [
+    {"id": "welcome", "stage": "1-1", "kind": "info", "target": "none", "hold": true, "text_key": "tut.welcome"},
+    {"id": "food", "stage": "1-1", "kind": "info", "target": "food", "hold": true, "text_key": "tut.food"},
+    {"id": "spawn", "stage": "1-1", "kind": "tap_card", "target": "card0", "hold": true, "needs": "card_ready", "text_key": "tut.spawn"},
+    {"id": "power", "stage": "1-1", "kind": "tap_power", "target": "power0", "hold": true, "needs": "power_ready_enemy", "text_key": "tut.power"},
+    {"id": "goal", "stage": "1-1", "kind": "info", "target": "enemy_base", "hold": false, "seconds": 7.0, "text_key": "tut.goal"},
+    {"id": "mix", "stage": "1-2", "kind": "info", "target": "cards", "hold": true, "text_key": "tut.mix"},
+    {"id": "speed", "stage": "1-2", "kind": "info", "target": "speed", "hold": true, "text_key": "tut.speed"},
+    {"id": "pause", "stage": "1-3", "kind": "info", "target": "pause", "hold": true, "text_key": "tut.pause"},
+    {"id": "recharge", "stage": "1-3", "kind": "info", "target": "powers", "hold": true, "text_key": "tut.recharge"}
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "_comment": "Comic panels (spec 3, 9.2). `art` is looked up in assets/manifest.json (SpriteManifest); without it the panel shows the colour + caption placeholder. text_key lives in i18n/strings_story.tsv. Era sequences: era_<n>_open / era_<n>_close (after the boss).",
+  "order": ["intro", "era_1_open", "era_1_close", "era_2_open", "era_2_close", "era_3_open", "era_3_close", "era_4_open", "era_4_close", "era_5_open", "era_5_close", "ending"],
+  "sequences": {
+    "intro": {"panels": [
+      {"art": "story_intro_1", "color": "#8FBF6A", "caption": "Garden picnic: Squirmy + Wormina", "text_key": "story.intro.1"},
+      {"art": "story_intro_2", "color": "#F2B632", "caption": "The glowing Chrono Core", "text_key": "story.intro.2"},
+      {"art": "story_intro_3", "color": "#15707A", "caption": "FLASH! Portal + five shards", "text_key": "story.intro.3"}
+    ]},
+    "era_1_open": {"panels": [
+      {"art": "story_era1_open_1", "color": "#8FBF6A", "caption": "Dino Valley: Squirmy lands", "text_key": "story.era1.open.1"}
+    ]},
+    "era_1_close": {"panels": [
+      {"art": "story_era1_close_1", "color": "#F28C28", "caption": "Rexy down, shard + daisy petal", "text_key": "story.era1.close.1"}
+    ]},
+    "era_2_open": {"panels": [
+      {"art": "story_era2_open_1", "color": "#E3C16F", "caption": "Scarab Sands", "text_key": "story.era2.open.1"}
+    ]},
+    "era_2_close": {"panels": [
+      {"art": "story_era2_close_1", "color": "#E3C16F", "caption": "Pharaoh Scarab + Wormina's note", "text_key": "story.era2.close.1"}
+    ]},
+    "era_3_open": {"panels": [
+      {"art": "story_era3_open_1", "color": "#9AA7B8", "caption": "Kingdom of Crumbs", "text_key": "story.era3.open.1"}
+    ]},
+    "era_3_close": {"panels": [
+      {"art": "story_era3_close_1", "color": "#C8453B", "caption": "Sir Sizzle sniffles, shard", "text_key": "story.era3.close.1"}
+    ]},
+    "era_4_open": {"panels": [
+      {"art": "story_era4_open_1", "color": "#B98A5B", "caption": "Steam City", "text_key": "story.era4.open.1"}
+    ]},
+    "era_4_close": {"panels": [
+      {"art": "story_era4_close_1", "color": "#B98A5B", "caption": "Clockwork Queen + Wormina's voice", "text_key": "story.era4.close.1"}
+    ]},
+    "era_5_open": {"panels": [
+      {"art": "story_era5_open_1", "color": "#2F6DB5", "caption": "Neon Orbit + Count Magpie", "text_key": "story.era5.open.1"}
+    ]},
+    "era_5_close": {"panels": [
+      {"art": "story_era5_close_1", "color": "#2F6DB5", "caption": "Count Magpie 3000 falls", "text_key": "story.era5.close.1"}
+    ]},
+    "ending": {"panels": [
+      {"art": "story_end_1", "color": "#F2B632", "caption": "Core reassembled", "text_key": "story.end.1"},
+      {"art": "story_end_2", "color": "#F4B6C8", "caption": "Wormina returns", "text_key": "story.end.2"},
+      {"art": "story_end_3", "color": "#8FBF6A", "caption": "Back in the garden", "text_key": "story.end.3"},
+      {"art": "story_end_4", "color": "#15707A", "caption": "A sixth socket glows", "text_key": "story.end.4"}
+    ]}
+  }
+}

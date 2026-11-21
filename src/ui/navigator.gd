@@ -20,6 +20,8 @@ const SCREENS := {
 	"shop": "res://src/meta/shop_screen.gd",
 	"capsules": "res://src/meta/capsule_screen.gd",
 	"relics": "res://src/meta/relics_screen.gd",
+	"story": "res://src/meta/story_screen.gd",
+	"credits": "res://src/meta/credits_screen.gd",
 }
 
 var host: Control

@@ -83,7 +83,8 @@ func consent_state() -> String:
 
 
 func _on_play() -> void:
+	var dest := Story.route(Game.save.profile, "intro", "home")   # the intro comic plays once, after consent
 	if Game.consent.needs_prompt():
-		Game.nav.go("consent", {"next": "home"})
+		Game.nav.go("consent", {"next": dest[0], "next_params": dest[1]})
 	else:
-		Game.nav.go("home")
+		Game.nav.go(dest[0], dest[1])

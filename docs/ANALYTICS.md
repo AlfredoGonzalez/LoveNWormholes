@@ -22,7 +22,7 @@ recording so tests can assert on events.
 |---|---|---|---|
 | `session_start` | `first_session` (bool), `lang` | `Game.start_services` | App start |
 | `consent_set` (extra) | `state` (accepted / declined) | `ConsentService` | The player chooses or changes consent |
-| `tutorial_step` | `step`, `index` | helper `AnalyticsService.tutorial_step`; no caller until the tutorial screens exist | Each tutorial step |
+| `tutorial_step` | `step`, `index` | `tutorial_director.gd` via `AnalyticsService.tutorial_step` | Each tutorial step shown (`index` = position in `data/tutorial.json`); `step` = `skip` when the player skips it |
 | `stage_start` | `stage`, `squad`, `powers`, `tries`, `food_boost` | `battle_screen.gd` | A battle starts (not on a Second Wind resume) |
 | `stage_end` | `stage`, `result`, `duration`, `squad`, `tries`, `quit?` | `battle_screen.gd` | A battle ends or is quit |
 | `power_used` | `power`, `stage`, `time` | `battle_screen.gd` | A hero power is cast |

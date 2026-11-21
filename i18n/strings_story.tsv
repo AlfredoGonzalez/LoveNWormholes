@@ -1,0 +1,49 @@
+key	en	es
+story.title	Story	Historia
+story.next	Next	Siguiente
+story.continue	Continue	Continuar
+story.back	Back	Atrás
+story.progress	{0} / {1}	{0} / {1}
+story.intro.1	Squirmy and Wormina were having the most romantic picnic ever. Well, a dirt picnic. Worms have standards.	Squirmy y Wormina tenían el picnic más romántico del mundo. Bueno, un picnic de tierra. Los gusanos tienen sus estándares.
+story.intro.2	Then they found a glowing golden orb. Wormina: "Ooh, shiny! What does this button do?" Squirmy: "Wormina, no..."	Entonces encontraron una esfera dorada que brillaba. Wormina: "¡Ooh, brillante! ¿Para qué sirve este botón?" Squirmy: "Wormina, no..."
+story.intro.3	FLASH! Wormina vanished and the orb cracked into five shards. A time portal swallowed Squirmy. "WORMIIINAAA!"	¡FLASH! Wormina desapareció y la esfera se rompió en cinco fragmentos. Un portal del tiempo se tragó a Squirmy. "¡WORMIIINAAA!"
+story.era1.open.1	Dino Valley! Volcanoes, giant ferns and a very grumpy ant tribe. "Hi! Seen a pink worm with a daisy?" The ants had not.	¡Valle Dino! Volcanes, helechos gigantes y una tribu de hormigas muy gruñona. "¡Hola! ¿Han visto a una gusana rosa con una margarita?" Las hormigas no.
+story.era1.close.1	Rexy the T-Rex went down, tiny arms and all. The first shard glowed, and a daisy petal floated by. "She was here!"	Rexy el T-Rex cayó, con sus bracitos y todo. El primer fragmento brilló y un pétalo de margarita pasó flotando. "¡Estuvo aquí!"
+story.era2.open.1	Scarab Sands. Sand everywhere. Squirmy was now 30% sand, and a scarab legion was marching over the dunes.	Arenas Escarabajo. Arena por todas partes. Squirmy ya era 30% arena y una legión de escarabajos marchaba sobre las dunas.
+story.era2.close.1	Pharaoh Scarab handed over the shard. Wormina's note: "Don't touch the sphinx. I touched the sphinx. Love, W."	El Faraón Escarabajo entregó el fragmento. Nota de Wormina: "No toques la esfinge. Yo toqué la esfinge. Besos, W."
+story.era3.open.1	The Kingdom of Crumbs! Beetle knights, banners and windmills, and everything smelled like fresh bread. Squirmy was very hungry. And very determined.	¡El Reino de las Migajas! Caballeros escarabajo, estandartes y molinos, y todo olía a pan recién hecho. Squirmy tenía mucha hambre. Y mucha determinación.
+story.era3.close.1	Sir Sizzle sniffled and gave up the shard. "Your girlfriend taught me to toast marshmallows. I miss her."	Sir Sizzle sorbió la nariz y entregó el fragmento. "Tu novia me enseñó a tostar malvaviscos. La extraño."
+story.era4.open.1	Steam City: brass towers, screaming pipes and clockwork roaches who never say please. Squirmy brought manners anyway.	Ciudad Vapor: torres de latón, tuberías chillonas y cucarachas mecánicas que nunca dicen por favor. Squirmy trajo buenos modales de todos modos.
+story.era4.close.1	The Clockwork Queen powered down. Inside the gears, a tiny recording: "Hang in there, Squirmy!" He teared up. Just steam. Probably.	La Reina Mecánica se apagó. Entre los engranes, una grabación diminuta: "¡Aguanta, Squirmy!" Se le humedecieron los ojos. Es solo vapor. Seguro.
+story.era5.open.1	Neon Orbit. Floating platforms, stars, and a very shiny bird: Count Magpie, who had been stealing the shards for his collection.	Órbita Neón. Plataformas flotantes, estrellas y un pájaro muy brillante: Count Magpie, que robaba los fragmentos para su colección.
+story.era5.close.1	Count Magpie 3000 crashed into a pile of his own shiny things. "My collection!" he wailed. Squirmy grabbed the last shard.	Count Magpie 3000 se estrelló contra su montaña de cosas brillantes. "¡Mi colección!" lloriqueó. Squirmy tomó el último fragmento.
+story.end.1	Squirmy clicked the five shards into the Chrono Core. It hummed, it glowed, and it opened a portal home.	Squirmy encajó los cinco fragmentos en el Núcleo Crono. Zumbó, brilló y abrió un portal a casa.
+story.end.2	Wormina stepped out, daisy in her hair. "You came for me!" Squirmy: "Five eras. Sand in places I cannot explain. Worth it."	Wormina salió con la margarita en el pelo. "¡Viniste por mí!" Squirmy: "Cinco eras. Arena en lugares que no puedo explicar. Valió la pena."
+story.end.3	Back in the garden, the Core sat quietly. Wormina: "Can I touch just ONE more shiny thing?" Squirmy: "No."	De vuelta en el jardín, el Núcleo descansaba tranquilo. Wormina: "¿Puedo tocar UNA cosa brillante más?" Squirmy: "No."
+story.end.4	The Core blinked. A sixth socket began to glow. "Is that a new era?" To be continued...	El Núcleo parpadeó. Un sexto engarce empezó a brillar. "¿Eso es una era nueva?" Continuará...
+settings.story_replay	View story	Ver historia
+tut.welcome	Ants have invaded the valley! Your burrow is on the left. Theirs is on the right.	¡Las hormigas invadieron el valle! Tu madriguera está a la izquierda. La suya, a la derecha.
+tut.food	Food fills up by itself. Worms cost Food, so spend it wisely.	La Comida se rellena sola. Los gusanos cuestan Comida: gástala con cabeza.
+tut.spawn	Tap {0} to send it out!	¡Toca a {0} para mandarlo al frente!
+tut.power	An enemy is close. Tap {0} to smash it!	¡Hay un enemigo cerca! ¡Toca {0} para aplastarlo!
+tut.goal	Break the enemy base to win. Keep sending worms!	Rompe la base enemiga para ganar. ¡Sigue mandando gusanos!
+tut.mix	Different enemies need different worms. Mix your squad to handle them all.	Cada enemigo pide un gusano distinto. Mezcla tu escuadrón para vencerlos a todos.
+tut.speed	Too slow for you? Tap this to fight faster. You can switch back any time.	¿Muy lento? Toca aquí para pelear más rápido. Puedes volver en cualquier momento.
+tut.pause	Need a breather? Pause any time. The ants will wait, promise.	¿Necesitas respirar? Pausa cuando quieras. Las hormigas esperan, lo prometo.
+tut.recharge	Powers recharge after each use. Save them for the big moments.	Los poderes se recargan tras cada uso. Guárdalos para los momentos importantes.
+tut.got_it	Got it	Entendido
+tut.skip	Skip tutorial	Saltar tutorial
+credits.title	Credits	Créditos
+credits.studio	A game by am23studios	Un juego de am23studios
+credits.game	Love 'n Wormholes: Lost in Time	Love 'n Wormholes: Perdidos en el Tiempo
+credits.design_title	Design and code	Diseño y código
+credits.design	Alfredo and the am23studios team	Alfredo y el equipo de am23studios
+credits.art_title	Art	Arte
+credits.art	Placeholder art for now. Final illustrations coming soon.	Arte provisional por ahora. Las ilustraciones finales llegan pronto.
+credits.audio_title	Music and sound	Música y sonido
+credits.audio	Placeholder audio. See the list below for licensed files.	Audio provisional. Mira abajo la lista de archivos con licencia.
+credits.engine_title	Made with	Hecho con
+credits.engine	Godot Engine (MIT license)	Godot Engine (licencia MIT)
+credits.files_title	Asset licenses	Licencias de recursos
+credits.files_none	No third-party files yet.	Aún no hay archivos de terceros.
+credits.thanks	Thanks for playing! Worms of all eras salute you.	¡Gracias por jugar! Los gusanos de todas las eras te saludan.
