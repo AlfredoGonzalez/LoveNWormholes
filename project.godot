@@ -8,6 +8,10 @@ run/main_scene="res://src/main.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
 boot_splash/show_image=false
 
+[autoload]
+
+Game="*res://src/autoload/game.gd"
+
 [display]
 window/size/viewport_width=540
 window/size/viewport_height=960
