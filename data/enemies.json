@@ -180,7 +180,9 @@
       "name_key": "enemy.e5_laser_bug.name",
       "desc_key": "enemy.e5_laser_bug.desc",
       "flags": {},
-      "abilities": {"pierce": true},
+      "abilities": {"pierce": true, "pierce_fraction": 0.5},
+      "proposed": true,
+      "proposed_fields": ["abilities.pierce_fraction"],
       "overrides": {},
       "desc_args": []
     },
@@ -193,11 +195,11 @@
       "name_key": "enemy.e5_drone_fly.name",
       "desc_key": "enemy.e5_drone_fly.desc",
       "flags": {"air": true},
-      "abilities": {"target_priority": "support"},
+      "abilities": {"target_priority": "support", "hunts": true},
       "overrides": {"speed": 90, "hp": 55},
       "desc_args": [],
       "proposed": true,
-      "proposed_fields": ["overrides.speed", "overrides.hp"]
+      "proposed_fields": ["overrides.speed", "overrides.hp", "abilities.hunts"]
     },
     {
       "id": "e5_mecha_beetle",
@@ -208,7 +210,7 @@
       "name_key": "enemy.e5_mecha_beetle.name",
       "desc_key": "enemy.e5_mecha_beetle.desc",
       "flags": {},
-      "abilities": {},
+      "abilities": {"target": "highest_hp"},
       "overrides": {"hp": 450},
       "desc_args": [],
       "proposed": true,

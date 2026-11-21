@@ -81,6 +81,41 @@ if os.environ.get("GEN_TUNING2"):  # experiments: GEN_TUNING2='{"rate_base": 1.2
     TUNING2.update(json.loads(os.environ["GEN_TUNING2"]))
 
 
+# ---- Era 5 (Far Future: Neon Orbit): enemy ids/costs (cost = base role cost x 1.5^4 = x5.0625) -------------------
+# Era 5 has no enemy fighter or support: Laser Bug (shooter, piercing beam), Drone Fly (air, hunts Support) and
+# Mecha Beetle (heavy, targets the highest-HP unit). The drones force at least one shooter in the squad (spec 4.7).
+ENEMIES5 = {
+    "e5_laser_bug": {"role": "shooter", "cost": 379.6875},
+    "e5_drone_fly": {"role": "air", "cost": 607.5},
+    "e5_mecha_beetle": {"role": "heavy", "cost": 759.375},
+}
+ROLE_ENEMY5 = {"shooter": "e5_laser_bug", "air": "e5_drone_fly", "heavy": "e5_mecha_beetle"}
+TUNING5 = {
+    "duration_base": 50.0,
+    "duration_step": 5.0,
+    "rate_base": 6.5,
+    "rate_step": -0.3,
+    "first_t": 6.0,
+    # Role shares per stage (shooter, air, heavy). Drones from stage 2, heavies from stage 3.
+    "mix": {1: (1.0, 0.0, 0.0), 2: (0.7, 0.3, 0.0), 3: (0.5, 0.25, 0.25), 4: (0.4, 0.3, 0.3), 5: (0.4, 0.25, 0.35),
+            6: (0.35, 0.3, 0.35), 7: (0.35, 0.25, 0.4), 8: (0.3, 0.3, 0.4), 9: (0.3, 0.25, 0.45)},
+    "boss_t": 30.0,            # when Count Magpie 3000 enters
+    "boss_pre_budget": 760.0,  # Food spent on the opening bursts before the boss
+    "boss_extra_budget": 0.0,
+    "boss_extra_dt": 25.0,
+    # Per-stage budget multiplier (fine tuning knob, same idea as TUNING / TUNING2 "scale").
+    "scale": {"1": 2.72, "2": 2.46, "3": 1.82, "4": 2.15, "5": 2.0, "6": 2.1, "7": 2.3, "8": 2.25, "9": 2.4},
+    # Gravity wells (rule from stage 3): list of (x, width) in lane px (lane = 1000), x = left edge. Like the sand
+    # patches they sit where the armies meet; they bend the projectiles of BOTH sides, so they are not a difficulty lever.
+    "wells": {3: [(440, 120)], 4: [(380, 120), (600, 120)], 5: [(340, 120), (560, 120)],
+              6: [(280, 100), (460, 100), (640, 100)], 7: [(280, 110), (480, 110), (680, 110)],
+              8: [(250, 120), (450, 120), (650, 120)], 9: [(230, 120), (430, 120), (630, 120)],
+              10: [(300, 120), (520, 120), (730, 100)]},
+}
+if os.environ.get("GEN_TUNING5"):  # experiments: GEN_TUNING5='{"rate_base": 1.2, "scale": {"5": 1.1}}'
+    TUNING5.update(json.loads(os.environ["GEN_TUNING5"]))
+
+
 def win_coins(n):
     return int(round(BALANCE["rewards"]["win_coins_base"] * BALANCE["rewards"]["win_coins_growth"] ** (n - 1)))
 
@@ -166,7 +201,7 @@ def food_budget(waves):
     for w in waves:
         if "boss" in w:
             continue
-        total += {**ENEMIES, **ENEMIES2}[w["enemy"]]["cost"] * w["count"]
+        total += {**ENEMIES, **ENEMIES2, **ENEMIES5}[w["enemy"]]["cost"] * w["count"]
     return int(total)
 
 
@@ -428,6 +463,114 @@ def build_era34():
     return out
 
 
+def bursts_for5(s, budget, duration, first_t):
+    """Era 5: split `budget` into bursts of one role each. Returns [(t, role, share)]."""
+    f, sh, sup = TUNING5["mix"][s]   # (shooter, air, heavy)
+    mix_share = {"shooter": f, "air": sh, "heavy": sup}
+    k = 6 + s // 2
+    counts = {r: v * k for r, v in mix_share.items()}
+    whole = {r: int(math.floor(v)) for r, v in counts.items()}
+    for r, v in mix_share.items():
+        if v > 0:
+            whole[r] = max(1, whole[r])
+    rest = k - sum(whole.values())
+    order = sorted(counts, key=lambda r: -(counts[r] - math.floor(counts[r])))
+    for r in order:
+        if rest <= 0:
+            break
+        if counts[r] > 0:
+            whole[r] += 1
+            rest -= 1
+    roles = []
+    left = dict(whole)
+    pattern = ["shooter", "heavy", "shooter", "air"]
+    i = 0
+    while sum(left.values()) > 0:
+        r = pattern[i % len(pattern)]
+        if left[r] > 0:
+            roles.append(r)
+            left[r] -= 1
+        i += 1
+    k = len(roles)
+    gap = (duration - first_t) / max(1, k - 1) if k > 1 else 0.0
+    weights = [1.0 + 0.5 * i / max(1, k - 1) for i in range(k)]
+    role_w = {}
+    for i, r in enumerate(roles):
+        role_w[r] = role_w.get(r, 0.0) + weights[i]
+    msum = sum(v for r, v in mix_share.items() if r in role_w)
+    out = []
+    for i, r in enumerate(roles):
+        out.append((first_t + gap * i, r, budget * (mix_share[r] / msum) * weights[i] / role_w[r]))
+    return out
+
+
+def make_waves5(s):
+    duration = TUNING5["duration_base"] + TUNING5["duration_step"] * (s - 1)
+    rate = TUNING5["rate_base"] + TUNING5["rate_step"] * (s - 1)
+    if s == 10:
+        # Opening bursts (shooters, then heavies), then Count Magpie 3000 at boss_t with its escorts.
+        waves = []
+        pre = TUNING5["boss_pre_budget"]
+        for t, role, share in ((6.0, "shooter", 0.6), (6.0 + TUNING5["boss_t"] / 2.0, "heavy", 0.4)):
+            e = ROLE_ENEMY5[role]
+            cnt = max(1, int(round(pre * share / ENEMIES5[e]["cost"])))
+            waves.append({"t": round(t, 1), "enemy": e, "count": cnt, "interval": 2.0})
+        waves.append({"t": TUNING5["boss_t"], "boss": "b5_count_magpie_3000"})
+        extra = TUNING5["boss_extra_budget"]
+        t = TUNING5["boss_t"] + TUNING5["boss_extra_dt"]
+        for role, share in (("shooter", 0.4), ("air", 0.3), ("shooter", 0.3)):
+            if extra <= 0.0:
+                break
+            e = ROLE_ENEMY5[role]
+            cnt = max(1, int(round(extra * share / ENEMIES5[e]["cost"])))
+            waves.append({"t": round(t, 1), "enemy": e, "count": cnt, "interval": 2.5})
+            t += 12.0
+        return waves
+    income = BALANCE["battle"]["food_income_base"]
+    budget = rate * income * duration * float(TUNING5["scale"].get(str(s), 1.0))
+    waves = []
+    carry = 0.0
+    for t, role, share in bursts_for5(s, budget, duration, TUNING5["first_t"]):
+        e = ROLE_ENEMY5[role]
+        cost = ENEMIES5[e]["cost"]
+        cnt = max(1, int(round((share + carry) / cost)))
+        carry = share + carry - cnt * cost
+        interval = {"shooter": 2.0, "air": 2.5, "heavy": 4.0}[role]
+        waves.append({"t": round(t, 1), "enemy": e, "count": cnt, "interval": interval})
+    return waves
+
+
+def rule_for5(s):
+    if s < 3:
+        return {"type": "none"}
+    return {"type": "gravity_well", "wells": [{"x": x, "w": w} for x, w in TUNING5["wells"][s]]}
+
+
+def build_era5():
+    """Stages 5-1..5-10 (n = 41..50)."""
+    stages = []
+    for s in range(1, 11):
+        n = 40 + s
+        waves = make_waves5(s)
+        stages.append({
+            "id": "5-%d" % s,
+            "era": 5,
+            "index": s,
+            "enemy_base_hp": enemy_base_hp(n),
+            "food_budget": food_budget(waves),
+            "waves": waves,
+            "rule": rule_for5(s),
+            "rewards": {
+                "coins": win_coins(n),
+                "first_clear_gems": BALANCE["rewards"]["boss_first_clear_gems"] if s == 10 else BALANCE["rewards"]["first_clear_gems"],
+                "boss": s == 10,
+                "echo": s == BALANCE["campaign"]["echo_stage"],
+                "shard": False,
+            },
+        })
+    return stages
+
+
 def build():
     stages = []
     for s in range(1, 11):
@@ -469,7 +612,8 @@ def build():
             },
         })
     stages += build_era34()
-    return {"version": 1, "_comment": "Generated by tools/gen_stages.py (do not edit by hand). Eras 1-4.", "stages": stages}
+    stages.extend(build_era5())
+    return {"version": 1, "_comment": "Generated by tools/gen_stages.py (do not edit by hand). Eras 1-5.", "stages": stages}
 
 
 def main():

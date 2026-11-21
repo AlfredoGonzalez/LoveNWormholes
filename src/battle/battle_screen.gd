@@ -501,6 +501,16 @@ func _handle_event(e: Dictionary) -> void:
 				effects.add_puff(Vector2(bx, LANE_Y - 20.0), Color(0.8, 0.3, 0.9, 0.8))
 		"phase2":
 			effects.add_flash(Color(0.9, 0.1, 0.1), 0.6)
+		"teleport":   # Count Magpie 3000 hop (phase 2)
+			effects.add_puff(Vector2(_sx(float(e["x"])), LANE_Y - 20.0), Color(0.3, 0.9, 1.0, 0.8))
+			effects.add_puff(Vector2(_sx(float(e["to"])), LANE_Y - 20.0), Color(0.3, 0.9, 1.0, 0.8))
+		"bomb_drop":
+			var bdx := _sx(float(e["x"]))
+			var bdur := float(e.get("delay", 1.0))
+			effects.add_warning(Vector2(bdx, LANE_Y - 90.0), bdur, Rect2(bdx - 40.0 * _px_scale * 2.0, LANE_Y - 42.0, 80.0 * _px_scale * 2.0, 84.0))
+		"bomb_hit":
+			effects.add_ring(Vector2(_sx(float(e["x"])), LANE_Y), float(e.get("radius", 80.0)) * _px_scale, Color(1.0, 0.8, 0.2), 0.5)
+			effects.add_flash(Color(1.0, 0.9, 0.5), 0.15)
 
 
 ## At most one hit / base_hit sound per 80 ms of sim time so a crowd does not turn into noise.

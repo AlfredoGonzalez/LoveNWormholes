@@ -15,6 +15,7 @@ extends RefCounted
 ##   powers : Array of {id, cooldown, effect: Dictionary} (DataDB.power_params output), slot order
 ##   rule : stage era rule, {type: "none"} or {type: "sand_patch", patches: [{x, w}, ...]} (x = left edge, lane px)
 ##          or {type: "walls", walls: [{x, w, side}]} (Era 3) or {type: "steam_vent", vents: [{x, w}]} (Era 4)
+##          or {type: "gravity_well", wells: [{x, w}, ...]} (Era 5, same x/w convention)
 
 const PLAYER := 0
 const ENEMY := 1
@@ -48,6 +49,9 @@ var powers: Array = []         # {id, cooldown, effect, cd, stolen_t}
 var events: Array = []
 var rule: Dictionary = {"type": "none"}   # era rule of the stage (read by the view)
 var patches: Array = []        # sand patches as {x, w} (left edge and width in lane px); empty unless rule is sand_patch
+var wells: Array = []          # Era 5 gravity wells as {x, w} (left edge and width in lane px); empty unless rule is gravity_well
+var bombs: Array = []          # Count Magpie 3000 shiny bombs in flight: {x, t, delay, damage, radius}
+var _well_loss := 0.0          # projectile damage lost per well crossed (balance.json era_rules.gravity_well.damage_loss)
 var _sand_slow := 0.0          # speed fraction lost on a patch (balance.json era_rules.sand_patch.slow_fraction)
 var stats := {"kills": 0, "units_spawned": 0, "powers_used": 0, "player_losses": 0}
 
@@ -118,6 +122,10 @@ func _init(setup: Dictionary) -> void:
 		for pt in rule.get("patches", []):
 			patches.append({"x": float(pt["x"]), "w": float(pt["w"])})
 	_init_era34_rule()
+	if str(rule.get("type", "none")) == "gravity_well":
+		_well_loss = DataDB.bal_f("era_rules.gravity_well.damage_loss", 0.35)
+		for wl in rule.get("wells", []):
+			wells.append({"x": float(wl["x"]), "w": float(wl["w"])})
 	for p in setup.get("powers", []):
 		var pw: Dictionary = (p as Dictionary).duplicate(true)
 		pw["cd"] = 0.0
@@ -232,6 +240,7 @@ func tick() -> void:
 	_update_projectiles()
 	_update_hazards()
 	_boss_logic()
+	_update_bombs()
 	_cleanup()
 	_check_end()
 
@@ -391,9 +400,12 @@ func _walk(u: SimUnit, support: bool) -> void:
 func _pick_target(u: SimUnit) -> int:
 	var best: SimUnit = null
 	var best_score := -1.0e9
+	var hunt_role := _hunt_role(u)
 	for e in units:
 		if e.side == u.side or not e.alive():
 			continue
+		if hunt_role != "" and e.role != hunt_role:
+			continue   # Drone Fly: flies past everything while a Support is still on the field
 		if e.is_air and not _can_hit_air(u):
 			continue
 		var d := absf(e.x - u.x)
@@ -443,8 +455,11 @@ func _resolve_attack(u: SimUnit) -> void:
 	if u.ranged:
 		var tx := lane if (to_base and u.side == PLAYER) else (0.0 if to_base else t.x)
 		var travel := absf(tx - u.x) / _proj_speed
+		var bend := _wells_crossed(u.x, tx)
 		projectiles.append({"side": u.side, "x0": u.x, "x1": tx, "t": 0.0, "dur": maxf(0.05, travel),
-				"target": -2 if to_base else t.uid, "damage": raw, "role": u.role, "src": u.uid})
+				"target": -2 if to_base else t.uid, "damage": raw * pow(1.0 - _well_loss, float(bend)), "role": u.role, "src": u.uid,
+				"bend": bend, "reach": u.range_px,
+				"pierce": float(u.abilities.get("pierce_fraction", 0.5)) if bool(u.abilities.get("pierce", false)) else 0.0})
 		_emit("shot", {"uid": u.uid, "x": u.x})
 	else:
 		_apply_hit(u, t, to_base, raw)
@@ -499,6 +514,8 @@ func _update_projectiles() -> void:
 			var tgt := _find(int(p["target"]))
 			if tgt != null and tgt.alive():
 				_damage_unit(tgt, float(p["damage"]), src, true, true)
+				if float(p.get("pierce", 0.0)) > 0.0:
+					_pierce_beam(p, tgt, src)
 	projectiles = keep
 
 
@@ -580,6 +597,8 @@ func _boss_logic() -> void:
 					_sandstorm_boss = u.uid
 				"take_flight":
 					u.is_air = true
+				"teleport_bombs":
+					u.extra_cd = float(p2.get("bomb_interval_s", 5.0))
 			_emit("phase2", {"uid": u.uid, "id": str(p2.get("id", ""))})
 		_phase2_periodic(u, def)
 		u.telegraph_cd -= dt
@@ -591,6 +610,7 @@ func _boss_logic() -> void:
 			u.telegraph_cd = DataDB.bal_f("boss.telegraph_interval_s", 10.0)
 			u.telegraph_warn = 0.0
 			_boss_attack(u, def.get("telegraph", {}))
+		_boss_phase2_tick(u, def)
 
 
 func _boss_attack(boss: SimUnit, t: Dictionary) -> void:
@@ -612,6 +632,8 @@ func _boss_attack(boss: SimUnit, t: Dictionary) -> void:
 			_fire_breath(boss, t)
 		"steam_burst":
 			_steam_burst(boss, t)
+		"steal_power":
+			_boss_steal_power(boss, t)
 		_:
 			_emit("boss_attack", {"uid": boss.uid, "id": str(t.get("id", "")), "x": boss.x})
 
@@ -799,3 +821,116 @@ func _emit(type: String, data: Dictionary) -> void:
 	data["type"] = type
 	data["t"] = time
 	events.append(data)
+
+
+# ------------------------------------------------------------------ Era 5 (Far Future): gravity wells, beams, drones, Count Magpie 3000
+## Kept in one block so the era rules stay easy to find. Numbers: balance.json era_rules.gravity_well, bosses.json b5.
+
+## How many wells the straight flight path between two lane x positions crosses (a shooter standing inside a well counts).
+func _wells_crossed(xa: float, xb: float) -> int:
+	var lo := minf(xa, xb)
+	var hi := maxf(xa, xb)
+	var n := 0
+	for wl in wells:
+		if hi >= float(wl["x"]) and lo <= float(wl["x"]) + float(wl["w"]):
+			n += 1
+	return n
+
+
+## True when x is inside a gravity well (for the view).
+func in_well(x: float) -> bool:
+	for wl in wells:
+		if x >= float(wl["x"]) and x <= float(wl["x"]) + float(wl["w"]):
+			return true
+	return false
+
+
+## Laser Bug beam: when the shot lands it also hits every other ground enemy of the shooter along the beam, from the
+## shooter through the target to the end of its range, for `pierce_fraction` of the damage.
+func _pierce_beam(p: Dictionary, tgt: SimUnit, src: SimUnit) -> void:
+	var dir := 1.0 if float(p["x1"]) >= float(p["x0"]) else -1.0
+	var end_x := float(p["x0"]) + dir * float(p.get("reach", 0.0))
+	var lo := minf(float(p["x0"]), end_x)
+	var hi := maxf(float(p["x0"]), end_x)
+	for o in units:
+		if o == tgt or o.side == int(p["side"]) or not o.alive() or o.is_air:
+			continue
+		if o.x >= lo and o.x <= hi:
+			_damage_unit(o, float(p["damage"]) * float(p["pierce"]), src, true, true)
+
+
+## Drone Fly (`hunts`): role it ignores everything else for, "" when it has no such target on the field.
+func _hunt_role(u: SimUnit) -> String:
+	if not bool(u.abilities.get("hunts", false)):
+		return ""
+	var pri := str(u.abilities.get("target_priority", ""))
+	if pri == "":
+		return ""
+	for e in units:
+		if e.side != u.side and e.alive() and e.role == pri:
+			return pri
+	return ""
+
+
+## Count Magpie 3000 telegraph: steals one equipped hero power for `duration_s`. Prefers a power that is ready now
+## (the one the player is about to press), otherwise the one that comes back soonest. Powers already stolen are skipped.
+func _boss_steal_power(boss: SimUnit, t: Dictionary) -> void:
+	var pick := -1
+	var best := 1.0e9
+	for i in powers.size():
+		var pw: Dictionary = powers[i]
+		if float(pw["stolen_t"]) > 0.0:
+			continue
+		var key := float(pw["cd"])
+		if key < best:
+			best = key
+			pick = i
+	var dur := float(t.get("duration_s", 8.0))
+	var pid := ""
+	if pick >= 0:
+		powers[pick]["stolen_t"] = dur
+		pid = str(powers[pick]["id"])
+	_emit("boss_attack", {"uid": boss.uid, "id": "steal_power", "x": boss.x, "power": pid, "slot": pick, "duration": dur})
+
+
+## Phase 2 "teleport_bombs": every bomb_interval_s the boss hops hop_units toward the player base (never past the front
+## player unit, it lands in melee reach) and drops a shiny bomb on the front player unit; it explodes after bomb_delay_s.
+func _boss_phase2_tick(u: SimUnit, def: Dictionary) -> void:
+	var p2: Dictionary = def.get("phase2", {})
+	if not u.phase2 or str(p2.get("id", "")) != "teleport_bombs":
+		return
+	u.extra_cd -= dt
+	if u.extra_cd > 0.0:
+		return
+	u.extra_cd = float(p2.get("bomb_interval_s", 5.0))
+	var front: SimUnit = null
+	for a in units:
+		if a.side == PLAYER and a.alive() and (front == null or a.x > front.x):
+			front = a
+	var floor_x := (front.x + _melee_px) if front != null else (_base_reach + 60.0)
+	var from := u.x
+	var to := maxf(floor_x, u.x - float(p2.get("hop_units", 4.0)) * range_unit)
+	if to < from:
+		u.x = to
+		_emit("teleport", {"uid": u.uid, "x": from, "to": to})
+	if front != null:
+		bombs.append({"x": front.x, "t": 0.0, "delay": float(p2.get("bomb_delay_s", 1.0)),
+				"damage": u.damage * float(p2.get("bomb_damage_mult", 1.0)),
+				"radius": float(p2.get("bomb_radius_units", 2.0)) * range_unit})
+		_emit("bomb_drop", {"uid": u.uid, "x": front.x, "delay": float(p2.get("bomb_delay_s", 1.0))})
+
+
+func _update_bombs() -> void:
+	if bombs.is_empty():
+		return
+	var keep: Array = []
+	for b in bombs:
+		b["t"] += dt
+		if b["t"] < b["delay"]:
+			keep.append(b)
+			continue
+		for a in units:
+			if a.side == PLAYER and a.alive() and absf(a.x - float(b["x"])) <= float(b["radius"]):
+				_damage_unit(a, float(b["damage"]), null, false, false)
+		_emit("bomb_hit", {"x": b["x"], "radius": b["radius"]})
+	bombs = keep

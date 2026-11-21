@@ -23,7 +23,7 @@ Secciones (ruta con puntos, p. ej. `DataDB.bal_f("upgrades.unit.cost_growth")`):
 | `daily` | `login_capsules`, `login_gems`, `streak_day` 7, bonos de racha (propuestos), `quests_per_day` | 6.6 |
 | `capsule` | `pity_rare_every` 5, `pity_epic_every` 20, `relic_bonus_cap` 0.25 | 7.4 |
 | `ads` | recompensas de los 5 placements (x2 monedas, +30% comida, 25% vida de base, 1 capsula/dia, x2 granja) y `first_ad_after_stage_cleared` 3 | 7.1 |
-| `era_rules` | constantes de reglas de era: arena -30% velocidad, murallas (20% de HP de base a la mitad), vapor +25% velocidad de ataque. Pozos de gravedad: sin numeros en el spec, falta definir | 4.6 |
+| `era_rules` | constantes de reglas de era: arena -30% velocidad, murallas (20% de HP de base a la mitad), vapor +25% velocidad de ataque. pozos de gravedad: `damage_loss` 0.35 y `pierce_fraction` 0.5 (propuestos, ver "Fase 5" al final) | 4.6 |
 | `boss` | `hp_mult` 6 (propuesto), `telegraph_interval_s` 10, `telegraph_warning_s` 1.5, `phase2_hp_fraction` 0.5 | 4.7, 5.3 |
 | `roles` | tabla 5.4 por rol: `cost, hp, damage, interval, range, speed, spawn_cooldown` (rango en unidades de 40 px, velocidad en px/s) + `strong_against`, `weak_against` (`"any"` = todos), `can_hit_air`, `is_air` | 4.4, 5.4 |
 | `proposed_keys` | lista legible de lo propuesto | |
@@ -114,3 +114,30 @@ Igual que units, con `id` `e<era>_...`, mas `behavior` (texto libre para el dire
 
 ## i18n/strings.csv
 Columnas `key,en,es`, UTF-8. Marcadores `{0}`, `{1}` iguales en ambos idiomas; `\n` literal = salto de linea. Nombres de claves: `ui.*`, `nav.*`, `role.<rol>` / `role.<rol>.plural`, `era.<n>.*`, `unit.<id>.name|desc`, `enemy.*`, `boss.*`, `power.*`, `relic.*`, `product.*`, `quest.*`, `ads.*`, y una familia por pantalla (`title, home, offline, map, prebattle, battle, pause, victory, defeat, upgrades, squad, shop, capsules, settings, story, consent, studio`). `tools/check_i18n.py` valida faltantes, duplicados, marcadores y que todo `*_key` de `data/` y `config/` exista. El archivo `i18n/strings.csv.import` (`importer="keep"`, versionado con `git add -f`) evita que Godot lo convierta en `.translation` y asi el CSV viaja tal cual en el export (ademas hay que incluir `*.json,*.csv` en el filtro de export de recursos no importados).
+
+## Fase 5 - Era 5 "Far Future: Neon Orbit" (pozos de gravedad, Count Magpie 3000)
+
+**Regla `gravity_well`** (`tools/gen_stages.py`, `TUNING5`; desde la etapa 3, ids `"5-<index>"`):
+```json
+"rule": { "type": "gravity_well", "wells": [ { "x": 440, "w": 120 } ] }
+```
+- `wells[]` usa la misma convencion que `patches`: `x` = borde izquierdo y `w` = ancho en px del carril (0..1000). `BattleSim` expone `sim.wells` (`Array` de `{x, w}`, vacio si la regla no es `gravity_well`), `sim.in_well(x)` y `sim.rule`. `RuleLayer` ya dibuja la clave `wells` como zonas moradas.
+- Efecto (el spec solo dice "doblan los proyectiles"; los numeros son PROPUESTOS en `balance.json era_rules.gravity_well`): todo proyectil de AMBOS bandos cuyo vuelo recto (de `x` del tirador a `x` del objetivo) cruce un pozo pierde `damage_loss` (0.35) de su dano por pozo cruzado (multiplicativo: 2 pozos = x0.65^2). Un tirador parado dentro de un pozo tambien cuenta. No afecta melee, bombas del jefe ni poderes. Cada proyectil lleva `bend` (n.º de pozos cruzados) por si la vista quiere curvar la trayectoria.
+- `pierce_fraction` (0.5): dano del rayo del Laser Bug sobre las demas unidades terrestres del haz (ver abajo).
+
+**Habilidades nuevas en `abilities`** (ya en `enemies.json` / `bosses.json`):
+
+| Id | Quien | Efecto en `BattleSim` |
+|---|---|---|
+| `pierce` + `pierce_fraction` | Laser Bug | Al impactar, el rayo tambien golpea (a `pierce_fraction` del dano) a cada otra unidad terrestre enemiga sobre el haz, del tirador hasta el final de su alcance. Los pozos tambien lo afectan |
+| `hunts` + `target_priority` | Drone Fly | Mientras haya una unidad del rol prioritario (Support) en el campo, ignora todo lo demas y vuela hacia ella; sin Support se comporta normal. Solo los Shooters pueden golpearla (`can_hit_air`) |
+| `target: highest_hp` | Mecha Beetle | Entre las unidades en rango ataca la de mas HP (igual que el Dung Catapult) |
+| `heal_fraction_per_sec` | Time Medic Worm | Cura 5 % de la vida maxima por segundo a los aliados en rango (ya existia) |
+
+El Laser Blade Worm es un Fighter con `overrides.speed` 80 (su "dash") y el Mecha Worm un Heavy con `overrides.hp` 400: sin codigo extra.
+
+**Count Magpie 3000** (`bosses.json b5_count_magpie_3000`; `telegraph` cada 10 s con aviso de 1.5 s, `phase2` al 50 % de HP):
+- `steal_power` (`duration_s` 8): roba UN poder equipado durante 8 s (`powers[i].stolen_t`; `power_ready` y `cast_power` fallan mientras dure). Elige el poder listo (cooldown 0) o, si ninguno, el que vuelve antes; los ya robados se saltan. Evento `boss_attack {id: "steal_power", power, slot, duration}`.
+- `teleport_bombs` (`hop_units` 4, `bomb_interval_s` 5, `bomb_damage_mult` 1.0, `bomb_radius_units` 2, `bomb_delay_s` 1.0; los dos ultimos propuestos): cada `bomb_interval_s` el jefe salta `hop_units` x 40 px hacia la base del jugador (sin pasar a la unidad aliada mas adelantada: aterriza a alcance melee) y suelta una bomba sobre esa unidad; explota tras `bomb_delay_s` y daña (dano del jefe x `bomb_damage_mult`, sin contrarresto) a las unidades del jugador a <= `bomb_radius_units` x 40 px. El temporizador se pausa si el jefe esta aturdido o congelado. Eventos nuevos: `teleport {uid, x, to}`, `bomb_drop {uid, x, delay}`, `bomb_hit {x, radius}`; `sim.bombs` = bombas en vuelo `{x, t, delay, damage, radius}`. La pantalla de batalla ya dibuja los tres.
+
+**Final del juego.** `profile.progress.game_completed` (bool, `false` por defecto; `_merge_defaults` lo rellena en perfiles viejos, el esquema sigue en v2). `Economy.settle_battle(5, 10, true, ...)` lo pone en `true` y devuelve `result["game_completed"] = true` solo la primera vez (las victorias siguientes devuelven `false`; el flag nunca se reinicia). Lectura: `Progress.game_completed(profile)`. No hay pantalla: la historia la muestra otro modulo.

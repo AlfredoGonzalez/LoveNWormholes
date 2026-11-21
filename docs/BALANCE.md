@@ -303,3 +303,91 @@ touched the collection. Optimized wins nearly everything except 3-10 (67%).
 4. Proposed values added by us (not in the spec): `chain_radius_units` 2, `chain_damage_fraction` 0.5, `slow_seconds` 3 (steam burst), the 0.5 s fire-breath tick,
    wall width/position (drawing only). They live in `data/*.json` or `TUNING3/4`, not in code.
 5. As in Era 2, win rate vs `scale` is a sawtooth: any change to unit stats, costs, bot scoring or sim rules needs a re-scan.
+# Balance: Era 5 "Far Future: Neon Orbit" (Phase 5, final era)
+
+Spec: 3, 4.6 (gravity wells), 4.7, 5.1-5.3 (Era 5 units, Laser Bug / Drone Fly / Mecha Beetle, Count Magpie 3000), 6.3.
+`python3 tools/balance_sim.py --era 5 [--runs 40] [--stages 1-10] [--profiles normal]` (stage column = index inside the era, n = 41..50).
+Eras 1-2 numbers and code paths are unchanged (Era 5 lives in `ERA5_*` constants of `balance_sim.gd` and in `TUNING5` / `*5` functions of `gen_stages.py`).
+
+## Gravity wells (our proposal, `balance.json era_rules.gravity_well`)
+
+The spec only says "gravity wells bend projectiles, so shooters should be placed carefully". Implemented deterministically (no RNG in the sim):
+every projectile of BOTH sides whose straight flight crosses a well loses `damage_loss` = 35% of its damage per well crossed
+(multiplicative), a shooter standing inside a well counts too. Melee, boss bombs and powers are not affected. Wells are stage data
+(`rule.wells = [{x, w}]`, lane px, from 5-3: 1 well at 5-3 growing to 3 by 5-6). They hit both armies, so, like the sand patches, they are
+placed once where the armies meet and are not a difficulty lever. `pierce_fraction` = 50% is the Laser Bug beam damage on the units it passes through.
+Both numbers are in `proposed_keys`; confirm with Alfredo.
+
+## Era 5 abilities
+
+| Unit | Implementation |
+|---|---|
+| Laser Bug (enemy shooter) | `pierce`: on impact the beam also hits every other ground unit on its line (shooter -> target -> end of range) for 50% damage |
+| Drone Fly (enemy air) | `hunts`: while a Support exists on the field it flies past everything and attacks only Supports (the Time Medic); only Shooters can hit it. Speed 90, HP 55 (data) |
+| Mecha Beetle (enemy heavy) | `target: highest_hp` (data change: the old `behavior` text had no code behind it) |
+| Laser Blade Worm / Mecha Worm / Time Medic | stats from the table (speed 80 / HP 400 / heals 5% max HP per second), no extra code |
+| Count Magpie 3000 | telegraph: steals one equipped power for 8 s (a ready one first); phase 2: hops 4 units toward the player (never past the front unit) every 5 s and drops a bomb on the front unit (1 s fuse, radius 2 units, boss damage x1.0) |
+
+## Era 5 player: the Time Squad
+
+Time sync: every earlier-era unit is played with `DataDB.unit_stats(id, level, 5)` (Era 1 x2.6, Era 2 x3.5, Era 3 x4.6, Era 4 x5.7 on HP/damage; Era 5 units x6.55 and 5x cost).
+5 squad slots (5th opened after the Era 2 boss), 3 power slots (3rd after the Era 3 boss), every power unlocked. Unit levels average
+`1 + 0.25(n-1)` (11 at 5-1, 13.25 at 5-10) for the normal profile; Food Burrow and Base are capped at level 10.
+
+| profile | squad (card order) | powers |
+|---|---|---|
+| normal | Club Worm, Gear Gunner (fast shooter), Shield Bearer (blocks 20% ranged), Time Medic, Laser Blade Worm | Squirm Slam, Apple Rain, Time Freeze |
+| casual | Club, Slinger, Dino Rider, Shield Bearer, Knight (first units owned; one weak shooter, no support) | Squirm Slam, Apple Rain |
+| optimized | Club, Gear Gunner, Mecha Worm, Time Medic, Laser Blade | Squirm Slam, Apple Rain, Time Freeze |
+
+The bots only know Slam, Rain and Freeze (Rewind, Dirt Shield and Fast-Forward are not played by any profile).
+
+## Era 5 stage generation (`TUNING5`)
+
+- `enemy_base_hp` = `1000 x (1 + 0.15(n-1))` (8350 at 5-10). Enemy costs x1.5^4: Laser Bug 379.7, Drone Fly 607.5, Mecha Beetle 759.4 Food.
+- Era 5 has no enemy fighter or support, so the role mix is (shooter, air, heavy): 5-1 only Laser Bugs, Drone Flies from 5-2 (they force at least one Shooter,
+  spec 4.7), Mecha Beetles from 5-3 (heavy share grows to 45%). Budget = `(6.5 - 0.3(s-1)) x 8 x duration x scale[s]`, duration `50 + 5(s-1)` s.
+- Stage 5-10: opening bursts (1 Laser Bug at 6 s, 1 Mecha Beetle at 21 s), Count Magpie 3000 at `boss_t` = 30 s with his escorts (3 Laser Bugs + 2 Drone Flies, `bosses.json`).
+
+## What was tuned in Era 5
+
+| Lever | Value | Why |
+|---|---|---|
+| `TUNING5.scale` per stage | 2.72, 2.46, 1.82, 2.15, 2.0, 2.1, 2.3, 2.25, 2.4 (5-1..5-9) | uniform scans (1.6-5.4) then per-stage multipliers (0.7-1.0) at 20-100 runs and 4 seeds; costs of 380-760 Food make the win rate a steep sawtooth in `scale` (one Mecha Beetle = ~8% of a stage budget) |
+| `TUNING5.boss_t` / `boss_pre_budget` | 30 s / 760 | with `boss_t` 50 the bots win in 43 s by killing the base before the boss arrives (100%); at 30 s it is 58-71%. Opening budget is one Laser Bug + one Mecha Beetle (the minimum the generator emits) |
+| `data/bosses.json` b5 `escorts`, `phase2.bomb_*` (proposed) | 3 Laser Bugs + 2 Drone Flies, bomb radius 2 / fuse 1 s | untouched (the spec fixes hop and bomb interval; these are the proposed numbers from the data phase) |
+| `boss.hp_mult`, hop 4 units, bomb interval 5 s, steal 8 s | untouched | spec / earlier phases |
+| `era_rules.gravity_well.damage_loss` 0.35, `pierce_fraction` 0.5 | proposed | see above; wells were not used as a difficulty lever |
+
+## Results (normal: 100 runs, mean of seeds 1 and 41; casual / optimized: 40 runs, seed 1)
+
+First-try win %:
+
+| stage (n) | normal | normal win time | normal base HP left | casual | optimized |
+|---|---|---|---|---|---|
+| 5-1 (41) | 74 | 124 s | 51% | 0 | 100 |
+| 5-2 (42) | 75.5 | 76 s | 94% | 15 | 100 |
+| 5-3 (43) | 73.5 | 99 s | 88% | 2.5 | 100 |
+| 5-4 (44) | 61.5 | 102 s | 92% | 0 | 100 |
+| 5-5 (45) | 69.5 | 103 s | 97% | 0 | 100 |
+| 5-6 (46) | 72 | 99 s | 97% | 5 | 100 |
+| 5-7 (47) | 79.5 | 85 s | 99% | 0 | 100 |
+| 5-8 (48) | 59.5 | 105 s | 99% | 0 | 100 |
+| 5-9 (49) | 75.5 | 93 s | 99% | 0 | 100 |
+| 5-10 (50, Count Magpie 3000) | 61 | 124 s | 91% | 0 | 100 |
+
+Gate (>= 45%) passes on every stage including the final boss (58-64%, a little harder than the rest as intended). Seven of ten stages are inside 60-75%; 5-2, 5-7 are 76-80%
+and 5-8 / 5-10 are 58-61% (about 1 standard error from the band edge at 100 runs: they are in the noise, not a bug).
+Expected tries for normal 1.3-1.7; P(win within 2 tries) 84-94%.
+
+## Era 5 open issues
+
+1. Profiles are extremely far apart again: casual is 0-15% everywhere (the first-units squad has one weak shooter, no support, and cannot beat the beams and
+   Mecha Beetles) and optimized is 100% (Time Freeze + a Medic + Mecha Worm). The spec only constrains the normal profile; needs real playtest data (see Era 1 issue 1).
+2. Win rate vs `scale` is a sawtooth with a cliff: on 5-7, scale 2.3 is 80% and 2.4 is 37%. Any change to unit stats, costs, the beam or the bot scoring needs a re-scan.
+3. The sim ends when a base falls, so a late boss can be skipped by killing the base: `boss_t` must stay early (about 30 s) for the boss to matter. If Alfredo wants the boss to arrive later,
+   raise `enemy_base_hp` for 5-10 instead.
+4. Gravity wells reduce both sides' shooters; the normal squad has two ranged cards and the enemy is two thirds ranged/air, so wells slightly favour the player (the player can avoid
+   shooting across a well, the bots do not). Not tuned; no bot models "place shooters carefully".
+5. Bombs hit only player units and ignore counters; with the boss damage x1.0 a bomb one-shots Era 1-2 units in the radius (level 11-13 squad). If it feels punishing lower `bomb_damage_mult`.
+6. The final 5-10 victory sets `profile.progress.game_completed`; the ending screen is a separate module.

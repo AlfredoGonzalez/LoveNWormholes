@@ -44,6 +44,7 @@ func default_profile() -> Dictionary:
 			"stars": {},                        # "era-stage" -> 0..3
 			"first_clear": {},                  # "era-stage" -> true
 			"loss_streak": {},                  # "era-stage" -> consecutive losses
+			"game_completed": false,            # true once 5-10 (Count Magpie 3000) is beaten; never reset
 		},
 		"units": {},                            # unit id -> level
 		"upgrades": {"food_burrow": 1, "base": 1, "powers": {}},
