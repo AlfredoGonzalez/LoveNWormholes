@@ -209,3 +209,97 @@ errors (about 6 points at 60 runs) outside the 60-75 band; the 3-seed means used
    spec ordering suggests. Squad choice and power choice matter more than skill here; the normal profile is the only one tuned.
 4. Sandstorm and sand patches are not tuned for difficulty (both sides are slowed). Whether patches should favour the defender is a design question.
 5. Win rate vs `scale` is a sawtooth: any later change to unit stats, bot scoring or costs needs a re-scan (see `scale` list).
+
+---
+
+# Balance: Era 3 "Medieval: Kingdom of Crumbs" and Era 4 "Industrial: Steam City" (Phase 2, Eras 3-4)
+
+Spec: 3, 4.6 (walls, steam vents), 4.7 (air from Era 3), 5.2-5.3 (Era 3-4 units/enemies, Sir Sizzle, Clockwork Queen), 6.3.
+Run: `python3 tools/balance_sim.py --era 3|4 [--runs 40] [--stages 1-10] [--profiles normal]` (stage column = index in the era;
+n = 21..30 and 31..40). Era 1-2 tuning and stage data are untouched (`data/stages.json` stages 1-1..2-10 are byte-identical to before).
+
+## Era 3-4 player: Time Squad with 5 slots
+
+5 squad slots (the 5th opens after the Era 2 boss), powers: 2 slots in Era 3 and 3 slots in Era 4 (the 3rd opens after the Era 3 boss).
+Older units get the time-sync bonus (`unit_stats(id, level, era)`). Average squad level `1 + 0.25 (n-1)` (6.0 at 3-1, 10.75 at 4-10);
+Burrow/Base/power levels follow the same profile table as Era 1 (power level capped at the max, base HP x1.6 per era). Policies in
+`ERA_SQUADS_34` / `ERA_POWERS_34` (`tools/balance_sim.gd`):
+
+| profile | Era 3 squad | Era 4 squad | powers |
+|---|---|---|---|
+| normal | Knight, Crossbow, Shield Bearer, Wizard, Bow Worm | Knight, Gear Gunner, Boiler Tank, Wizard, Crossbow | Slam + Rain (Era 3); Slam + Rain + Time Freeze (Era 4) |
+| casual | Club, Slinger, Dino Rider, Shield Bearer, Bow Worm (units of Eras 1-2 only) | same | Slam + Rain |
+| optimized | Knight, Crossbow, Dino Rider, Wizard, Bow Worm | Knight, Gear Gunner, Boiler Tank, Wizard, Crossbow | Slam + Freeze (Era 3); Slam + Rain + Freeze (Era 4); saves for its best card |
+
+Bot change (Era 1-2 have no air enemies, so their rates cannot move): a card that cannot hit air (`can_hit_air` false: fighter, heavy, support)
+scores -0.2 per air enemy on the field instead of the counter score, so the bot buys Shooters against hornets, spark flies and the flying Sizzle.
+
+## Mechanics added to BattleSim (docs/DATA_SCHEMA.md has the view contract)
+
+- Walls (Era 3, from stage 3): each base has a wall worth `era_rules.walls.hp_fraction` (20%) of its max HP; while it stands, hits on that base do
+  `damage_mult` (0.5) of their damage; it is gone once the base has lost that 20% (damage that crosses the limit is split). Both bases have one; the Dirt
+  Shield absorbs first. `sim.wall_hp[side]`, `sim.wall_up(side)`, event `wall_down`. Interpretation of "first 20% of base HP damage by half": the wall is
+  measured in base HP lost (it takes 400 raw damage on a 1000-HP base to break it), so while it stands the base is effectively 20% tougher.
+- Steam vents (Era 4, from stage 3): any unit of either side standing on a vent has its attack cycle (wind-up and cooldown) run 1.25x faster
+  (`era_rules.steam_vent.attack_speed_bonus`); movement is unchanged. Like the sand patches they help both sides, so they are not a difficulty lever;
+  positions are in `TUNING4["vents"]`, centred on the meeting zone.
+- Sir Sizzle: `fire_breath` leaves a fixed 6-unit (240 px) segment in front of him that burns player units for 3 s at `boss.damage x 0.5` per second
+  (applied twice a second); `take_flight` at 50% HP makes him an air target (only Shooters and powers reach him).
+- Clockwork Queen: `steam_burst` hits player units within 4 units for `boss.damage x 1.0` and slows them 30% for 3 s (`slow_seconds` is our proposed field);
+  phase 2 `spawn_cogs` spawns a Cog Roach when phase 2 starts and every 8 s after.
+- Spark Fly: the hit chains to the 2 nearest other units within 2 range units at 50% damage (`abilities.chain_*` in `enemies.json`, proposed values).
+- Already in the sim and now covered by tests: Knight / Beetle Knight first-hit +50%, Wizard +15% damage aura, Dung Catapult targets highest HP,
+  Boiler Tank / Balloon Bomber splash, Clank Crab frontal armor 25%, Hornet Scout (air).
+
+## Era 3-4 stage generation (`tools/gen_stages.py`, `TUNING3` / `TUNING4`)
+
+Generic burst generator (`make_waves_abc`): three role slots per era with shares per stage (`mix`), bursts of one role each from t = 6 s, the same
+ramp and error diffusion as Era 2. Enemy costs are read from `data/enemies.json` (cost x 1.5^(era-1)).
+- Era 3: Beetle Knight (fighter 112.5 Food), Dung Catapult (shooter 169, range 8 outranges everything), Hornet Scout (air 270, from stage 3). No heavy or support.
+- Era 4: Cog Roach (fighter 169, speed 80), Spark Fly (air 405, from stage 2), Clank Crab (heavy 506, all stages).
+- Budget `(rate_base + rate_step (s-1)) x 8 x duration x scale[s]`, duration `50 + 5(s-1)` s. `rate_base` 6.0, `rate_step` -0.2 in both eras; the per-stage
+  `scale` absorbs the rest. Era 3 scales are 1.5-2.1, Era 4 scales 3.0-4.0 (Era 4 needs about twice the Food of Era 3: the normal squad is made of native Era 3-4 units).
+- Stage 10: opening bursts (300 Food: fighters at 6 s, shooters at 6 + boss_t/2 s), the boss at `boss_t` = 18 s with its escorts, no late bursts.
+- Rules from stage 3: Era 3 `walls` (decorative x = 52 and 928), Era 4 `steam_vent` with 1 vent at 4-3 growing to 3 (positions in `TUNING4["vents"]`).
+
+## What was tuned in Era 3-4 (allowed levers only)
+
+| Lever | Era 3 | Era 4 | Why |
+|---|---|---|---|
+| `scale` per stage 1-9 | 1.59, 1.512, 2.09, 1.66, 1.595, 1.74, 1.59, 1.68, 1.793 | 3.04, 3.46, 3.85, 3.6, 3.55, 3.85, 4.0, 3.43, 3.25 | uniform scale scan, then +-3..8% around the guess with 2-3 seeds x 40 runs, then a verification seed; win rate vs scale is a sawtooth (integer unit counts) |
+| `boss_t` | 18 s | 18 s | main lever of stage 10 (Era 3: 10 s = 15%, 12 s = 33%, 15 s = 60%, 18 s = 68%, 25 s = 100%; Era 4 is flat at 62-65% from 10 to 26 s) |
+| `boss_pre_budget` | 300 | 300 | same as Era 2 |
+| bosses.json escorts, `boss.hp_mult`, every spec number | untouched | untouched | Sir Sizzle and the Queen did not need the escort cut Rexy and the Pharaoh did |
+
+## Results (60 runs)
+
+First-try win % of the normal profile (seed 2), mean win time and base HP left on wins; casual and optimized for reference (seed 1):
+
+| stage | Era 3 normal | win time | base HP left | casual | optimized | Era 4 normal | win time | base HP left | casual | optimized |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 78.3 | 117 s | 67% | 0 | 100 | 78.3 | 89 s | 94% | 0 | 100 |
+| 2 | 60.0 | 119 s | 55% | 0 | 100 | 66.7 | 86 s | 100% | 2 | 100 |
+| 3 | 75.0 | 124 s | 80% | 0 | 100 | 63.3 | 94 s | 99% | 0 | 98 |
+| 4 | 53.3 | 116 s | 86% | 0 | 100 | 65.0 | 89 s | 100% | 0 | 100 |
+| 5 | 60.0 | 109 s | 91% | 0 | 98 | 70.0 | 94 s | 100% | 0 | 100 |
+| 6 | 75.0 | 104 s | 95% | 0 | 100 | 65.0 | 98 s | 100% | 0 | 100 |
+| 7 | 63.3 | 108 s | 96% | 0 | 100 | 61.7 | 94 s | 100% | 0 | 98 |
+| 8 | 61.7 | 117 s | 86% | 0 | 100 | 76.7 | 93 s | 100% | 0 | 100 |
+| 9 | 66.7 | 116 s | 97% | 0 | 100 | 53.3 (see note) | 96 s | 100% | 0 | 100 |
+| 10 (boss) | 58.3 | 139 s | 35% | 0 | 67 | 71.7 | 119 s | 85% | 0 | 97 |
+
+Era 4 stage 9 was lowered from scale 3.3 to 3.25 after this table (re-run with seeds 71-72: 71%). The gate (normal >= 45%) passes with a wide margin in both
+eras. The 3-seed tuning runs (120 runs per cell) were 60-80% on every stage; single 60-run cells can sit 1-2 standard errors (about 6 points) outside 60-75
+(3-4 at 53%, 3-1 and 4-1 at 78%). Casual (units of Eras 1-2 only, no support, no new shooter) loses everything from 3-1 on, like Era 2: it models a player who never
+touched the collection. Optimized wins nearly everything except 3-10 (67%).
+
+## Open issues (Eras 3-4)
+
+1. The normal profile is the only one tuned. The spread to casual (0%) is much wider than in Era 1 because Era 3-4 enemies are native-era units
+   while the casual squad is time-synced Era 1-2 units; with real players the Underdog bonus and unit upgrades will matter more than the bot shows.
+2. Sir Sizzle's flight makes 3-10 sensitive to the number of Shooters in the squad (a squad without Shooters cannot hurt him at all, which is the intent of spec 4.7).
+   The normal bot carries 2-3 Shooters. The fire breath is a fixed segment cast at his position; a human can avoid it, the bot does not.
+3. Steam vents and walls are symmetric rules; neither pushes the win rate in one direction by itself. If 3-x feels too long (walls), lower the Era 3 `scale` or `duration_*`.
+4. Proposed values added by us (not in the spec): `chain_radius_units` 2, `chain_damage_fraction` 0.5, `slow_seconds` 3 (steam burst), the 0.5 s fire-breath tick,
+   wall width/position (drawing only). They live in `data/*.json` or `TUNING3/4`, not in code.
+5. As in Era 2, win rate vs `scale` is a sawtooth: any change to unit stats, costs, bot scoring or sim rules needs a re-scan.

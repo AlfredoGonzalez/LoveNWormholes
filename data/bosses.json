@@ -64,11 +64,11 @@
       "abilities": {},
       "overrides": {},
       "desc_args": [],
-      "telegraph": {"id": "steam_burst", "radius_units": 4, "slow_fraction": 0.3, "damage_mult": 1.0},
+      "telegraph": {"id": "steam_burst", "radius_units": 4, "slow_fraction": 0.3, "slow_seconds": 3, "damage_mult": 1.0},
       "phase2": {"id": "spawn_cogs", "enemy": "e4_cog_roach", "interval_s": 8, "count": 1},
       "escorts": [{"enemy": "e4_cog_roach", "count": 3}, {"enemy": "e4_clank_crab", "count": 1}],
       "proposed": true,
-      "proposed_fields": ["telegraph.radius_units", "telegraph.slow_fraction", "telegraph.damage_mult", "escorts", "base stats"]
+      "proposed_fields": ["telegraph.radius_units", "telegraph.slow_fraction", "telegraph.slow_seconds", "telegraph.damage_mult", "escorts", "base stats"]
     },
     {
       "id": "b5_count_magpie_3000",

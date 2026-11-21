@@ -12,6 +12,7 @@ const ZONE_TINTS := {
 	"walls": Color(0.55, 0.55, 0.6, 0.5),
 	"steam_vent": Color(0.85, 0.95, 1.0, 0.45),
 	"gravity_well": Color(0.55, 0.3, 0.85, 0.4),
+	"fire": Color(1.0, 0.45, 0.1, 0.5),
 }
 ## Other zone arrays a rule may expose, by the tint they get (entries are {x, w}; w defaults to DEFAULT_W).
 const ZONE_FIELDS := {"walls": "walls", "vents": "steam_vent", "steam_vents": "steam_vent", "wells": "gravity_well", "gravity_wells": "gravity_well"}
@@ -61,6 +62,30 @@ static func on_patch(patches: Array, x: float) -> bool:
 	return false
 
 
+## Wall of `side_name` ("player"/"enemy", "" = both) still up? Tolerant of sims without wall data.
+static func _wall_standing(sim, side_name: String) -> bool:
+	if sim == null or not sim.has_method("wall_up"):
+		return true
+	if side_name == "player":
+		return bool(sim.wall_up(0))
+	if side_name == "enemy":
+		return bool(sim.wall_up(1))
+	return bool(sim.wall_up(0)) or bool(sim.wall_up(1))
+
+
+## sim.hazards (timed lane zones such as the fire breath), tolerant: only well-formed {x0, x1} entries.
+static func hazards_of(sim) -> Array:
+	var out: Array = []
+	if sim == null:
+		return out
+	var h: Variant = sim.get("hazards")
+	if h is Array:
+		for e in h:
+			if e is Dictionary and (e as Dictionary).has("x0") and (e as Dictionary).has("x1") and float(e["x1"]) > float(e["x0"]):
+				out.append(e)
+	return out
+
+
 func sync(sim) -> void:
 	var r := rule_of(sim)
 	var t := str(r.get("type", "none"))
@@ -72,12 +97,16 @@ func sync(sim) -> void:
 		if arr is Array:
 			for e in arr:
 				if e is Dictionary and (e as Dictionary).has("x"):
+					if field == "walls" and not _wall_standing(sim, str((e as Dictionary).get("side", ""))):
+						continue   # Era 3: a wall disappears once its base lost the wall's share of HP
 					z.append({"x": float(e["x"]), "w": float(e.get("w", DEFAULT_W)), "kind": str(ZONE_FIELDS[field])})
+	for h in hazards_of(sim):   # Sir Sizzle fire breath: a burning lane segment while it lasts
+		z.append({"x": float(h["x0"]), "w": float(h["x1"]) - float(h["x0"]), "kind": "fire"})
 	if t != rule_type or z.size() != zones.size() or str(z) != str(zones):
 		rule_type = t
 		zones = z
 		queue_redraw()
-	if rule_type == "steam_vent" or rule_type == "gravity_well":
+	if rule_type == "steam_vent" or rule_type == "gravity_well" or not hazards_of(sim).is_empty():
 		queue_redraw()   # these pulse
 
 
@@ -92,7 +121,7 @@ func _draw() -> void:
 		var sx := x0 + float(z["x"]) * px_scale
 		var w := maxf(2.0, float(z["w"]) * px_scale)
 		var r := Rect2(sx, lane_y - 38.0, w, 76.0)
-		if kind == "gravity_well" or kind == "steam_vent":
+		if kind == "gravity_well" or kind == "steam_vent" or kind == "fire":
 			tint.a *= 0.75 + 0.25 * sin(_t * 4.0)
 		draw_rect(r, tint)
 		if kind == "sand_patch":

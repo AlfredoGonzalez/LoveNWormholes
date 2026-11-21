@@ -152,7 +152,7 @@
       "name_key": "enemy.e4_spark_fly.name",
       "desc_key": "enemy.e4_spark_fly.desc",
       "flags": {"air": true},
-      "abilities": {"chain_targets": 2},
+      "abilities": {"chain_targets": 2, "chain_radius_units": 2, "chain_damage_fraction": 0.5},
       "overrides": {},
       "desc_args": []
     },
