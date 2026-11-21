@@ -32,7 +32,7 @@ func _ready() -> void:
 	var head := HBoxContainer.new()
 	back_button = UI.button(Game.t("ui.back"), "ghost", Vector2(110, UI.MIN_TOUCH), 18)
 	back_button.name = "back_button"
-	back_button.pressed.connect(func(): Game.nav.go("levels"))
+	back_button.pressed.connect(func(): Game.nav.go("home"))
 	head.add_child(back_button)
 	var title := UI.label(Game.t("prebattle.stage_title", [era, stage]), 24, UI.INK, HORIZONTAL_ALIGNMENT_CENTER)
 	title.name = "stage_title"

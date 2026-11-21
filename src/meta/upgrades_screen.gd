@@ -44,7 +44,7 @@ func ensure_built() -> void:
 	top.add_theme_constant_override("separation", 8)
 	root.add_child(top)
 	var back := UI.button(Game.t("ui.back"), "ghost", Vector2(96, 0), 20)
-	back.pressed.connect(func(): Game.nav.go("levels"))
+	back.pressed.connect(func(): Game.nav.go("home"))
 	top.add_child(back)
 	var title := UI.label(Game.t("upgrades.title"), 28, UI.INK, HORIZONTAL_ALIGNMENT_CENTER)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL

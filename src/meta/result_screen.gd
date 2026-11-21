@@ -237,7 +237,7 @@ func _build_buttons() -> Control:
 	home_button = UI.button(Game.t("victory.home"), "ghost", Vector2(0, 60), 20)
 	home_button.name = "home_button"
 	home_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	home_button.pressed.connect(func(): Game.nav.go("levels"))
+	home_button.pressed.connect(func(): Game.nav.go("home"))
 	if won:
 		row.add_child(home_button)
 		var nxt := Progress.next_stage(Game.save.profile)

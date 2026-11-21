@@ -169,7 +169,7 @@ func test_prebattle_builds_and_starts() -> void:
 	assert_eq(c[1]["food_boost"], false)
 	assert_eq(c[1]["squad"].size(), 3)
 	s.back_button.pressed.emit()
-	assert_eq(nav.calls[-1][0], "levels")
+	assert_eq(nav.calls[-1][0], "home")
 	_drop(s)
 
 
@@ -212,7 +212,7 @@ func test_result_win_settles_once() -> void:
 	var s2 = _make("res://src/meta/result_screen.gd", params)
 	assert_eq(_g().economy.get_amount("coins"), coins0 + expected, "re-created screen does not pay again")
 	s2.home_button.pressed.emit()
-	assert_eq(nav.calls[-1][0], "levels")
+	assert_eq(nav.calls[-1][0], "home")
 	s2.next_button.pressed.emit()
 	assert_eq(nav.calls[-1], ["prebattle", {"era": 1, "stage": 2}])
 	assert_eq(_g().economy.get_amount("coins"), coins0 + expected, "buttons never pay")

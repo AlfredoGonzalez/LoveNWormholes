@@ -2,7 +2,7 @@ class_name HomeScreen
 extends Screen
 ## Home hub (mockup Home / HomeOffline): currency chips, Shards chip, Squirmy on the burrow, next-stage panel
 ## with the enemy role mix and Play, settings, daily-reward button (badge) and the bottom navigation.
-## Popups (children of this screen): the offline Worm Farm claim (once per visit, only when coins are pending)
+## Popups (children of this screen): the offline Worm Farm claim (once per app session, only when coins are pending)
 ## and the Daily overlay (login reward, 3 quests, optional Bonus Capsule ad).
 ## Ad rewards are applied by Game's global listener (Quests.apply_reward); this screen only reacts to the
 ## resulting Economy / Quests signals. params.now (optional) overrides the clock, for tests.
@@ -49,7 +49,8 @@ func _ready() -> void:
 	_connect_signals()
 	# Offline Worm Farm: shown once per Home visit, only when something is pending.
 	_offline_pending = Game.economy.offline_pending(_now())
-	if _offline_pending > 0:
+	if _offline_pending > 0 and not Game.offline_popup_shown:
+		Game.offline_popup_shown = true
 		_show_offline()
 	Game.mark_seen(_now())   # last_seen, and the farm timer starts on the very first visit
 

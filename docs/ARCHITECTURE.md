@@ -27,8 +27,9 @@ Todo es GDScript construido por código. Las reglas están en `docs/spec.md`; lo
 
 | Pantalla | Archivo | `params` de entrada | Siguiente |
 |---|---|---|---|
-| `title` | `src/meta/title_screen.gd` | – | `levels` |
-| `levels` | `src/meta/level_select_screen.gd` | – | `prebattle {era, stage}`, `upgrades`, `settings` |
+| `title` | `src/meta/title_screen.gd` | – | `home` |
+| `home` | `src/meta/home_screen.gd` | – | `prebattle`, `levels` (mapa), `squad`, `upgrades`, `settings` |
+| `levels` | `src/meta/level_select_screen.gd` | – (Mapa Mundial) | `prebattle {era, stage}`, `home` |
 | `prebattle` | `src/meta/pre_battle_screen.gd` | `{era, stage}` | `battle {era, stage, squad: [ids], powers: [ids], food_boost: bool}` |
 | `battle` | `src/battle/battle_screen.gd` | `{era, stage, squad, powers, food_boost, resume: bool}` | `result` |
 | `result` | `src/meta/result_screen.gd` | `{result: "win"/"lose", era, stage, stats: Dictionary, time: float}` | `levels`, `battle` (reintentar / Segundo Aliento con `resume: true`), `prebattle` |

@@ -271,7 +271,7 @@ func _build() -> void:
 
 
 func _go_back() -> void:
-	Game.nav.go("levels" if str(params.get("from", "")) == "levels" else "title")
+	Game.nav.go("home" if str(params.get("from", "")) in ["home", "levels"] else "title")
 
 
 func _section(title: String) -> VBoxContainer:

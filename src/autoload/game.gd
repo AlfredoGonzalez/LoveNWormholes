@@ -18,6 +18,7 @@ var _ad_timer := 0.0
 var _mock_ads: MockAdProvider
 var _mock_billing: MockBillingProvider
 var booted_ok := false
+var offline_popup_shown := false   # the offline Worm Farm popup shows once per app session (spec 6.5: claimed on app open)
 
 
 func _ready() -> void:
@@ -52,6 +53,7 @@ func boot(save_path := "user://save.json") -> void:
 	quests = Quests.new(save, economy)
 	ads.reward_granted.connect(_on_reward_granted)
 	nav = Navigator.new()
+	offline_popup_shown = false
 	booted_ok = true
 	booted.emit()
 
