@@ -22,6 +22,8 @@ var coins_shown := 0
 var _coins_label: Label
 var _doubled := false
 var _double_extra := 0
+var _chips: HBoxContainer
+var stats_row: Control
 
 
 func _ready() -> void:
@@ -38,7 +40,8 @@ func _ready() -> void:
 
 	var v := MetaUI.scaffold(self, 18)
 	v.add_theme_constant_override("separation", 12)
-	v.add_child(MetaUI.currency_bar())
+	_chips = MetaUI.currency_bar()
+	v.add_child(_chips)
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -55,6 +58,43 @@ func _ready() -> void:
 	if Game.ads != null:
 		Game.ads.reward_granted.connect(_on_reward)
 		Game.ads.availability_changed.connect(_on_availability)
+	Game.economy.currency_changed.connect(_on_currency_changed)
+
+
+## Chips follow the wallet live (Double Coins, a reverted loss...).
+func _on_currency_changed(_c: String, _v: int, _d: int) -> void:
+	if _chips == null or not is_instance_valid(_chips) or _chips.get_parent() == null:
+		return
+	var parent := _chips.get_parent()
+	var idx := _chips.get_index()
+	var fresh := MetaUI.currency_bar()
+	parent.add_child(fresh)
+	parent.move_child(fresh, idx)
+	parent.remove_child(_chips)
+	_chips.queue_free()
+	_chips = fresh
+
+
+func _stats_row() -> Control:
+	var st: Dictionary = params.get("stats", {}) if params.get("stats", {}) is Dictionary else {}
+	var row := HFlowContainer.new()
+	row.name = "stats_row"
+	row.alignment = FlowContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("h_separation", 14)
+	row.add_theme_constant_override("v_separation", 2)
+	var items := [
+		["stat_kills", int(st.get("kills", 0))],
+		["stat_spawned", int(st.get("units_spawned", 0))],
+		["stat_powers", int(st.get("powers_used", 0))],
+	]
+	for it in items:
+		var l := UI.label(Game.t("result." + str(it[0]), [it[1]]), 16, UI.LOCKED_INK, HORIZONTAL_ALIGNMENT_CENTER)
+		l.autowrap_mode = TextServer.AUTOWRAP_OFF
+		row.add_child(l)
+	var tl := UI.label(Game.t("result.time", [MetaUI.format_time(float(params.get("time", 0.0)))]), 16, UI.LOCKED_INK, HORIZONTAL_ALIGNMENT_CENTER)
+	tl.autowrap_mode = TextServer.AUTOWRAP_OFF
+	row.add_child(tl)
+	return row
 
 
 func _exit_tree() -> void:
@@ -63,6 +103,8 @@ func _exit_tree() -> void:
 			Game.ads.reward_granted.disconnect(_on_reward)
 		if Game.ads.availability_changed.is_connected(_on_availability):
 			Game.ads.availability_changed.disconnect(_on_availability)
+	if Game.economy != null and Game.economy.currency_changed.is_connected(_on_currency_changed):
+		Game.economy.currency_changed.disconnect(_on_currency_changed)
 
 
 func _settle_once() -> void:
@@ -89,7 +131,8 @@ func _build_victory(body: VBoxContainer) -> void:
 	var st := UI.label(MetaUI.stars_text(stars), 48, UI.GOLD, HORIZONTAL_ALIGNMENT_CENTER)
 	st.name = "stars"
 	body.add_child(st)
-	body.add_child(UI.label(Game.t("result.time", [MetaUI.format_time(float(params.get("time", 0.0)))]), 16, UI.LOCKED_INK, HORIZONTAL_ALIGNMENT_CENTER))
+	stats_row = _stats_row()
+	body.add_child(stats_row)
 	var rp := UI.panel()
 	rp.name = "rewards_panel"
 	var rb := VBoxContainer.new()
@@ -144,6 +187,8 @@ func _build_defeat(body: VBoxContainer) -> void:
 	var flavor := UI.label(Game.t("defeat.flavor"), 20, UI.INK, HORIZONTAL_ALIGNMENT_CENTER)
 	flavor.name = "flavor"
 	body.add_child(flavor)
+	stats_row = _stats_row()
+	body.add_child(stats_row)
 	var rp := UI.panel()
 	rp.name = "rewards_panel"
 	var rb := VBoxContainer.new()
@@ -177,7 +222,7 @@ func _refresh_wind() -> void:
 	if wind_button == null:
 		return
 	var wind := DataDB.bal_f("ads.second_wind_base_hp_fraction", 0.25)
-	var used := bool(params.get("_wind_used", false))
+	var used := _wind_spent()
 	MetaUI.refresh_ad_button(wind_button, "second_wind", Game.t("result.second_wind_btn", [MetaUI.percent(wind)]),
 			Game.t("ui.not_available") if used else "")
 
@@ -232,8 +277,13 @@ func _on_double_pressed() -> void:
 	Game.ads.show_ad("double_coins", {"coins": _double_amount(), "multiplier": _double_mult()})
 
 
+## Second Wind is once per battle: also spent when this result comes from an already resumed battle.
+func _wind_spent() -> bool:
+	return bool(params.get("_wind_used", false)) or bool(params.get("second_wind_used", false))
+
+
 func _on_wind_pressed() -> void:
-	if bool(params.get("_wind_used", false)):
+	if _wind_spent():
 		return
 	Game.ads.show_ad("second_wind", {"base_hp_fraction": DataDB.bal_f("ads.second_wind_base_hp_fraction", 0.25)})
 
@@ -242,14 +292,19 @@ func _on_reward(placement: String, reward: Dictionary) -> void:
 	if placement == "double_coins" and won and not _doubled:
 		_doubled = true
 		params["_doubled"] = true
-		var extra := int(reward.get("coins", _double_amount()))
+		var extra := mini(int(reward.get("coins", _double_amount())), _double_amount())
 		params["_double_extra"] = extra
 		Game.economy.add("coins", extra)
 		coins_shown += extra
 		_update_coins_label()
 		_refresh_double()
-	elif placement == "second_wind" and not won and not bool(params.get("_wind_used", false)):
+	elif placement == "second_wind" and not won and not _wind_spent():
 		params["_wind_used"] = true
+		# The battle goes on, so the final result (not this defeat) is the one that pays: take the mercy
+		# reward back, once. params outlives the screen, so re-entering cannot revert twice.
+		if not bool(params.get("_reverted", false)):
+			params["_reverted"] = true
+			Game.economy.revert_loss(era, stage, settled)
 		Game.nav.go("battle", battle_params(true))
 
 

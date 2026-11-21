@@ -25,6 +25,9 @@ var speed_button: Button
 var pause_button: Button
 var toast_label: Label
 var underdog_label: Label
+var boss_bar: ProgressBar
+var boss_text: Label
+var _toast_big := false
 var cards: Array[CardButton] = []
 var power_buttons: Array[CardButton] = []
 var _toast_t := 0.0
@@ -107,6 +110,10 @@ func build(sim: BattleSim, squad: Array, powers: Array, era: int) -> void:
 	underdog_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	underdog_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(underdog_label)
+	# Boss HP bar (hidden unless a boss is on the field), under the enemy base bar.
+	boss_bar = _bar(self, Rect2(275, 98, 255, 22), UI.ORANGE)
+	boss_text = _bar_text(boss_bar, 13)
+	boss_bar.visible = false
 	# Toast line under the bars.
 	toast_label = UI.label("", 22, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER)
 	toast_label.position = Vector2(20, 126)
@@ -136,6 +143,7 @@ func _build_cards(sim: BattleSim) -> void:
 		c.position = Vector2(x0 + float(i) * (cw + gap), CARD_Y)
 		c.size = Vector2(cw, CARD_H)
 		c.name = "Card%d" % i
+		c.fit_title()
 		c.activated.connect(func(): card_pressed.emit(i))
 		add_child(c)
 		cards.append(c)
@@ -163,10 +171,14 @@ func set_underdog(stacks: int) -> void:
 	underdog_label.text = Game.t("battle.underdog_badge", [stacks]) if stacks > 0 else ""
 
 
-func toast(text: String, seconds := 1.4) -> void:
+## `alarm` = boss warning: bigger, red banner so it reads at a glance.
+func toast(text: String, seconds := 1.4, alarm := false) -> void:
 	toast_label.text = text
 	toast_label.visible = true
 	_toast_t = seconds
+	toast_label.add_theme_font_size_override("font_size", 28 if alarm else 22)
+	toast_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2) if alarm else Color.WHITE)
+	toast_label.add_theme_color_override("font_outline_color", Color(0.55, 0.05, 0.0, 1.0) if alarm else Color(0.2, 0.05, 0.0, 0.95))
 
 
 func tick_toast(dt: float) -> void:
@@ -176,7 +188,23 @@ func tick_toast(dt: float) -> void:
 			toast_label.visible = false
 
 
+func _refresh_boss(sim: BattleSim) -> void:
+	var boss: SimUnit = null
+	for u in sim.units:
+		if u.is_boss and u.alive() and u.side == BattleSim.ENEMY:
+			boss = u
+			break
+	boss_bar.visible = boss != null
+	if boss == null:
+		return
+	boss_bar.value = clampf(boss.hp / maxf(1.0, boss.max_hp), 0.0, 1.0)
+	var key := "boss.%s.name" % boss.id
+	var nm := Game.t(key) if Localization.has_key(key) else boss.id
+	boss_text.text = "%s  %d%%" % [nm, int(ceil(boss_bar.value * 100.0))]
+
+
 func refresh(sim: BattleSim, speed: int) -> void:
+	_refresh_boss(sim)
 	player_bar.value = clampf(sim.player_base_hp / maxf(1.0, sim.player_base_max), 0.0, 1.0)
 	enemy_bar.value = clampf(sim.enemy_base_hp / maxf(1.0, sim.enemy_base_max), 0.0, 1.0)
 	player_text.text = Game.t("battle.base_player", [int(ceil(sim.player_base_hp)), int(sim.player_base_max)])

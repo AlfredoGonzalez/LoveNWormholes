@@ -5,6 +5,10 @@ extends Button
 
 signal activated
 
+const TAP_MIN := 64.0           # >= UI.MIN_TOUCH (48) even after the screen is scaled down
+const NAME_SIZE := 13
+const NAME_SIZE_MIN := 9
+
 var _name_label: Label
 var _sub_label: Label
 var _sweep: Control
@@ -16,7 +20,8 @@ var _accent: Color = UI.BLUE
 
 func _init(title := "", sub := "", accent: Color = UI.BLUE, min_size := Vector2(96, 112)) -> void:
 	_accent = accent
-	custom_minimum_size = Vector2(maxf(min_size.x, UI.MIN_TOUCH), maxf(min_size.y, UI.MIN_TOUCH))
+	# Tap area never below TAP_MIN logical px (the 540x960 canvas shrinks on small phones).
+	custom_minimum_size = Vector2(maxf(min_size.x, TAP_MIN), maxf(min_size.y, TAP_MIN))
 	size = custom_minimum_size
 	focus_mode = Control.FOCUS_NONE
 	text = ""
@@ -29,7 +34,9 @@ func _init(title := "", sub := "", accent: Color = UI.BLUE, min_size := Vector2(
 	_name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_name_label.clip_text = true
 	_name_label.max_lines_visible = 2
+	_name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(_name_label)
+	fit_title()
 	_sub_label = UI.label(sub, 20, UI.INK, HORIZONTAL_ALIGNMENT_CENTER)
 	_sub_label.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	_sub_label.offset_top = -38
@@ -55,6 +62,33 @@ func _init(title := "", sub := "", accent: Color = UI.BLUE, min_size := Vector2(
 
 func set_title(t: String) -> void:
 	_name_label.text = t
+	fit_title()
+
+
+## Shrinks the name until it fits in two lines of the card (Spanish names are longer).
+func fit_title() -> void:
+	var w := maxf(10.0, size.x - 6.0)
+	var font := _name_label.get_theme_font("font")
+	if font == null:
+		font = ThemeDB.fallback_font
+	var sz := NAME_SIZE
+	while sz > NAME_SIZE_MIN:
+		var need := font.get_multiline_string_size(_name_label.text, HORIZONTAL_ALIGNMENT_CENTER, w, sz, 3)
+		if need.y <= float(sz) * 2.5 and _longest_word_width(font, sz) <= w:
+			break
+		sz -= 1
+	_name_label.add_theme_font_size_override("font_size", sz)
+
+
+func _longest_word_width(font: Font, sz: int) -> float:
+	var m := 0.0
+	for word in _name_label.text.split(" "):
+		m = maxf(m, font.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, sz).x)
+	return m
+
+
+func title_font_size() -> int:
+	return _name_label.get_theme_font_size("font_size")
 
 
 ## state: "ready" | "wait" (cooling down) | "poor" (not enough Food) | "off" (blocked).

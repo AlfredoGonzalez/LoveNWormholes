@@ -58,8 +58,9 @@ func add_ring(pos: Vector2, radius: float, color: Color, dur := 0.5) -> void:
 	_push({"k": "ring", "p": pos, "r": radius, "c": color, "d": dur})
 
 
-func add_warning(pos: Vector2, dur := 1.5) -> void:
-	_push({"k": "warn", "p": pos, "d": dur})
+## Boss attack warning: a big pulsing triangle plus (optionally) a red danger strip `zone` on the lane.
+func add_warning(pos: Vector2, dur := 1.5, zone := Rect2()) -> void:
+	_push({"k": "warn", "p": pos, "d": dur, "z": zone})
 
 
 func add_flash(color: Color, dur := 0.5) -> void:
@@ -127,7 +128,11 @@ func _draw() -> void:
 			"warn":
 				var p5: Vector2 = e["p"]
 				var pulse := 0.75 + 0.25 * sin(float(e["t"]) * 14.0)
-				var s := 22.0 * pulse
+				var zone: Rect2 = e.get("z", Rect2())
+				if zone.size.x > 0.0:
+					draw_rect(zone, Color(1.0, 0.15, 0.1, 0.18 + 0.2 * (0.5 + 0.5 * sin(float(e["t"]) * 14.0))))
+					draw_rect(zone, Color(1.0, 0.2, 0.1, 0.8), false, 3.0)
+				var s := 30.0 * pulse
 				var tri := PackedVector2Array([p5 + Vector2(0, -s), p5 + Vector2(s, s * 0.8), p5 + Vector2(-s, s * 0.8)])
 				draw_colored_polygon(tri, Color(1.0, 0.8, 0.1))
 				var tri2 := tri.duplicate()

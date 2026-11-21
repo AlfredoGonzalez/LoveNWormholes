@@ -20,6 +20,7 @@ var _last_x := -1.0
 var _time := 0.0
 var _attack_t := 0.0
 var _boss := false
+var slowed := false      # standing on a sand patch
 var _height := 70.0
 var _die_time := 0.6
 var _die_view_t := 0.0   # own clock so the fade-out still plays while the sim is stopped
@@ -42,6 +43,13 @@ func setup(u: SimUnit) -> void:
 	base_scale = _height / fh if fh > 1.0 else 0.3
 	actor.scale = Vector2(base_scale, base_scale)
 	_last_x = u.x
+
+
+## Small slow icon (a snail shell) above the unit while it stands on a sand patch.
+func set_slowed(on: bool) -> void:
+	if on != slowed:
+		slowed = on
+		queue_redraw()
 
 
 func screen_height() -> float:
@@ -111,6 +119,12 @@ func _draw() -> void:
 		draw_colored_polygon(pts, col)
 		pts.append(pts[0])
 		draw_polyline(pts, edge, 1.5)
+	if slowed:
+		var c := Vector2(0, MARKER_Y + 12.0)
+		draw_circle(c, 6.0, Color(0.93, 0.75, 0.3, a))
+		draw_arc(c, 6.0, 0.0, TAU, 14, Color(0.4, 0.25, 0.05, a), 1.5)
+		draw_arc(c, 2.5, 0.0, TAU * 0.8, 8, Color(0.4, 0.25, 0.05, a), 1.2)
+		draw_line(c + Vector2(-6, 6), c + Vector2(9, 6), Color(0.4, 0.25, 0.05, a), 2.0)
 	if show_hp:
 		var w := 70.0 if _boss else 40.0
 		var r := Rect2(-w / 2.0, -_height - 10.0, w, 5.0)

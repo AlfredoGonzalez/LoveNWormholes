@@ -263,6 +263,27 @@ func settle_battle(era: int, stage: int, won: bool, stars := 0, coin_multiplier 
 	battle_settled.emit(result)
 	return result
 
+## Undoes a LOSS settlement (Second Wind: the battle goes on, so the final result is the one that pays).
+## Subtracts the coins that loss paid (never below 0) and decrements the stage's loss streak (never below 0;
+## the entry is erased at 0). `settle_result` is the dictionary settle_battle returned. A win result is
+## ignored (returns false). Persisted once; emits currency_changed (negative delta) but not battle_settled.
+func revert_loss(era: int, stage: int, settle_result: Dictionary) -> bool:
+	if bool(settle_result.get("won", false)) or settle_result.is_empty():
+		return false
+	var coins := int(settle_result.get("coins", 0))
+	var take := mini(maxi(coins, 0), get_amount("coins"))
+	if take > 0:
+		profile["currencies"]["coins"] = get_amount("coins") - take
+		currency_changed.emit("coins", get_amount("coins"), -take)
+	var sid := stage_id(era, stage)
+	var streak := loss_streak(era, stage) - 1
+	if streak > 0:
+		profile["progress"]["loss_streak"][sid] = streak
+	else:
+		profile["progress"]["loss_streak"].erase(sid)
+	_persist()
+	return true
+
 # ---------------------------------------------------------------- offline Worm Farm (6.5)
 
 func offline_rate_per_minute() -> float:

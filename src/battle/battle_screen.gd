@@ -41,6 +41,7 @@ var unit_views: Dictionary = {}    # uid -> UnitView
 var hud: BattleHud
 var effects: BattleEffects
 var overlay: PauseOverlay
+var rule_layer: RuleLayer
 
 var _bg: BattleBackground
 var _world: Node2D
@@ -136,6 +137,9 @@ func _build_ui() -> void:
 	_bg = BattleBackground.new()
 	_bg.setup(Vector2(SCREEN_W, SCREEN_H), LANE_Y, era)
 	add_child(_bg)
+	rule_layer = RuleLayer.new()
+	rule_layer.setup(LANE_X0, _px_scale, LANE_Y)
+	add_child(rule_layer)
 	_world = Node2D.new()
 	_world.name = "World"
 	add_child(_world)
@@ -331,10 +335,9 @@ func _finish() -> void:
 
 
 ## Second Wind (rewarded ad): the player base comes back at a fraction of its HP and the fight goes on.
-## Views are rebuilt from the sim state. (BattleSim has no method for this yet, so fields are set directly.)
+## BattleSim.revive_base does the revive; views are rebuilt from the sim state.
 func apply_second_wind() -> void:
-	sim.player_base_hp = sim.player_base_max * DataDB.bal_f("ads.second_wind_base_hp_fraction", 0.25)
-	sim.result = ""
+	sim.revive_base(DataDB.bal_f("ads.second_wind_base_hp_fraction", 0.25))
 	ending = false
 	finished = false
 	_stage_end_logged = false
@@ -406,13 +409,14 @@ func _update_visuals(dt: float) -> void:
 			unit_views[u.uid] = v
 		var fy := _foot_y(u.uid)
 		v.update_from(u, _sx(u.x), fy, dt)
+		v.set_slowed(_on_patch(u))
 		v.z_index = int(fy)
 		seen[u.uid] = true
 	for uid in unit_views.keys():
 		if not seen.has(uid):
 			(unit_views[uid] as Node).queue_free()
 			unit_views.erase(uid)
-	_shield_max = maxf(_shield_max, sim.player_shield)
+	_shield_max = maxf(1.0, sim.player_shield_max)
 	_player_base.update_from(sim.player_base_hp, sim.player_base_max, sim.player_shield, _shield_max, dt)
 	_enemy_base.update_from(sim.enemy_base_hp, sim.enemy_base_max, 0.0, 1.0, dt)
 	var pr: Array = []
@@ -423,7 +427,15 @@ func _update_visuals(dt: float) -> void:
 	effects.projectiles = pr
 	effects.advance(dt)
 	_bg.drift(dt)
+	rule_layer.sync(sim)
 	hud.refresh(sim, speed)
+
+
+## True when the (non-air) unit stands on a sand patch (Era 2 rule): shown with a small slow icon.
+func _on_patch(u: SimUnit) -> bool:
+	if u.is_air or not u.alive():
+		return false
+	return RuleLayer.on_patch(RuleLayer.patches_of(sim), u.x)
 
 
 func _drain_events() -> void:
@@ -464,8 +476,12 @@ func _handle_event(e: Dictionary) -> void:
 			_power_visual(e)
 			audio.play_sfx(str(POWER_SFX.get(str(e["id"]), "power_cast_1")))
 		"telegraph":
-			effects.add_warning(Vector2(_sx(float(e["x"])), LANE_Y - 120.0), DataDB.bal_f("boss.telegraph_warning_s", 1.5))
-			hud.toast(Game.t("battle.boss_warning"), DataDB.bal_f("boss.telegraph_warning_s", 1.5))
+			var wx := _sx(float(e["x"]))
+			var wdur := DataDB.bal_f("boss.telegraph_warning_s", 1.5)
+			# Danger strip in front of the boss (toward the player side), clamped to the lane.
+			var zx0 := maxf(LANE_X0 - 20.0, wx - 150.0 * _px_scale * 2.5)
+			effects.add_warning(Vector2(wx, LANE_Y - 120.0), wdur, Rect2(zx0, LANE_Y - 42.0, maxf(0.0, wx - zx0), 84.0))
+			hud.toast(Game.t("battle.boss_warning"), wdur + 0.5, true)
 		"boss_attack":
 			var bx := _sx(float(e["x"]))
 			if str(e["id"]) == "stomp":

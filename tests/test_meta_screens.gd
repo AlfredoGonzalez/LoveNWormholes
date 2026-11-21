@@ -288,7 +288,62 @@ func test_result_defeat_underdog_and_second_wind() -> void:
 	var n = nav.calls.size()
 	s.wind_button.pressed.emit()
 	assert_eq(nav.calls.size(), n, "second wind only once per battle")
-	assert_eq(_g().economy.loss_streak(1, 4), 3, "ad buttons never settle again")
+	assert_eq(_g().economy.loss_streak(1, 4), 2, "second wind took this defeat's streak back")
+	assert_eq(_g().economy.get_amount("coins"), coins0 + _g().economy.loss_reward(4) * 2, "and its mercy coins")
+	_drop(s)
+
+
+func test_second_wind_pays_once_then_the_final_result() -> void:
+	if _skip():
+		return
+	var nav = _fresh()
+	_clear(3)
+	_ready_ads()
+	var coins0 = _g().economy.get_amount("coins")
+	var params = {"result": "lose", "era": 1, "stage": 4, "time": 50.0, "base_hp_fraction": 0.0,
+			"stats": {"kills": 7, "units_spawned": 9, "powers_used": 2}}
+	var s = _make("res://src/meta/result_screen.gd", params)
+	assert_eq(_g().economy.get_amount("coins"), coins0 + _g().economy.loss_reward(4))
+	assert_true(s.stats_row != null and s.stats_row.get_child_count() == 4, "kills, units, powers, time")
+	s.wind_button.pressed.emit()
+	assert_eq(_g().economy.get_amount("coins"), coins0, "loss settlement undone")
+	assert_eq(_g().economy.loss_streak(1, 4), 0)
+	# Re-entering the same result screen must not revert (or pay) again.
+	_drop(s)
+	var s_again = _make("res://src/meta/result_screen.gd", params)
+	assert_true(s_again.wind_button.disabled, "second wind spent")
+	s_again.wind_button.pressed.emit()
+	assert_eq(_g().economy.get_amount("coins"), coins0, "no second revert, no payment")
+	_drop(s_again)
+	# The resumed battle is won: only the win pays.
+	var win = {"result": "win", "era": 1, "stage": 4, "time": 90.0, "base_hp_fraction": 0.5, "second_wind_used": true}
+	var w = _make("res://src/meta/result_screen.gd", win)
+	assert_eq(_g().economy.get_amount("coins"), coins0 + _g().economy.win_reward(4) * 2, "first clear win paid once")
+	_drop(w)
+	# A resumed battle that is lost again offers no second Second Wind.
+	var lose2 = {"result": "lose", "era": 1, "stage": 5, "second_wind_used": true}
+	var l = _make("res://src/meta/result_screen.gd", lose2)
+	assert_true(l.wind_button.disabled)
+	_drop(l)
+
+
+func test_result_chips_follow_double_coins() -> void:
+	if _skip():
+		return
+	_fresh()
+	_clear(3)
+	_ready_ads()
+	var s = _make("res://src/meta/result_screen.gd", {"result": "win", "era": 1, "stage": 3, "time": 10.0, "base_hp_fraction": 0.6})
+	var before = _g().economy.get_amount("coins")
+	s.double_button.pressed.emit()
+	var chip = s.find_child("chip_coins", true, false)
+	assert_true(chip != null)
+	var txt := ""
+	for c in chip.get_children():
+		if c is Label:
+			txt = c.text
+	assert_true(txt.contains(str(_g().economy.get_amount("coins"))), "chip shows the new wallet: " + txt)
+	assert_true(_g().economy.get_amount("coins") > before)
 	_drop(s)
 
 
