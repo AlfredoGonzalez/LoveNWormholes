@@ -31,6 +31,7 @@ var enemy_base_hp := 1000.0
 var enemy_base_max := 1000.0
 var player_shield := 0.0       # Dirt Shield: remaining absorb
 var player_shield_t := 0.0
+var player_shield_max := 0.0   # size of the shield when it was cast (for the view)
 
 var food := 0.0
 var food_cap := 500.0
@@ -171,6 +172,7 @@ func cast_power(i: int) -> bool:
 			_emit("power", {"id": "rewind", "revived": revived})
 		"dirt_shield":
 			player_shield = player_base_max * float(e.get("absorb_fraction", 0.25))
+			player_shield_max = player_shield
 			player_shield_t = float(e.get("duration_s", 8.0))
 			_emit("power", {"id": "dirt_shield"})
 		"fast_forward":
@@ -209,6 +211,15 @@ func tick() -> void:
 	_boss_logic()
 	_cleanup()
 	_check_end()
+
+
+## Second Wind (rewarded ad): the player base comes back with `fraction` of its max HP and the battle goes on.
+func revive_base(fraction: float) -> void:
+	if result != "lose":
+		return
+	player_base_hp = player_base_max * clampf(fraction, 0.01, 1.0)
+	result = ""
+	_emit("revived", {"fraction": fraction})
 
 
 func drain_events() -> Array:

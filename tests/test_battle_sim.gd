@@ -281,3 +281,12 @@ func test_battle_setup_from_stage_data() -> void:
 	s.spawn_player(0)
 	s.run(30.0)
 	assert_true(s.result != "win", "one club worm does not beat Rexy")
+
+
+func test_revive_base_continues_battle() -> void:
+	var s := _sim([], {"e": _u("e", "fighter", 100, 500, 0.5, 1.0, 200.0)}, [{"t": 0.0, "id": "e"}], {"player_base_hp": 100.0})
+	s.run(60.0)
+	assert_eq(s.result, "lose")
+	s.revive_base(0.25)
+	assert_eq(s.result, "")
+	assert_near(s.player_base_hp, 25.0)

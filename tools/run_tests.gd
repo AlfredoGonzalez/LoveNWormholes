@@ -2,7 +2,9 @@ extends SceneTree
 ## Headless test runner: godot --headless --path . --script res://tools/run_tests.gd
 ## Runs every res://tests/test_*.gd (a TestCase subclass) and exits non-zero on any failure.
 
-func _init() -> void:
+func _initialize() -> void:
+	# Wait one frame so autoloads (Game) and the live scene tree exist before any test runs.
+	await process_frame
 	var total_checks := 0
 	var failed := 0
 	var files: Array[String] = []
