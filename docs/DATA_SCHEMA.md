@@ -82,6 +82,17 @@ Igual que units, con `id` `e<era>_...`, mas `behavior` (texto libre para el dire
       "rule": { "type": "none" },
       "rewards": { "coins": 30, "first_clear_gems": 5, "boss": false, "echo": false, "shard": false } } ] }
 ```
+**Regla de era (`rule`)**, generada por `tools/gen_stages.py` (Fases 1-2: Era 1 = `none`, Era 2 = arenas desde la etapa 3; ids `"<era>-<index>"`, p. ej. `"2-3"`):
+
+```json
+"rule": { "type": "none" }
+"rule": { "type": "sand_patch", "patches": [ { "x": 420, "w": 160 }, { "x": 600, "w": 140 } ] }
+```
+- `sand_patch`: `patches[]` con `x` = borde izquierdo y `w` = ancho, ambos en px del carril (0..`sim.lane_length_px` = 1000, el mismo eje que `SimUnit.x`; la base del jugador esta en x = 0, la enemiga en x = 1000). Un parche cubre `x <= unit.x <= x + w`. Cualquier unidad (de ambos bandos) que este sobre uno pierde `balance.era_rules.sand_patch.slow_fraction` (0.30) de velocidad de movimiento; no afecta la velocidad de ataque. Se combina multiplicando con la aura de lentitud de la Cobra y con la Tormenta de Arena.
+- `BattleSetup.make` copia `stage_def.rule` a `setup["rule"]`. `BattleSim` expone para la vista: `sim.rule` (el diccionario completo, `{"type": "none"}` si falta) y `sim.patches` (`Array` de `{x: float, w: float}`, vacio si la regla no es `sand_patch`), y por unidad `SimUnit.in_sand` (bool, se refresca cada tick). La vista debe dibujar `sim.patches` como franjas de ancho `w` a partir de `x` (mismo mapeo lane-px a pantalla que las unidades).
+- Eventos nuevos del sim (`drain_events()`): `jump_back {uid, x, to}` (Locust Archer salta atras tras disparar). El resto de los eventos de jefe (`phase2 {id: "sandstorm"}`, `telegraph`, `boss_attack {id: "summon"}`) ya existian.
+- Tormenta de Arena (fase 2 de Pharaoh Scarab, `bosses.json phase2.slow_fraction` 0.3): "ralentiza todo el carril" se interpreta como TODAS las unidades de ambos bandos (spec 5.3); termina cuando muere el Faraon.
+
 `index` = 1..10 dentro de la era (n = (era-1) x 10 + index); `enemy_base_hp` = `DataDB.enemy_base_hp(n)`; `waves[]` usa ids de `enemies.json`/`bosses.json` y `food_budget` es lo que gasta el director; `rule.type` en `none, sand_patch, walls, steam_vent, gravity_well` con parametros tomados de `balance.era_rules`; `rewards` se calcula con las formulas de `DataDB` (`win_coins`, etc.). `echo` en la etapa 5 y `boss` en la 10. Los nombres de etapa (ej. "Ant Patrol") iran en `i18n/strings.csv`.
 
 ## i18n/strings.csv

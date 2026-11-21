@@ -28,6 +28,7 @@ var windup := 0.0
 var attack_target_uid := -1   # -1 none, -2 the enemy base, otherwise a unit uid
 var stun := 0.0
 var freeze := 0.0
+var in_sand := false          # standing on a sand patch this tick (Era 2 rule)
 var slow := 0.0               # 0..1 speed reduction applied this tick
 var dmg_buff := 0.0           # additive damage bonus applied this tick
 var first_hit_done := false

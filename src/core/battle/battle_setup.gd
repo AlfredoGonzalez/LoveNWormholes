@@ -83,6 +83,7 @@ static func make(stage_def: Dictionary, opts: Dictionary) -> Dictionary:
 		"boss_defs": boss_defs,
 		"spawns": spawns,
 		"powers": powers,
+		"rule": (stage_def.get("rule", {"type": "none"}) as Dictionary).duplicate(true),
 	}
 
 

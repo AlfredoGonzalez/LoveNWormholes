@@ -83,3 +83,78 @@ func test_stage1_is_winnable_by_simple_player() -> void:
 		sim.tick()
 	assert_eq(sim.result, "win", "stage 1 won within 180s, got '%s' at %.0fs" % [sim.result, sim.time])
 	assert_true(sim.player_base_hp > sim.player_base_max * 0.5, "base mostly intact")
+
+
+# ---------------------------------------------------------------- Era 2 (Ancient Egypt)
+
+const SQUAD2 := ["p1_club_worm", "p2_bow_worm", "p2_shield_bearer_worm", "p2_cobra_charmer_worm"]
+
+
+func test_era2_stages_are_valid() -> void:
+	var all := DataDB.stages_of_era(2)
+	assert_eq(all.size(), 10)
+	for i in all.size():
+		var st: Dictionary = all[i]
+		assert_eq(int(st["index"]), i + 1)
+		assert_eq(str(st["id"]), "2-%d" % (i + 1))
+		var n := DataDB.stage_number(2, i + 1)
+		var label := "stage 2-%d" % (i + 1)
+		assert_near(float(st["enemy_base_hp"]), DataDB.enemy_base_hp(n), 0.01, label + " base HP uses the global n")
+		assert_eq(int((st["rewards"] as Dictionary)["coins"]), DataDB.win_coins(n))
+		var has_boss := false
+		var spent := 0.0
+		var last_t := -1.0
+		for w in st["waves"]:
+			assert_true(float(w["t"]) >= last_t, label + " waves sorted")
+			last_t = float(w["t"])
+			if w.has("boss"):
+				has_boss = true
+				assert_eq(str(w["boss"]), "b2_pharaoh_scarab")
+			else:
+				var e := DataDB.enemy(str(w["enemy"]))
+				assert_true(not e.is_empty() and int(e["era"]) == 2, label + " era 2 enemy " + str(w["enemy"]))
+				spent += float(DataDB.enemy_stats(str(w["enemy"]), 2, i + 1)["cost"]) * int(w["count"])
+		assert_eq(has_boss, i == 9, label + " boss only at stage 10")
+		assert_eq(bool((st["rewards"] as Dictionary)["boss"]), i == 9)
+		if not has_boss:
+			assert_near(float(st["food_budget"]), spent, 1.0, label + " food_budget = sum of costs")
+
+
+func test_era2_boss_stage_has_pharaoh_and_escorts() -> void:
+	var st := DataDB.stage(2, 10)
+	var boss_def := DataDB.boss("b2_pharaoh_scarab")
+	assert_true(not boss_def.is_empty())
+	assert_true((boss_def["escorts"] as Array).size() > 0)
+	var setup := BattleSetup.make(st, {"squad": SQUAD2})
+	var ids := {}
+	for sp in setup["spawns"]:
+		ids[sp["id"]] = true
+	assert_true(ids.has("b2_pharaoh_scarab"), "boss is spawned")
+	assert_true(ids.has("e2_scarab_soldier") and ids.has("e2_locust_archer"), "escorts are spawned")
+
+
+func test_era2_sand_patches_from_stage_3() -> void:
+	for st in DataDB.stages_of_era(2):
+		var idx := int(st["index"])
+		var rule: Dictionary = st["rule"]
+		if idx < 3:
+			assert_eq(str(rule["type"]), "none", "no rule in stage %d" % idx)
+			continue
+		assert_eq(str(rule["type"]), "sand_patch", "sand patches in stage %d" % idx)
+		var patches: Array = rule["patches"]
+		assert_true(patches.size() >= 1, "patches in stage %d" % idx)
+		for p in patches:
+			assert_true(float(p["x"]) >= 0.0 and float(p["w"]) > 0.0 and float(p["x"]) + float(p["w"]) <= 1000.0, "patch inside the lane")
+	for st in DataDB.stages_of_era(1):
+		assert_eq(str((st["rule"] as Dictionary)["type"]), "none", "Era 1 has no rule")
+
+
+func test_era2_setup_uses_time_sync_and_runs() -> void:
+	var st := DataDB.stage(2, 3)
+	var setup := BattleSetup.make(st, {"squad": ["p1_club_worm", "p2_bow_worm"]})
+	var club: Dictionary = setup["squad"][0]
+	assert_near(float(club["hp"]), float(DataDB.unit_stats("p1_club_worm", 1, 2)["hp"]), 0.001)
+	assert_true(float(club["hp"]) > float(DataDB.unit_stats("p1_club_worm", 1, 1)["hp"]), "time sync makes Era 1 units stronger")
+	var sim := BattleSim.new(setup)
+	sim.run(20.0)
+	assert_true(sim.units.size() > 0, "enemies arrive")
