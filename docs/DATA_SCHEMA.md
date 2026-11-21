@@ -93,6 +93,23 @@ Igual que units, con `id` `e<era>_...`, mas `behavior` (texto libre para el dire
 - Eventos nuevos del sim (`drain_events()`): `jump_back {uid, x, to}` (Locust Archer salta atras tras disparar). El resto de los eventos de jefe (`phase2 {id: "sandstorm"}`, `telegraph`, `boss_attack {id: "summon"}`) ya existian.
 - Tormenta de Arena (fase 2 de Pharaoh Scarab, `bosses.json phase2.slow_fraction` 0.3): "ralentiza todo el carril" se interpreta como TODAS las unidades de ambos bandos (spec 5.3); termina cuando muere el Faraon.
 
+**Era 3 (Medieval), `walls`** (desde la etapa 3; etapas 1-2 `none`):
+```json
+"rule": { "type": "walls", "hp_fraction": 0.2, "damage_mult": 0.5,
+          "walls": [ { "x": 52, "w": 20, "side": "player" }, { "x": 928, "w": 20, "side": "enemy" } ] }
+```
+- `hp_fraction` / `damage_mult` son copias informativas de `balance.era_rules.walls` (la simulacion lee el balance, no la regla). Cada base tiene un muro: mientras esta en pie, los golpes a esa base hacen `damage_mult` (0.5) de dano, y el muro "dura" `hp_fraction` (20%) de la vida maxima de la base (se rompe cuando la base ha perdido ese 20%; el dano que cruza el limite cuenta mitad la parte del muro y completo el resto). Vale para las dos bases. El Escudo de Tierra absorbe antes que el muro.
+- `walls[]` es solo para dibujar: `x` borde izquierdo y `w` ancho en px del carril, `side` `"player"|"enemy"` (el de la base propia esta en x ~ 52, el enemigo en ~ 928). `RuleLayer` los dibuja como zonas grises y deja de dibujar el de un lado cuando `sim.wall_up(side)` es false.
+- API del sim para la vista: `sim.walls_on`, `sim.wall_hp[side]` / `sim.wall_max[side]` (side 0 = jugador, 1 = enemigo; HP de base que el muro aun puede ahorrar), `sim.wall_up(side)`. Evento `wall_down {side}` cuando cae un muro.
+- Sir Sizzle (`b3_sir_sizzle`): `telegraph fire_breath {segment_units 6, dps_mult 0.5, duration_s 3}` = tras el aviso de 1.5 s, una zona fija de `segment_units x 40` px delante del jefe (hacia la base del jugador) quema a las unidades del jugador `boss.damage x dps_mult` por segundo durante `duration_s` (el dano cae dos veces por segundo, sin multiplicador de contraataque). `phase2 take_flight`: a la mitad de vida `is_air = true`, solo los roles con `can_hit_air` (Shooters) y los poderes le alcanzan. Para la vista: `sim.hazards` (`Array` de `{kind: "fire_breath", x0, x1, t, dps}`; `RuleLayer` los pinta en naranja) y el evento `boss_attack {id: "fire_breath", x, x0, x1, duration}`.
+
+**Era 4 (Industrial), `steam_vent`** (desde la etapa 3):
+```json
+"rule": { "type": "steam_vent", "attack_speed_bonus": 0.25, "vents": [ { "x": 430, "w": 140 } ] }
+```
+- `vents[]` igual que `patches` (`x` borde izquierdo, `w` ancho, px del carril, 0..1000). Cualquier unidad de ambos bandos con `x` dentro de un respiradero gana `balance.era_rules.steam_vent.attack_speed_bonus` (0.25) de velocidad de ataque (el ciclo de ataque, espera y recarga, corre 1.25x; no cambia la velocidad de movimiento). `attack_speed_bonus` en la regla es informativo. Para la vista: `sim.vents` (`Array` de `{x, w}`) y `SimUnit.in_vent`; `RuleLayer` dibuja `vents`/`steam_vents` como zonas azul claro que pulsan.
+- Habilidades nuevas del sim: Spark Fly `abilities {chain_targets 2, chain_radius_units 2, chain_damage_fraction 0.5}` (el golpe tambien daña a hasta 2 unidades enemigas mas cercanas al objetivo dentro de 2 unidades de alcance, al 50%; evento `chain {uid, x, r}`); Clockwork Queen `telegraph steam_burst {radius_units 4, slow_fraction 0.3, slow_seconds 3, damage_mult 1.0}` (dano `boss.damage x damage_mult` y lentitud del 30% durante 3 s a las unidades del jugador a <= 4 unidades; `slow_seconds` es campo propuesto nuestro) y `phase2 spawn_cogs {enemy, interval_s 8, count 1}` (un Cog Roach al instante de la fase 2 y cada 8 s; evento `boss_attack {id: "spawn_cogs"}`). Boiler Tank (`splash_radius_units`), Clank Crab (`frontal_armor_fraction`), Knight/Beetle Knight (`first_hit_bonus`), Wizard (`damage_aura`) y el Dung Catapult (`target: highest_hp`) ya existian en el sim.
+
 `index` = 1..10 dentro de la era (n = (era-1) x 10 + index); `enemy_base_hp` = `DataDB.enemy_base_hp(n)`; `waves[]` usa ids de `enemies.json`/`bosses.json` y `food_budget` es lo que gasta el director; `rule.type` en `none, sand_patch, walls, steam_vent, gravity_well` con parametros tomados de `balance.era_rules`; `rewards` se calcula con las formulas de `DataDB` (`win_coins`, etc.). `echo` en la etapa 5 y `boss` en la 10. Los nombres de etapa (ej. "Ant Patrol") iran en `i18n/strings.csv`.
 
 ## i18n/strings.csv

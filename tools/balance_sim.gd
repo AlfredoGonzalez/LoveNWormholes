@@ -14,6 +14,9 @@ extends SceneTree
 ## Squad-picking policy per profile is in ERA_SQUADS, power picks in ERA_POWERS (see docs/BALANCE.md).
 ## All 10 stages of Era 2 (n = 11..20) are held to the 60-75% band; only Era 1 stages 1-2 are tutorial.
 ##
+## Eras 3 and 4 (--era 3 / --era 4): same Time Squad idea with 5 slots (the 5th opens after the Era 2 boss); powers
+## 2 slots in Era 3 and 3 in Era 4 (the 3rd opens after the Era 3 boss). Policies in ERA_SQUADS_34 / ERA_POWERS_34.
+##
 ## Nothing about combat is re-implemented here: this file only decides WHAT to press and WHEN.
 ## All bot tunables are in PROFILES and in the Bot class, documented in docs/BALANCE.md.
 
@@ -44,6 +47,27 @@ const ERA_SQUADS := {
 		"normal": ["p1_club_worm", "p2_bow_worm", "p2_shield_bearer_worm", "p2_cobra_charmer_worm"],
 		"optimized": ["p1_club_worm", "p2_bow_worm", "p1_dino_rider_worm", "p2_cobra_charmer_worm"]},
 }
+## Eras 3-4 (5 squad slots). Normal = one of each role the era needs: Era 3 fighter (Knight Worm, first-hit bonus), Crossbow
+## (shooter that hits air, vs hornets and the flying Sir Sizzle), Shield Bearer (heavy), Cobra Charmer or Wizard (support);
+## Era 4 Knight, Gear Gunner (fast shooter, hits air), Boiler Tank (splash heavy), Wizard (damage aura), Crossbow.
+const ERA_SQUADS_34 := {
+	3: {"casual": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm", "p2_shield_bearer_worm", "p2_bow_worm"],
+		"normal": ["p3_knight_worm", "p3_crossbow_worm", "p2_shield_bearer_worm", "p3_wizard_worm", "p2_bow_worm"],
+		"optimized": ["p3_knight_worm", "p3_crossbow_worm", "p1_dino_rider_worm", "p3_wizard_worm", "p2_bow_worm"]},
+	4: {"casual": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm", "p2_shield_bearer_worm", "p2_bow_worm"],
+		"normal": ["p3_knight_worm", "p4_gear_gunner_worm", "p4_boiler_tank_worm", "p3_wizard_worm", "p3_crossbow_worm"],
+		"optimized": ["p3_knight_worm", "p4_gear_gunner_worm", "p4_boiler_tank_worm", "p3_wizard_worm", "p3_crossbow_worm"]},
+}
+## Power slots: 2 in Era 3, 3 in Era 4. The bots can cast Squirm Slam, Apple Rain and Time Freeze.
+const ERA_POWERS_34 := {
+	3: {"casual": POWERS, "normal": POWERS, "optimized": ["squirm_slam", "time_freeze"]},
+	4: {"casual": POWERS, "normal": ["squirm_slam", "apple_rain", "time_freeze"], "optimized": ["squirm_slam", "apple_rain", "time_freeze"]},
+}
+const ERA_PROFILE_OVERRIDES_34 := {
+	3: {"normal": {"save": 0.0}, "optimized": {"save_window": 2.5}},
+	4: {"normal": {"save": 0.0}, "optimized": {"save_window": 2.5}},
+}
+
 ## Equipped powers (2 slots until the Era 3 boss). Unlocked in Era 2: Squirm Slam, Apple Rain, Time Freeze.
 const ERA_POWERS := {
 	1: {"casual": POWERS, "normal": POWERS, "optimized": POWERS},
@@ -157,6 +181,9 @@ class Bot extends RefCounted:
 			var role := str(st["role"])
 			var s := 0.0
 			for e in enemies:
+				if e.is_air and not DataDB.can_hit(role, true):
+					s -= 0.2   # Eras 3+: air enemies (hornets, sparks, the flying boss) only die to Shooters
+					continue
 				s += DataDB.counter_multiplier(role, e.role) - 0.5 * DataDB.counter_multiplier(e.role, role)
 				if e.role == "heavy" and role == "shooter":
 					s += 0.5   # kite it
@@ -258,8 +285,8 @@ static func profile_opts(prof: String, n: int, era: int = 1) -> Dictionary:
 	var k := float(n - 1)
 	var avg := 1.0 + DataDB.bal_f("scaling.target_avg_level_step") * float(p["progress"]) * k
 	var pl := clampi(1 + int(floor(float(p["power_step"]) * k)), 1, DataDB.bal_i("upgrades.power.max_level"))
-	var squad: Array = ERA_SQUADS[era][prof]
-	var powers: Array = ERA_POWERS[era][prof]
+	var squad: Array = _era_table(ERA_SQUADS, ERA_SQUADS_34, era)[prof]
+	var powers: Array = _era_table(ERA_POWERS, ERA_POWERS_34, era)[prof]
 	var power_levels := {}
 	for pid in powers:
 		power_levels[pid] = pl
@@ -297,8 +324,15 @@ func _play_stage(era: int, stage_index: int, prof: String, runs: int, base_seed:
 
 static func _profile(era: int, prof: String) -> Dictionary:
 	var p: Dictionary = (PROFILES[prof] as Dictionary).duplicate()
-	p.merge((ERA_PROFILE_OVERRIDES.get(era, {}) as Dictionary).get(prof, {}), true)
+	p.merge((_era_table(ERA_PROFILE_OVERRIDES, ERA_PROFILE_OVERRIDES_34, era)).get(prof, {}), true)
 	return p
+
+
+## Looks `era` up in the base table, then in the Era 3-4 table (kept apart so each era's tables live in their own constant).
+static func _era_table(base: Dictionary, extra: Dictionary, era: int) -> Dictionary:
+	if base.has(era):
+		return base[era]
+	return extra.get(era, {})
 
 
 static func _rate(r: Dictionary) -> float:

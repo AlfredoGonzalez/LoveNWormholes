@@ -14,6 +14,7 @@ extends RefCounted
 ##   spawns : Array of {t: seconds, id: enemy/boss id} sorted by t (the director script)
 ##   powers : Array of {id, cooldown, effect: Dictionary} (DataDB.power_params output), slot order
 ##   rule : stage era rule, {type: "none"} or {type: "sand_patch", patches: [{x, w}, ...]} (x = left edge, lane px)
+##          or {type: "walls", walls: [{x, w, side}]} (Era 3) or {type: "steam_vent", vents: [{x, w}]} (Era 4)
 
 const PLAYER := 0
 const ENEMY := 1
@@ -50,6 +51,14 @@ var patches: Array = []        # sand patches as {x, w} (left edge and width in 
 var _sand_slow := 0.0          # speed fraction lost on a patch (balance.json era_rules.sand_patch.slow_fraction)
 var stats := {"kills": 0, "units_spawned": 0, "powers_used": 0, "player_losses": 0}
 
+# --- Era 3 walls / Era 4 steam vents / boss hazards (docs/DATA_SCHEMA.md)
+var wall_hp := [0.0, 0.0]      # per side (PLAYER, ENEMY): HP the wall still has before the base is exposed; 0 = no wall / destroyed
+var wall_max := [0.0, 0.0]
+var walls_on := false
+var vents: Array = []          # steam vents as {x, w}; empty unless rule is steam_vent
+var hazards: Array = []        # timed lane zones: {kind, x0, x1, t, dps, acc} (Sir Sizzle fire breath); read by the view
+var _wall_damage_mult := 0.5
+var _vent_bonus := 0.25
 var _enemy_units: Dictionary = {}
 var _boss_defs: Dictionary = {}
 var _spawns: Array = []
@@ -108,6 +117,7 @@ func _init(setup: Dictionary) -> void:
 		_sand_slow = DataDB.bal_f("era_rules.sand_patch.slow_fraction", 0.3)
 		for pt in rule.get("patches", []):
 			patches.append({"x": float(pt["x"]), "w": float(pt["w"])})
+	_init_era34_rule()
 	for p in setup.get("powers", []):
 		var pw: Dictionary = (p as Dictionary).duplicate(true)
 		pw["cd"] = 0.0
@@ -220,6 +230,7 @@ func tick() -> void:
 	for u in units:
 		_update_unit(u)
 	_update_projectiles()
+	_update_hazards()
 	_boss_logic()
 	_cleanup()
 	_check_end()
@@ -294,6 +305,10 @@ func _reset_auras() -> void:
 		u.dmg_buff = 0.0
 		u.slow = 0.0
 		u.in_sand = _on_sand(u.x)
+		u.in_vent = _on_vent(u.x)
+		u.burst_slow_t = maxf(0.0, u.burst_slow_t - dt)
+		if u.burst_slow_t > 0.0:
+			u.slow = maxf(u.slow, u.burst_slow)
 
 
 func _apply_auras() -> void:
@@ -330,6 +345,8 @@ func _update_unit(u: SimUnit) -> void:
 		u.freeze -= dt
 		return
 	var haste := _player_speed_mult if u.side == PLAYER else 1.0
+	if u.in_vent:
+		haste *= 1.0 + _vent_bonus   # Era 4 steam vent: faster attack cycle
 	u.atk_cd = maxf(0.0, u.atk_cd - dt * haste)
 	if u.state == SimUnit.State.ATTACK:
 		u.windup -= dt * haste
@@ -438,6 +455,8 @@ func _resolve_attack(u: SimUnit) -> void:
 		for o in units:
 			if o != t and o.side != u.side and o.alive() and not o.is_air and absf(o.x - t.x) <= r:
 				_damage_unit(o, raw * 0.5, u, false, true)
+	if u.abilities.has("chain_targets") and t != null:
+		_chain_shock(u, t, raw)
 
 
 ## Locust Archer: after shooting it hops back `units` range units, away from the enemy, never past its own
@@ -523,9 +542,9 @@ func _damage_base(side: int, raw: float, x: float) -> void:
 			var absorbed := minf(player_shield, d)
 			player_shield -= absorbed
 			d -= absorbed
-		player_base_hp = maxf(0.0, player_base_hp - d)
+		player_base_hp = maxf(0.0, player_base_hp - _through_wall(PLAYER, d))
 	else:
-		enemy_base_hp = maxf(0.0, enemy_base_hp - d)
+		enemy_base_hp = maxf(0.0, enemy_base_hp - _through_wall(ENEMY, d))
 	_emit("base_hit", {"side": side, "damage": d, "x": x})
 
 
@@ -562,6 +581,7 @@ func _boss_logic() -> void:
 				"take_flight":
 					u.is_air = true
 			_emit("phase2", {"uid": u.uid, "id": str(p2.get("id", ""))})
+		_phase2_periodic(u, def)
 		u.telegraph_cd -= dt
 		var warn := DataDB.bal_f("boss.telegraph_warning_s", 1.5)
 		if u.telegraph_warn <= 0.0 and u.telegraph_cd <= warn and u.telegraph_cd > 0.0:
@@ -588,8 +608,137 @@ func _boss_attack(boss: SimUnit, t: Dictionary) -> void:
 					if _alive_count(ENEMY) < _pop_cap:
 						_add_unit(_enemy_units[eid], ENEMY, boss.x)
 			_emit("boss_attack", {"uid": boss.uid, "id": "summon", "x": boss.x})
+		"fire_breath":
+			_fire_breath(boss, t)
+		"steam_burst":
+			_steam_burst(boss, t)
 		_:
 			_emit("boss_attack", {"uid": boss.uid, "id": str(t.get("id", "")), "x": boss.x})
+
+
+# ------------------------------------------------------------------ Era 3 walls, Era 4 vents, boss hazards
+
+func _init_era34_rule() -> void:
+	match str(rule.get("type", "none")):
+		"walls":
+			walls_on = true
+			var frac := DataDB.bal_f("era_rules.walls.hp_fraction", 0.2)
+			_wall_damage_mult = DataDB.bal_f("era_rules.walls.damage_mult", 0.5)
+			wall_max = [player_base_max * frac, enemy_base_max * frac]
+			wall_hp = wall_max.duplicate()
+		"steam_vent":
+			_vent_bonus = DataDB.bal_f("era_rules.steam_vent.attack_speed_bonus", 0.25)
+			for pt in rule.get("vents", []):
+				vents.append({"x": float(pt["x"]), "w": float(pt["w"])})
+
+
+## Era 3: while the wall of a base stands, hits on that base do `walls.damage_mult` (0.5) of their damage.
+## The wall is the first `walls.hp_fraction` (20%) of the base's max HP: it is gone once the base has lost that
+## much (damage that goes through the wall counts at the reduced rate, the rest at full rate).
+## Returns the HP the base actually loses.
+func _through_wall(side: int, d: float) -> float:
+	if not walls_on or wall_hp[side] <= 0.0:
+		return d
+	var cost := d * _wall_damage_mult
+	if cost <= wall_hp[side]:
+		wall_hp[side] -= cost
+		if wall_hp[side] <= 0.0:
+			wall_hp[side] = 0.0
+			_emit("wall_down", {"side": side})
+		return cost
+	var used_raw: float = wall_hp[side] / maxf(0.0001, _wall_damage_mult)
+	var lost: float = wall_hp[side] + (d - used_raw)
+	wall_hp[side] = 0.0
+	_emit("wall_down", {"side": side})
+	return lost
+
+
+func wall_up(side: int) -> bool:
+	return walls_on and wall_hp[side] > 0.0
+
+
+func _on_vent(x: float) -> bool:
+	for pt in vents:
+		if x >= float(pt["x"]) and x <= float(pt["x"]) + float(pt["w"]):
+			return true
+	return false
+
+
+## Spark Fly: the shock also hits up to `chain_targets` other enemies of the target within
+## `chain_radius_units`, for `chain_damage_fraction` of the damage.
+func _chain_shock(u: SimUnit, t: SimUnit, raw: float) -> void:
+	var r := float(u.abilities.get("chain_radius_units", 2.0)) * range_unit
+	var frac := float(u.abilities.get("chain_damage_fraction", 0.5))
+	var left := int(u.abilities["chain_targets"])
+	var cands: Array = []
+	for o in units:
+		if o != t and o.side != u.side and o.alive() and absf(o.x - t.x) <= r:
+			cands.append(o)
+	cands.sort_custom(func(a, b): return absf(a.x - t.x) < absf(b.x - t.x))
+	for o in cands:
+		if left <= 0:
+			break
+		_damage_unit(o, raw * frac, u, false, false)
+		left -= 1
+	_emit("chain", {"uid": u.uid, "x": t.x, "r": r})
+
+
+## Sir Sizzle: a fixed lane segment in front of him burns player units for `duration_s`.
+func _fire_breath(boss: SimUnit, t: Dictionary) -> void:
+	var seg := float(t.get("segment_units", 6.0)) * range_unit
+	var x0 := maxf(0.0, boss.x - seg)
+	hazards.append({"kind": "fire_breath", "x0": x0, "x1": boss.x, "t": float(t.get("duration_s", 3.0)),
+			"dps": boss.damage * float(t.get("dps_mult", 0.5)), "acc": 0.0, "src": boss.uid})
+	_emit("boss_attack", {"uid": boss.uid, "id": "fire_breath", "x": boss.x, "x0": x0, "x1": boss.x,
+			"duration": float(t.get("duration_s", 3.0))})
+
+
+func _update_hazards() -> void:
+	if hazards.is_empty():
+		return
+	var keep: Array = []
+	for h in hazards:
+		h["t"] -= dt
+		h["acc"] += dt
+		if h["acc"] >= 0.5 - 0.0001:   # damage over time lands twice a second (fewer hit events than every tick)
+			var chunk := float(h["dps"]) * float(h["acc"])
+			h["acc"] = 0.0
+			for a in units:
+				if a.side == PLAYER and a.alive() and a.x >= float(h["x0"]) and a.x <= float(h["x1"]):
+					_damage_unit(a, chunk, null, false, false)
+		if h["t"] > 0.0:
+			keep.append(h)
+	hazards = keep
+
+
+## Clockwork Queen: steam burst damages (boss damage x damage_mult) and slows player units within `radius_units`.
+func _steam_burst(boss: SimUnit, t: Dictionary) -> void:
+	var reach := float(t.get("radius_units", 4.0)) * range_unit
+	for a in units:
+		if a.side == PLAYER and a.alive() and absf(a.x - boss.x) <= reach:
+			_damage_unit(a, boss.damage * float(t.get("damage_mult", 1.0)), boss, false, false)
+			a.burst_slow = float(t.get("slow_fraction", 0.3))
+			a.burst_slow_t = float(t.get("slow_seconds", 3.0))
+	_emit("boss_attack", {"uid": boss.uid, "id": "steam_burst", "x": boss.x, "reach": reach})
+
+
+## Phase 2 effects that repeat (Clockwork Queen: spawn_cogs every `interval_s`).
+func _phase2_periodic(u: SimUnit, def: Dictionary) -> void:
+	if not u.phase2:
+		return
+	var p2: Dictionary = def.get("phase2", {})
+	if str(p2.get("id", "")) != "spawn_cogs":
+		return
+	u.extra_cd -= dt
+	if u.extra_cd > 0.0:
+		return
+	u.extra_cd = float(p2.get("interval_s", 8.0))
+	var eid := str(p2.get("enemy", ""))
+	if _enemy_units.has(eid):
+		for _i in int(p2.get("count", 1)):
+			if _alive_count(ENEMY) < _pop_cap:
+				_add_unit(_enemy_units[eid], ENEMY, u.x)
+	_emit("boss_attack", {"uid": u.uid, "id": "spawn_cogs", "x": u.x})
 
 
 # ------------------------------------------------------------------ helpers
