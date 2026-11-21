@@ -1,0 +1,24 @@
+key	en	es
+squad.era_n	Era {0}	Era {0}
+squad.all	All	Todas
+squad.locked_era	Unlocks with Era {0}	Se desbloquea con la Era {0}
+squad.stat_summary	HP {0} · DMG {1}	Vida {0} · Daño {1}
+squad.stat_hp	HP: {0}	Vida: {0}
+squad.stat_damage	Damage: {0}	Daño: {0}
+squad.stat_cost	Cost: {0} Food	Coste: {0} Comida
+squad.stat_range	Range: {0}	Alcance: {0}
+squad.stat_speed	Speed: {0}	Velocidad: {0}
+squad.stat_interval	Attack every {0} s	Ataca cada {0} s
+squad.stat_cooldown	Cooldown: {0} s	Espera: {0} s
+squad.detail_hint	Tap a unit to add it to the squad or remove it, and to see its details.	Toca una unidad para añadirla al escuadrón o quitarla, y ver sus detalles.
+squad.ability	Ability	Habilidad
+squad.in_squad	In squad	En el escuadrón
+squad.full	Squad full. Remove a unit first.	Escuadrón completo. Quita una unidad primero.
+squad.keep_one	Keep at least one unit in the squad.	Deja al menos una unidad en el escuadrón.
+squad.counter_weak	Countered units deal x{0} damage.	Las unidades contrarrestadas hacen x{0} de daño.
+squad.slots_title	Time Squad {0} / {1}	Escuadrón del Tiempo {0} / {1}
+prebattle.edit_hint	Tap a unit or an empty slot to edit the squad.	Toca una unidad o un espacio vacío para editar el escuadrón.
+prebattle.add_unit	+ Add	+ Añadir
+prebattle.power_n	Power {0}	Poder {0}
+prebattle.power_swap_hint	Tap a power to swap it.	Toca un poder para cambiarlo.
+prebattle.power_empty	Empty. Tap to equip.	Vacío. Toca para equipar.

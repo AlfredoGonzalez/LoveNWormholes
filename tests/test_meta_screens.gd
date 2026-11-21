@@ -162,10 +162,13 @@ func test_prebattle_builds_and_starts() -> void:
 		return
 	var nav = _fresh()
 	var s = _make("res://src/meta/pre_battle_screen.gd", {"era": 1, "stage": 3})
-	assert_eq(s.squad.size(), 3)
+	assert_eq(s.squad.size(), 3, "fresh profile: the Era-1 trio (no other unit is unlocked)")
+	assert_eq(s.squad, Squad.active(_g().save.profile))
 	assert_eq(s.powers, ["squirm_slam", "apple_rain"])
-	assert_eq(s.slot_notes.size(), 3, "two locked squad slots and the third power slot")
-	assert_eq((s.slot_notes[0] as Label).text, _g().t("ui.unlocks_level", [Progress.feature_unlock_stage("squad")]))
+	assert_eq(s.slot_notes.size(), 2, "locked squad slot 5 and the locked third power slot")
+	assert_eq((s.slot_notes[0] as Label).text, _g().t("ui.unlocks_boss", [2]))
+	assert_eq((s.slot_notes[1] as Label).text, _g().t("ui.unlocks_boss", [3]))
+	assert_eq(s.empty_slots.size(), 1, "slot 4 is open but empty")
 	var mix = (load("res://src/meta/pre_battle_screen.gd") as GDScript).scout_mix(DataDB.stage(1, 3))
 	var expected := {}
 	for w in DataDB.stage(1, 3)["waves"]:

@@ -2,25 +2,54 @@ class_name MetaUI
 extends RefCounted
 ## Small helpers shared by the menu-flow screens (title, levels, prebattle, result).
 
-const DEFAULT_POWERS := ["squirm_slam", "apple_rain"]
-const SQUAD_SIZE := 3
-
-
-## The 3 Era-1 units used as the squad in the vertical slice.
+## The active Time Squad (Squad.active): used where a battle needs a squad and none was passed.
 static func default_squad() -> Array:
-	var ids: Array = []
-	for u in DataDB.units_of_era(1):
-		ids.append(str(u["id"]))
-		if ids.size() >= SQUAD_SIZE:
-			break
-	return ids
+	return Squad.active(Game.save.profile)
 
 
 static func default_powers() -> Array:
-	var eq: Array = Game.save.profile["loadout"].get("equipped_powers", [])
-	if not eq.is_empty():
-		return eq.duplicate()
-	return DEFAULT_POWERS.duplicate()
+	return Squad.equipped_powers(Game.save.profile)
+
+
+## A tappable card: a Button (so it is focusable and >= 48 px) with a "box" VBox on top for labels.
+## kind: "normal" (cream), "selected" (gold border), "locked" (greyed, disabled), "empty" (greyed, tappable).
+static func card_button(min_size: Vector2, kind := "normal") -> Button:
+	var b := Button.new()
+	b.custom_minimum_size = Vector2(min_size.x, maxf(min_size.y, UI.MIN_TOUCH))
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.clip_text = false
+	var bg := UI.PANEL
+	var border := UI.BORDER
+	match kind:
+		"selected":
+			border = UI.ORANGE
+		"locked", "empty":
+			bg = UI.LOCKED
+	b.add_theme_stylebox_override("normal", UI.style(bg, border, 16))
+	b.add_theme_stylebox_override("hover", UI.style(bg.lightened(0.06), border, 16))
+	b.add_theme_stylebox_override("pressed", UI.style(bg.darkened(0.1), border, 16, 3, false))
+	b.add_theme_stylebox_override("disabled", UI.style(UI.LOCKED, UI.LOCKED_INK, 16))
+	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	var box := VBoxContainer.new()
+	box.name = "box"
+	box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	box.offset_left = 6
+	box.offset_right = -6
+	box.offset_top = 4
+	box.offset_bottom = -4
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_theme_constant_override("separation", 2)
+	b.add_child(box)
+	b.disabled = kind == "locked"
+	return b
+
+
+## Removes every child immediately (not deferred) so a section can be rebuilt in the same frame.
+static func clear_children(n: Node) -> void:
+	for c in n.get_children():
+		n.remove_child(c)
+		c.queue_free()
 
 
 ## Full-screen margin + vertical box on top of the cream background. Returns the VBox.
