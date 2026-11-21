@@ -9,6 +9,11 @@ extends SceneTree
 ## win rate outside the 60-75% first-try band only prints a WARNING (stages 3+; stages 1-2 are tutorial
 ## and are expected above 90%).
 ##
+## Era 2 (--era 2): the player has the TIME SQUAD (every unlocked unit of Era 1 and Era 2, 6 units, 4 slots; the
+## 5th slot opens after the Era 2 boss) and the powers of the bosses beaten so far (Era 1 boss: Time Freeze).
+## Squad-picking policy per profile is in ERA_SQUADS, power picks in ERA_POWERS (see docs/BALANCE.md).
+## All 10 stages of Era 2 (n = 11..20) are held to the 60-75% band; only Era 1 stages 1-2 are tutorial.
+##
 ## Nothing about combat is re-implemented here: this file only decides WHAT to press and WHEN.
 ## All bot tunables are in PROFILES and in the Bot class, documented in docs/BALANCE.md.
 
@@ -19,6 +24,24 @@ const TIME_LIMIT := 480.0   # seconds of sim time; a battle still running then c
 
 const SQUAD := ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"]
 const POWERS := ["squirm_slam", "apple_rain"]
+
+## Squad policy by era and profile (card order). Era 1: the three starting units. Era 2 (4 slots out of 6 units):
+##   normal    fighter + shooter + heavy + support: cheap Club Worm, Bow Worm (Era 2 shooter, 0.8 s interval),
+##             Shield Bearer (heavy, blocks 20% of ranged = counter to Locust Archers), Cobra Charmer (slow aura).
+##   casual    suboptimal: the first four units a player owns (Club, Slinger, Dino Rider, Shield Bearer), no support,
+##             no Era 2 shooter (never opened the collection screen).
+##   optimized fighter + shooter + heavy + support, but the heavy is the cheaper Dino Rider (time sync makes it x1.4).
+const ERA_SQUADS := {
+	1: {"casual": SQUAD, "normal": SQUAD, "optimized": SQUAD},
+	2: {"casual": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm", "p2_shield_bearer_worm"],
+		"normal": ["p1_club_worm", "p2_bow_worm", "p2_shield_bearer_worm", "p2_cobra_charmer_worm"],
+		"optimized": ["p1_club_worm", "p2_bow_worm", "p1_dino_rider_worm", "p2_cobra_charmer_worm"]},
+}
+## Equipped powers (2 slots until the Era 3 boss). Unlocked in Era 2: Squirm Slam, Apple Rain, Time Freeze.
+const ERA_POWERS := {
+	1: {"casual": POWERS, "normal": POWERS, "optimized": POWERS},
+	2: {"casual": POWERS, "normal": POWERS, "optimized": ["squirm_slam", "time_freeze"]},
+}
 
 ## Profile definitions. `progress` multiplies the spec pacing (average squad level = 1 + 0.25 x progress x (n-1)).
 ## react / jitter: seconds between bot decisions (mean, +- uniform). skill: probability that a decision
@@ -66,10 +89,24 @@ class Bot extends RefCounted:
 			if pid == "squirm_slam":
 				if _slam_worthwhile(sim) and rng.randf() < float(p["slam_prob"]):
 					sim.cast_power(i)
+			elif pid == "time_freeze":
+				if _freeze_worthwhile(sim) and rng.randf() < float(p["slam_prob"]):
+					sim.cast_power(i)
 			elif pid == "apple_rain":
 				# Food low and income still matters (early/mid battle, enemies still to come).
 				if sim.food < 70.0 and sim.time > 6.0 and sim.time < 240.0 and rng.randf() < float(p["rain_prob"]):
 					sim.cast_power(i)
+
+	## Freeze when 3+ enemies are near the front, or the boss is on the field and close to the front.
+	func _freeze_worthwhile(sim: BattleSim) -> bool:
+		var enemies := sim.alive_units(BattleSim.ENEMY)
+		var near := 0
+		for e in enemies:
+			if e.x <= 650.0:
+				near += 1
+				if e.is_boss:
+					near += 2
+		return near >= 3
 
 	func _slam_worthwhile(sim: BattleSim) -> bool:
 		var enemies := sim.alive_units(BattleSim.ENEMY)
@@ -81,7 +118,10 @@ class Bot extends RefCounted:
 				front = e
 		if front.x > 650.0:
 			return false   # not at the front yet
-		var radius := float(sim.powers[0]["effect"].get("radius_units", 3.0)) * sim.range_unit
+		var radius := 3.0 * sim.range_unit
+		for pw in sim.powers:
+			if str(pw["id"]) == "squirm_slam":
+				radius = float(pw["effect"].get("radius_units", 3.0)) * sim.range_unit
 		var near := 0
 		for e in enemies:
 			if absf(e.x - front.x) <= radius:
@@ -115,6 +155,15 @@ class Bot extends RefCounted:
 			for o in own:
 				if o.role == role:
 					s -= 0.35
+			if role == "support":
+				# Support cards never fight: one at a time, and only when there is something to slow or outlast.
+				var has_support := false
+				for o2 in own:
+					if o2.role == "support":
+						has_support = true
+				s = -0.4 + 0.2 * minf(float(enemies.size()), 4.0) + (own.size() * 0.05)
+				if has_support or own.size() < 2:
+					s -= 2.0
 			if enemies.is_empty():
 				s += 0.3 if role == "fighter" else 0.0
 			s -= float(st["cost"]) * 0.002
@@ -153,7 +202,7 @@ func _initialize() -> void:
 			results[prof][s] = _play_stage(era, int(s), str(prof), runs, base_seed)
 			if verbose:
 				print("  %s stage %d: %.0f%%" % [prof, s, 100.0 * _rate(results[prof][s])])
-	var rc := _report(results, profiles, rng_stages, runs)
+	var rc := _report(results, profiles, rng_stages, runs, era)
 	quit(rc)
 
 
@@ -186,25 +235,30 @@ func _range(spec: String) -> Array:
 
 
 ## Squad levels so that their mean is `avg` (integer levels, spread over the cards).
-static func squad_levels(avg: float) -> Dictionary:
+static func squad_levels(avg: float, squad: Array = SQUAD) -> Dictionary:
 	var out := {}
-	var k := SQUAD.size()
+	var k := squad.size()
 	for i in k:
 		var lv := int(floor(avg - 1.0 + (float(i) + 0.5) / float(k)))
-		out[SQUAD[i]] = clampi(lv + 1, 1, DataDB.bal_i("upgrades.unit.max_level"))
+		out[squad[i]] = clampi(lv + 1, 1, DataDB.bal_i("upgrades.unit.max_level"))
 	return out
 
 
-static func profile_opts(prof: String, n: int) -> Dictionary:
+static func profile_opts(prof: String, n: int, era: int = 1) -> Dictionary:
 	var p: Dictionary = PROFILES[prof]
 	var k := float(n - 1)
 	var avg := 1.0 + DataDB.bal_f("scaling.target_avg_level_step") * float(p["progress"]) * k
 	var pl := clampi(1 + int(floor(float(p["power_step"]) * k)), 1, DataDB.bal_i("upgrades.power.max_level"))
+	var squad: Array = ERA_SQUADS[era][prof]
+	var powers: Array = ERA_POWERS[era][prof]
+	var power_levels := {}
+	for pid in powers:
+		power_levels[pid] = pl
 	return {
-		"squad": SQUAD, "unit_levels": squad_levels(avg),
+		"squad": squad, "unit_levels": squad_levels(avg, squad),
 		"burrow_level": clampi(1 + int(round(float(p["burrow_step"]) * k)), 1, DataDB.bal_i("upgrades.burrow.max_level")),
 		"base_level": clampi(1 + int(round(float(p["base_step"]) * k)), 1, DataDB.bal_i("upgrades.base.max_level")),
-		"powers": POWERS, "power_levels": {"squirm_slam": pl, "apple_rain": pl},
+		"powers": powers, "power_levels": power_levels,
 	}
 
 
@@ -215,7 +269,7 @@ func _play_stage(era: int, stage_index: int, prof: String, runs: int, base_seed:
 		push_error("no stage %d-%d" % [era, stage_index])
 		return res
 	var n := DataDB.stage_number(era, stage_index)
-	var opts := profile_opts(prof, n)
+	var opts := profile_opts(prof, n, era)
 	var setup := BattleSetup.make(def, opts)
 	for r in runs:
 		var seed_value := base_seed * 1000003 + n * 7919 + r * 104729 + prof.hash() % 9973
@@ -236,11 +290,11 @@ static func _rate(r: Dictionary) -> float:
 	return float(r["wins"]) / maxf(1.0, float(r["runs"]))
 
 
-func _report(results: Dictionary, profiles: Array, stages: Array, runs: int) -> int:
+func _report(results: Dictionary, profiles: Array, stages: Array, runs: int, era: int = 1) -> int:
 	var rc := 0
 	var warnings: Array = []
 	print("")
-	print("Balance simulator: Era 1, %d runs per cell. First-try win %% | mean win time (s) | mean base HP left on wins (%%)" % runs)
+	print("Balance simulator: Era %d, %d runs per cell. First-try win %% | mean win time (s) | mean base HP left on wins (%%)" % [era, runs])
 	var head := "stage |"
 	for prof in profiles:
 		head += " %-26s|" % prof
@@ -268,9 +322,9 @@ func _report(results: Dictionary, profiles: Array, stages: Array, runs: int) -> 
 			if w3 < GATE_MIN:
 				print("GATE FAIL: normal profile stage %d first-try win %.1f%% < %.0f%%" % [s, 100.0 * w3, 100.0 * GATE_MIN])
 				rc = 1
-			elif int(s) >= 3 and (w3 < BAND_LO or w3 > BAND_HI):
+			elif (era > 1 or int(s) >= 3) and (w3 < BAND_LO or w3 > BAND_HI):
 				warnings.append("WARNING: normal profile stage %d first-try win %.1f%% outside the %.0f-%.0f%% band" % [s, 100.0 * w3, 100.0 * BAND_LO, 100.0 * BAND_HI])
-			elif int(s) <= 2 and w3 < 0.90:
+			elif era == 1 and int(s) <= 2 and w3 < 0.90:
 				warnings.append("WARNING: normal profile tutorial stage %d first-try win %.1f%% below 90%%" % [s, 100.0 * w3])
 	for w4 in warnings:
 		print(w4)

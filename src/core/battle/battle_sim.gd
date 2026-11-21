@@ -13,6 +13,7 @@ extends RefCounted
 ##   boss_defs : Dictionary boss id -> {telegraph: {...}, phase2: {...}}
 ##   spawns : Array of {t: seconds, id: enemy/boss id} sorted by t (the director script)
 ##   powers : Array of {id, cooldown, effect: Dictionary} (DataDB.power_params output), slot order
+##   rule : stage era rule, {type: "none"} or {type: "sand_patch", patches: [{x, w}, ...]} (x = left edge, lane px)
 
 const PLAYER := 0
 const ENEMY := 1
@@ -44,6 +45,9 @@ var projectiles: Array = []    # Array of Dictionary
 var cards: Array = []          # {stats, cd}
 var powers: Array = []         # {id, cooldown, effect, cd, stolen_t}
 var events: Array = []
+var rule: Dictionary = {"type": "none"}   # era rule of the stage (read by the view)
+var patches: Array = []        # sand patches as {x, w} (left edge and width in lane px); empty unless rule is sand_patch
+var _sand_slow := 0.0          # speed fraction lost on a patch (balance.json era_rules.sand_patch.slow_fraction)
 var stats := {"kills": 0, "units_spawned": 0, "powers_used": 0, "player_losses": 0}
 
 var _enemy_units: Dictionary = {}
@@ -55,7 +59,8 @@ var _death_log: Array = []     # player deaths for Rewind: {t, stats, x}
 var _enemy_speed_mult := 1.0
 var _player_speed_mult := 1.0  # Fast-Forward (movement and attack speed)
 var _player_haste_t := 0.0
-var _player_global_slow := 0.0
+var _global_slow := 0.0        # Sandstorm (boss phase 2): slows every unit of both sides
+var _sandstorm_boss := 0
 var _melee_px := 40.0
 var _base_reach := 30.0
 var _windup := 0.167
@@ -96,6 +101,13 @@ func _init(setup: Dictionary) -> void:
 	_enemy_units = setup.get("enemy_units", {})
 	_boss_defs = setup.get("boss_defs", {})
 	_spawns = setup.get("spawns", [])
+	var r = setup.get("rule", {})
+	if r is Dictionary and not (r as Dictionary).is_empty():
+		rule = (r as Dictionary).duplicate(true)
+	if str(rule.get("type", "none")) == "sand_patch":
+		_sand_slow = DataDB.bal_f("era_rules.sand_patch.slow_fraction", 0.3)
+		for pt in rule.get("patches", []):
+			patches.append({"x": float(pt["x"]), "w": float(pt["w"])})
 	for p in setup.get("powers", []):
 		var pw: Dictionary = (p as Dictionary).duplicate(true)
 		pw["cd"] = 0.0
@@ -281,6 +293,7 @@ func _reset_auras() -> void:
 	for u in units:
 		u.dmg_buff = 0.0
 		u.slow = 0.0
+		u.in_sand = _on_sand(u.x)
 
 
 func _apply_auras() -> void:
@@ -347,9 +360,11 @@ func _walk(u: SimUnit, support: bool) -> void:
 		return
 	if support and absf(enemy_base_x - u.x) <= 60.0 + _base_reach:
 		return
-	var spd := u.speed * (1.0 - clampf(u.slow, 0.0, 0.9))
+	var spd := u.speed * (1.0 - clampf(u.slow, 0.0, 0.9)) * (1.0 - _global_slow)
+	if u.in_sand:
+		spd *= 1.0 - _sand_slow
 	if u.side == PLAYER:
-		spd *= _player_speed_mult * (1.0 - _player_global_slow)
+		spd *= _player_speed_mult
 	else:
 		spd *= _enemy_speed_mult
 	u.x = clampf(u.x + dir * spd * dt, 0.0, lane)
@@ -416,11 +431,32 @@ func _resolve_attack(u: SimUnit) -> void:
 		_emit("shot", {"uid": u.uid, "x": u.x})
 	else:
 		_apply_hit(u, t, to_base, raw)
+	if u.ranged and not to_base and u.abilities.has("jump_back_units"):
+		_jump_back(u, float(u.abilities["jump_back_units"]))
 	if u.abilities.has("splash_radius_units") and t != null:
 		var r := float(u.abilities["splash_radius_units"]) * range_unit
 		for o in units:
 			if o != t and o.side != u.side and o.alive() and not o.is_air and absf(o.x - t.x) <= r:
 				_damage_unit(o, raw * 0.5, u, false, true)
+
+
+## Locust Archer: after shooting it hops back `units` range units, away from the enemy, never past its own
+## base side (the spawn point of its side).
+func _jump_back(u: SimUnit, units_back: float) -> void:
+	var dir := -1.0 if u.side == PLAYER else 1.0
+	var limit_lo := 30.0 if u.side == PLAYER else 0.0
+	var limit_hi := lane if u.side == PLAYER else lane - 30.0
+	var from := u.x
+	u.x = clampf(u.x + dir * units_back * range_unit, limit_lo, limit_hi)
+	if absf(u.x - from) > 0.0:
+		_emit("jump_back", {"uid": u.uid, "x": from, "to": u.x})
+
+
+func _on_sand(x: float) -> bool:
+	for pt in patches:
+		if x >= float(pt["x"]) and x <= float(pt["x"]) + float(pt["w"]):
+			return true
+	return false
 
 
 func _apply_hit(src: SimUnit, tgt: SimUnit, to_base: bool, raw: float, ranged := false) -> void:
@@ -503,6 +539,11 @@ func _stats_for_player_unit(id: String) -> Dictionary:
 # ------------------------------------------------------------------ bosses (spec 4.7, 5.3)
 
 func _boss_logic() -> void:
+	if _sandstorm_boss > 0:
+		var sb := _find(_sandstorm_boss)
+		if sb == null or not sb.alive():
+			_global_slow = 0.0   # the storm dies with the Pharaoh
+			_sandstorm_boss = 0
 	for u in units:
 		if not u.is_boss or not u.alive():
 			continue
@@ -516,7 +557,8 @@ func _boss_logic() -> void:
 				"roar":
 					_enemy_speed_mult = float(p2.get("enemy_speed_mult", 1.2))
 				"sandstorm":
-					_player_global_slow = float(p2.get("slow_fraction", 0.3))
+					_global_slow = float(p2.get("slow_fraction", 0.3))
+					_sandstorm_boss = u.uid
 				"take_flight":
 					u.is_air = true
 			_emit("phase2", {"uid": u.uid, "id": str(p2.get("id", ""))})
