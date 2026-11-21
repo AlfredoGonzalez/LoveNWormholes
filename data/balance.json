@@ -82,6 +82,7 @@
     "bonus_capsule_per_day": 1,
     "double_farm_mult": 2
   },
+  "stars": {"three_min_base_hp": 0.8, "two_min_base_hp": 0.5},
   "era_rules": {
     "sand_patch": {"slow_fraction": 0.3},
     "walls": {"hp_fraction": 0.2, "damage_mult": 0.5},
@@ -156,6 +157,7 @@
     }
   },
   "proposed_keys": {
+    "stars.*": "Spec shows stars on the map but never defines them: 3 stars if the player base keeps >= 80% HP at the win, 2 if >= 50%, else 1.",
     "battle.player_base_hp_era_mult": "Spec only says player base HP is 1000 in Era 1; per-era growth x1.6 (same as unit HP) is proposed.",
     "sim.max_catchup_ticks": "Implementation guard for the fixed-timestep loop, not in the spec.",
     "daily.streak_bonus_gems": "Spec says 'streak bonus on day 7' without an amount.",
