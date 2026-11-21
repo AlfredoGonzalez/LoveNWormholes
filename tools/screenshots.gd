@@ -17,7 +17,9 @@ func _initialize() -> void:
 	Game.start_services()
 	var shots := [
 		["title", {}, 3],
+		["home", {}, 3],
 		["levels", {}, 3],
+		["squad", {}, 3],
 		["prebattle", {"era": 1, "stage": 1}, 3],
 		["battle", {"era": 1, "stage": 1, "squad": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"], "powers": ["squirm_slam", "apple_rain"]}, 3],
 		["upgrades", {}, 3],
