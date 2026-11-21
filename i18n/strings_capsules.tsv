@@ -1,0 +1,43 @@
+key	en	es
+capsules.have	You have {0} capsules	Tienes {0} cápsulas
+capsules.dust_have	Chrono Dust {0}	Polvo Crono {0}
+capsules.opening	Opening...	Abriendo...
+capsules.open_again	Open another	Abrir otra
+capsules.pity_forced	Guaranteed by pity	Garantizada por la racha
+capsules.pity_now	Next capsule is guaranteed	La próxima cápsula está garantizada
+capsules.pity_progress	{0} of {1} opened since the last one	{0} de {1} abiertas desde la última
+capsules.rare_label	Rare or better	Rara o mejor
+capsules.epic_label	Epic	Épica
+capsules.buy_1	Buy 1 · {0} Gems	Comprar 1 · {0} Gemas
+capsules.buy_bundle	Buy {0} · {1} Gems	Comprar {0} · {1} Gemas
+capsules.my_relics	My relics	Mis reliquias
+capsules.free_note	Capsules are also earned free: daily login and boss clears. Ads are optional.	Las cápsulas también se ganan gratis: inicio diario y jefes. Los anuncios son opcionales.
+capsules.results	Results	Resultados
+capsules.kind_new	New relic	Reliquia nueva
+capsules.kind_level	Level {0}	Nivel {0}
+capsules.kind_dust	+{0} Chrono Dust	+{0} de Polvo Crono
+capsules.empty_prompt	Open a capsule to find a relic.	Abre una cápsula para encontrar una reliquia.
+relics.title	Relics	Reliquias
+relics.equipped_count	Equipped {0} / {1}	Equipadas {0} / {1}
+relics.equip	Equip	Equipar
+relics.unequip	Remove	Quitar
+relics.slots_full	All slots are in use. Remove a relic first.	Todos los espacios están ocupados. Quita una reliquia primero.
+relics.level_of	Level {0} / {1}	Nivel {0} / {1}
+relics.not_found	Not found yet	Aún no la encuentras
+relics.craft	Craft · {0} Dust	Crear · {0} de Polvo
+relics.upgrade_dust	Level up · {0} Dust	Subir nivel · {0} de Polvo
+relics.max_level	Max level	Nivel máximo
+relics.active	Active bonuses	Bonos activos
+relics.none_active	No active bonuses yet.	Aún no hay bonos activos.
+relics.bonus_plus	{0} +{1}%	{0} +{1}%
+relics.bonus_minus	{0} -{1}%	{0} -{1}%
+relics.current	Now: {0}	Ahora: {0}
+relics.stat.food_income	Food income	Ingreso de Comida
+relics.stat.coins	Coins	Monedas
+relics.stat.base_hp	Base HP	Vida de la base
+relics.stat.unit_damage	Unit damage	Daño de unidades
+relics.stat.unit_hp	Unit HP	Vida de unidades
+relics.stat.spawn_cooldown	Spawn cooldown	Enfriamiento de lanzamiento
+relics.stat.power_cooldown	Power cooldown	Enfriamiento de poderes
+relics.back_capsules	Capsules	Cápsulas
+capsules.open_n	Open {0}	Abrir {0}

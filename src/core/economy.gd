@@ -250,6 +250,8 @@ func settle_battle(era: int, stage: int, won: bool, stars := 0, coin_multiplier 
 				result["capsules"] = int(_b("rewards.boss_first_clear_capsules", 1))
 				result["boss_first_clear"] = true
 			prog["first_clear"][sid] = true
+		# Relics (Lucky Clover, Golden Dewdrop): + coins %, before the ad multiplier.
+		coins = int(round(coins * (1.0 + float(Relics.modifiers(profile).get("coins", 0.0)))))
 		result["coins"] = coins * maxi(coin_multiplier, 1)
 		var era_key := str(era)
 		prog["highest_stage_cleared"][era_key] = maxi(int(prog["highest_stage_cleared"].get(era_key, 0)), stage)

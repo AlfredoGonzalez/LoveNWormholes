@@ -17,6 +17,8 @@ const SCREENS := {
 	"upgrades": "res://src/meta/upgrades_screen.gd",
 	"settings": "res://src/meta/settings_screen.gd",
 	"shop": "res://src/meta/shop_screen.gd",
+	"capsules": "res://src/meta/capsule_screen.gd",
+	"relics": "res://src/meta/relics_screen.gd",
 }
 
 var host: Control

@@ -96,3 +96,23 @@ Guardado **v2** (`SaveService.CURRENT_VERSION = 2`, migración `_migrate_1_to_2`
 - `MockBillingProvider`: `prices` (id -> texto localizado, vacío por defecto => precio de referencia), `refund(id)`.
 
 Pendiente: aplicar el Golden Pass en los demás puntos de anuncio (Result: Monedas x2 / Segundo Aliento, Prebatalla: Comida +30%, Popup offline: Granja x2, Home: Cápsula Extra) y `Quests.apply_reward("double_farm")` con las horas extra; mostrar skins/gorras equipados (solo se guardan en `profile.skins` / `profile.cosmetics`); proveedores reales de Android/iOS.
+## Fase 3 – Cápsulas
+Cápsulas del Tiempo, reliquias y Polvo Crono (spec 7.4). Sin tienda: la UI de compra es de otro agente; aquí solo hay lógica y las pantallas de apertura y colección.
+
+| Pieza | Archivo | Resumen |
+|---|---|---|
+| `Capsules` | `src/core/capsules.gd` | Lógica pura. `open_one()`, `open_many(n)` (un solo guardado), `buy_with_gems(bundle)` (60 / 540 por 10, de `shop.json`), `craft(relic_id)` (Polvo), `request_bonus_ad(ads, quests)`, `pity()`, `rarity_odds()`, `dust_cost/dust_on_duplicate(rareza)`. `pick_rarity` y `next_counters` son estáticas y puras |
+| `Relics` | `src/core/relics.gd` | Estática sobre el perfil: `modifiers(profile)` (fracción por atributo de las reliquias **equipadas**, con tope +25% de `DataDB.relic_bonus`), `equip/unequip/equipped`, `slots()` |
+| `CapsuleScreen` | `src/meta/capsule_screen.gd` | Ruta `capsules` (ya enlazada en el Home). Animación placeholder (sacudida + fundido), revelación, botones Abrir 1 / Abrir N, comprar con Gemas, anuncio de cápsula extra, y siempre visibles: probabilidades, contadores de pity, conversión y precios de Polvo |
+| `RelicsScreen` | `src/meta/relics_screen.gd` | Ruta `relics`. Colección, equipar/quitar, crear o subir de nivel con Polvo, bonos activos |
+| Textos | `i18n/strings_capsules.tsv` | Claves nuevas; las de `capsules.*`, `relic.*`, `rarity.*` ya estaban en `strings.csv` |
+
+**Reglas.** Pity duro: la cápsula nº `pity_rare_every` (5) desde la última Rara+ es Rara o mejor y la nº `pity_epic_every` (20) desde la última Épica es Épica (Épica gana; una Épica también reinicia el contador de Rara). Un duplicado sube de nivel hasta el máximo de su rareza; al máximo se convierte en Polvo (5/15/50). El Polvo compra una reliquia elegida (30/90/250) o le sube un nivel; no se puede comprar por encima del máximo. Una reliquia nueva se equipa sola si hay un espacio libre.
+
+**Determinismo y guardado.** `Capsules.new(economy, rng)`: con un `RandomNumberGenerator` inyectado (tests, simulador) se usa tal cual. Sin él, cada apertura siembra un generador local con `profile.pity.rng_state` y guarda la siguiente semilla (50 bits, exacta en JSON), así que cerrar la app no reinicia ni el pity (`since_rare`, `since_epic`) ni la secuencia. El esquema sigue en v2: `loadout.equipped_relics` (nuevo) se rellena con `[]` en perfiles viejos mediante `_merge_defaults`, y `Relics.equipped` tolera su ausencia.
+
+**Efectos en combate.** `BattleSetup.make(stage, opts)` acepta `opts.relics = Relics.modifiers(profile)` (sin la clave no cambia nada; `BattleScreen._make_opts` la envía): `food_income`, `base_hp`, `unit_hp`, `unit_damage` (solo tus unidades), `spawn_cooldown` y `power_cooldown` (reducciones). `coins` lo aplica `Economy.settle_battle` solo (antes del multiplicador del anuncio, así `revert_loss` sigue siendo coherente).
+
+**balance.json (claves nuevas, en `proposed_keys`).** `capsule.relic_slots` = 4 (el spec no fija un límite de equipables: todas las reliquias se aplican con tope +25%; pon 12 para el comportamiento literal del spec) y `capsule.open_many` = 10 (botón "Abrir N").
+
+**Reglas de la tienda.** Probabilidades, pity y conversión a Polvo se muestran siempre en `CapsuleScreen`; los anuncios son opcionales y la cápsula gratis tiene camino sin anuncio (login diario, jefes). Sin temporizadores ni cuentas atrás.

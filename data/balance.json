@@ -72,7 +72,7 @@
     "streak_bonus_capsules": 1,
     "quests_per_day": 3
   },
-  "capsule": {"pity_rare_every": 5, "pity_epic_every": 20, "relic_bonus_cap": 0.25},
+  "capsule": {"pity_rare_every": 5, "pity_epic_every": 20, "relic_bonus_cap": 0.25, "relic_slots": 4, "open_many": 10},
   "ads": {
     "first_ad_after_stage_cleared": 3,
     "double_coins_mult": 2,
@@ -164,6 +164,8 @@
     "daily.streak_bonus_capsules": "Same as above.",
     "boss.hp_mult": "Spec says nothing about boss stats; Rexy = Heavy with 6x HP is the brief of the data phase, applied to all bosses.",
     "roles.*.strong_against/weak_against": "From the 4.4 table. 'any' means every attacker counters Support. Shooter counters Air (from the Air row) is proposed as x1.5.",
+    "capsule.relic_slots": "Spec 7.4 gives no equip limit (every relic applies, capped at +25% per stat). 4 equipable relics is proposed so the collection screen has a real choice; set it to 12 to apply all relics as the spec reads literally.",
+    "capsule.open_many": "Size of the 'Open N' button (10, same as the 10-capsule gem bundle).",
     "scaling.target_avg_level_step": "Spec 6.3 pacing target, kept here for the balance simulator."
   }
 }
