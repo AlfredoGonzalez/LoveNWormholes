@@ -1,0 +1,220 @@
+{
+ "version": 1,
+ "_comment": "id -> file + bus + volume. If the file does not exist AudioService synthesizes a placeholder for that id. Replace a placeholder by dropping the file at the given path (see docs/AUDIO_CANDIDATES.md).",
+ "buses": [
+  "Music",
+  "SFX"
+ ],
+ "max_voices": 8,
+ "crossfade_s": 1.2,
+ "duck_release_s": 0.8,
+ "music_map": {
+  "consent": "menu",
+  "title": "menu",
+  "home": "menu",
+  "squad": "menu",
+  "prebattle": "menu",
+  "upgrades": "menu",
+  "settings": "menu",
+  "shop": "menu",
+  "capsules": "menu",
+  "relics": "menu",
+  "result": "menu",
+  "levels": "map",
+  "battle_era": {
+   "1": "battle_1",
+   "2": "battle_2",
+   "3": "battle_3",
+   "4": "battle_4",
+   "5": "battle_5"
+  },
+  "boss": "boss",
+  "win": "victory",
+  "lose": "defeat"
+ },
+ "sfx": {
+  "spawn": {
+   "file": "res://assets/audio/sfx/spawn.ogg",
+   "bus": "SFX",
+   "volume": 1.0,
+   "cooldown": 0.04
+  },
+  "hit": {
+   "file": "res://assets/audio/sfx/hit.ogg",
+   "bus": "SFX",
+   "volume": 1.0,
+   "cooldown": 0.06
+  },
+  "death": {
+   "file": "res://assets/audio/sfx/death.ogg",
+   "bus": "SFX",
+   "volume": 1.0,
+   "cooldown": 0.05
+  },
+  "base_hit": {
+   "file": "res://assets/audio/sfx/base_hit.ogg",
+   "bus": "SFX",
+   "volume": 1.0,
+   "cooldown": 0.08
+  },
+  "power_cast_1": {
+   "file": "res://assets/audio/sfx/power_cast_1.ogg",
+   "bus": "SFX",
+   "volume": 1.0
+  },
+  "power_cast_2": {
+   "file": "res://assets/audio/sfx/power_cast_2.ogg",
+   "bus": "SFX",
+   "volume": 1.0
+  },
+  "power_cast_3": {
+   "file": "res://assets/audio/sfx/power_cast_3.ogg",
+   "bus": "SFX",
+   "volume": 1.0
+  },
+  "power_cast_4": {
+   "file": "res://assets/audio/sfx/power_cast_4.ogg",
+   "bus": "SFX",
+   "volume": 1.0
+  },
+  "power_cast_5": {
+   "file": "res://assets/audio/sfx/power_cast_5.ogg",
+   "bus": "SFX",
+   "volume": 1.0
+  },
+  "power_cast_6": {
+   "file": "res://assets/audio/sfx/power_cast_6.ogg",
+   "bus": "SFX",
+   "volume": 1.0
+  },
+  "ui_tap": {
+   "file": "res://assets/audio/sfx/ui_tap.ogg",
+   "bus": "SFX",
+   "volume": 1.0,
+   "cooldown": 0.04
+  },
+  "ui_back": {
+   "file": "res://assets/audio/sfx/ui_back.ogg",
+   "bus": "SFX",
+   "volume": 1.0
+  },
+  "coin": {
+   "file": "res://assets/audio/sfx/coin.ogg",
+   "bus": "SFX",
+   "volume": 1.0,
+   "cooldown": 0.05
+  },
+  "gem": {
+   "file": "res://assets/audio/sfx/gem.ogg",
+   "bus": "SFX",
+   "volume": 1.0
+  },
+  "buy": {
+   "file": "res://assets/audio/sfx/buy.ogg",
+   "bus": "SFX",
+   "volume": 1.0
+  },
+  "capsule_common": {
+   "file": "res://assets/audio/sfx/capsule_common.ogg",
+   "bus": "SFX",
+   "volume": 1.0
+  },
+  "capsule_rare": {
+   "file": "res://assets/audio/sfx/capsule_rare.ogg",
+   "bus": "SFX",
+   "volume": 1.0,
+   "duck_db": -4
+  },
+  "capsule_epic": {
+   "file": "res://assets/audio/sfx/capsule_epic.ogg",
+   "bus": "SFX",
+   "volume": 1.0,
+   "duck_db": -6
+  },
+  "ad_reward": {
+   "file": "res://assets/audio/sfx/ad_reward.ogg",
+   "bus": "SFX",
+   "volume": 1.0
+  },
+  "boss_warning": {
+   "file": "res://assets/audio/sfx/boss_warning.ogg",
+   "bus": "SFX",
+   "volume": 1.0,
+   "duck_db": -6
+  },
+  "victory": {
+   "file": "res://assets/audio/sfx/victory.ogg",
+   "bus": "SFX",
+   "volume": 1.0,
+   "duck_db": -8
+  },
+  "defeat": {
+   "file": "res://assets/audio/sfx/defeat.ogg",
+   "bus": "SFX",
+   "volume": 1.0,
+   "duck_db": -8
+  }
+ },
+ "music": {
+  "menu": {
+   "file": "res://assets/audio/music/menu.ogg",
+   "bus": "Music",
+   "volume": 1.0,
+   "loop": true
+  },
+  "map": {
+   "file": "res://assets/audio/music/map.ogg",
+   "bus": "Music",
+   "volume": 1.0,
+   "loop": true
+  },
+  "battle_1": {
+   "file": "res://assets/audio/music/battle_1.ogg",
+   "bus": "Music",
+   "volume": 1.0,
+   "loop": true
+  },
+  "battle_2": {
+   "file": "res://assets/audio/music/battle_2.ogg",
+   "bus": "Music",
+   "volume": 1.0,
+   "loop": true
+  },
+  "battle_3": {
+   "file": "res://assets/audio/music/battle_3.ogg",
+   "bus": "Music",
+   "volume": 1.0,
+   "loop": true
+  },
+  "battle_4": {
+   "file": "res://assets/audio/music/battle_4.ogg",
+   "bus": "Music",
+   "volume": 1.0,
+   "loop": true
+  },
+  "battle_5": {
+   "file": "res://assets/audio/music/battle_5.ogg",
+   "bus": "Music",
+   "volume": 1.0,
+   "loop": true
+  },
+  "boss": {
+   "file": "res://assets/audio/music/boss.ogg",
+   "bus": "Music",
+   "volume": 1.0,
+   "loop": true
+  },
+  "victory": {
+   "file": "res://assets/audio/music/victory.ogg",
+   "bus": "Music",
+   "volume": 1.0,
+   "loop": false
+  },
+  "defeat": {
+   "file": "res://assets/audio/music/defeat.ogg",
+   "bus": "Music",
+   "volume": 1.0,
+   "loop": false
+  }
+ }
+}

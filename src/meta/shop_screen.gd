@@ -115,6 +115,8 @@ func _set_status() -> void:
 func buy(product_id: String) -> bool:
 	status_text = ""
 	var ok := Game.shop.buy(product_id)
+	if ok:
+		Game.audio.play_sfx("buy")
 	if ok and Game.shop.owns(product_id):
 		status_text = Game.t("shop.bought")
 	_set_status()
@@ -141,6 +143,8 @@ func _on_restore_finished(newly_owned: Array) -> void:
 
 func buy_gem_item(item_id: String) -> void:
 	var r: Dictionary = Game.shop.buy_gem_item(item_id)
+	if bool(r["ok"]):
+		Game.audio.play_sfx("buy")
 	status_text = Game.t("shop.item_bought") if bool(r["ok"]) else (Game.t("shop.not_enough_gems") if r["reason"] == "not_enough_gems" else "")
 	_set_status()
 
@@ -148,6 +152,7 @@ func buy_gem_item(item_id: String) -> void:
 func claim_daily() -> void:
 	var r: Dictionary = Game.economy.claim_daily(_now())
 	if bool(r.get("claimed", false)):
+		Game.audio.play_sfx("coin")
 		status_text = Game.t("shop.daily_claimed")
 		_set_status()
 		_request_refresh()

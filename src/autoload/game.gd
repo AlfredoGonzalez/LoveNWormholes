@@ -83,6 +83,7 @@ func boot(save_path := "user://save.json") -> void:
 	ads.reward_granted.connect(_on_reward_granted)
 	_connect_analytics()
 	nav = Navigator.new()
+	nav.changed.connect(func(screen_name: String): audio.play_music_for_screen(screen_name))
 	offline_popup_shown = false
 	booted_ok = true
 	booted.emit()
@@ -185,6 +186,7 @@ func claim_bonus(placement: String, reward := {}) -> bool:
 ## re-delivered after an app kill). AdService emits each reward exactly once. When a ResultScreen is listening,
 ## it applies Double Coins itself, so this skips it then (a reward is never applied twice).
 func _on_reward_granted(placement: String, reward: Dictionary) -> void:
+	audio.play_sfx("ad_reward")
 	if placement == "double_coins":
 		for c in ads.reward_granted.get_connections():
 			var o = (c["callable"] as Callable).get_object()

@@ -7,7 +7,7 @@ func test_every_spec_sfx_has_a_stream() -> void:
 	var a := AudioService.new()
 	for n in required:
 		assert_true(AudioService.sfx_names().has(n), "missing " + n)
-		var s := a.get_stream(n)
+		var s := a.get_stream(n) as AudioStreamWAV
 		assert_true(s != null, n)
 		if s != null:
 			assert_eq(s.format, AudioStreamWAV.FORMAT_16_BITS)

@@ -86,6 +86,7 @@ func _begin() -> void:
 			squad_ids = _fallback_squad()
 		sim = BattleSim.new(BattleSetup.make(stage_def, _make_opts()))
 	_px_scale = (LANE_X1 - LANE_X0) / sim.lane
+	Game.audio.play_music_for_battle(era, bool(DataDB.stage(era, stage).get("boss", false)))
 	_shield_max = 1.0
 	_build_ui()
 	if resuming:
@@ -303,6 +304,7 @@ func _begin_end() -> void:
 	ending = true
 	_end_timer = END_DELAY
 	Game.audio.play_sfx("victory" if sim.result == "win" else "defeat")
+	Game.audio.play_result_music(sim.result == "win")
 	_log_stage_end(sim.result, false)
 
 
@@ -452,6 +454,8 @@ func _handle_event(e: Dictionary) -> void:
 			effects.add_puff(Vector2(gx, LANE_Y), Color(1, 1, 1, 0.7))
 			if side == BattleSim.PLAYER:
 				audio.play_sfx("spawn")
+			elif bool(e.get("boss", false)):
+				audio.play_music_for_battle(era, true)
 		"hit":
 			var side2 := _side_of(int(e["uid"]))
 			var pos := Vector2(_sx(float(e["x"])), LANE_Y - 50.0)
@@ -482,6 +486,7 @@ func _handle_event(e: Dictionary) -> void:
 			var zx0 := maxf(LANE_X0 - 20.0, wx - 150.0 * _px_scale * 2.5)
 			effects.add_warning(Vector2(wx, LANE_Y - 120.0), wdur, Rect2(zx0, LANE_Y - 42.0, maxf(0.0, wx - zx0), 84.0))
 			hud.toast(Game.t("battle.boss_warning"), wdur + 0.5, true)
+			audio.play_sfx("boss_warning")
 		"boss_attack":
 			var bx := _sx(float(e["x"]))
 			if str(e["id"]) == "stomp":

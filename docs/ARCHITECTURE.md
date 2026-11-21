@@ -126,3 +126,13 @@ Cápsulas del Tiempo, reliquias y Polvo Crono (spec 7.4). Sin tienda: la UI de c
 - Selección de implementaciones: `PlatformFactory` (`src/platform/platform_factory.gd`): mock salvo en Android con el flag `native_services` (adaptadores en `src/platform/android/`, sin referencias estáticas a plugins; compilan en headless).
 - `AdService`: solo rewarded; límites `daily_cap` / `cooldown_s` por colocación y `global_cooldown_s` (`config/ads.json`), contadores en `profile.seen.ad_limits`; `note_offered` registra `ad_offered`.
 - Analítica: tabla de eventos y Data safety en `docs/ANALYTICS.md`. Android: `docs/ANDROID.md`.
+
+## Audio
+
+`AudioService` (`src/core/audio_service.gd`, child of the `Game` autoload) reads the catalog `data/audio.json`
+(id -> file, bus, volume, cooldown, duck_db; plus `music_map` screen/era -> track). Missing files fall back to
+sounds synthesized in code (SFX recipes and 10 music recipes: menu, map, battle_1..5, boss, victory, defeat), so
+nothing is mute. Buses `Music`/`SFX` are created at runtime and follow the Settings volumes and mute. Music
+crossfades on screen change (`Game.nav.changed`), era battle start and boss spawn; stingers and boss warnings duck
+the music; SFX use a pool of `max_voices` slots with per-id cooldowns. `UI.button` plays `ui_tap`. How to swap in
+real files: `docs/AUDIO_CANDIDATES.md`.

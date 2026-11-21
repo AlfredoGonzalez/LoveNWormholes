@@ -72,7 +72,14 @@ static func button(text: String, kind := "primary", min_size := Vector2(0, MIN_T
 	b.add_theme_color_override("font_disabled_color", LOCKED_INK)
 	if kind == "off":
 		b.disabled = true
+	b.pressed.connect(_tap_sound)
 	return b
+
+
+## Click feedback for every UI.button (no-op before the services are booted).
+static func _tap_sound() -> void:
+	if Game.audio != null:
+		Game.audio.play_sfx("ui_tap")
 
 
 static func panel(bg := PANEL) -> PanelContainer:
