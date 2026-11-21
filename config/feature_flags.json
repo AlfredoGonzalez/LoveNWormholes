@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "_comment": "Feature switches. All names are proposed (the spec only requires a flag file).",
+  "flags": {
+    "ads": true,
+    "iap": true,
+    "time_capsules": true,
+    "offline_farm": true,
+    "daily_login": true,
+    "daily_quests": true,
+    "story_panels": true,
+    "studio_intro": true,
+    "consent_flow": true,
+    "speed_x2": true,
+    "analytics": true,
+    "debug_menu": false,
+    "endless_rift": false,
+    "daily_challenge": false
+  }
+}

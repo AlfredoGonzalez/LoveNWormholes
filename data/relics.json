@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "_comment": "Stats spawn_cooldown and power_cooldown are REDUCTIONS. Bonus is added per level; total per stat is capped by balance.capsule.relic_bonus_cap.",
+  "rarities": {
+    "common": {"odds": 0.7, "max_level": 5, "dust_on_duplicate": 5, "dust_cost": 30},
+    "rare": {"odds": 0.25, "max_level": 4, "dust_on_duplicate": 15, "dust_cost": 90},
+    "epic": {"odds": 0.05, "max_level": 3, "dust_on_duplicate": 50, "dust_cost": 250}
+  },
+  "relics": [
+    {
+      "id": "sticky_seed",
+      "rarity": "common",
+      "stat": "food_income",
+      "bonus": 0.05,
+      "name_key": "relic.sticky_seed.name",
+      "desc_key": "relic.sticky_seed.desc",
+      "desc_args": [["bonus", 100]]
+    },
+    {
+      "id": "lucky_clover",
+      "rarity": "common",
+      "stat": "coins",
+      "bonus": 0.05,
+      "name_key": "relic.lucky_clover.name",
+      "desc_key": "relic.lucky_clover.desc",
+      "desc_args": [["bonus", 100]]
+    },
+    {
+      "id": "tough_pebble",
+      "rarity": "common",
+      "stat": "base_hp",
+      "bonus": 0.05,
+      "name_key": "relic.tough_pebble.name",
+      "desc_key": "relic.tough_pebble.desc",
+      "desc_args": [["bonus", 100]]
+    },
+    {
+      "id": "sharp_thorn",
+      "rarity": "common",
+      "stat": "unit_damage",
+      "bonus": 0.03,
+      "name_key": "relic.sharp_thorn.name",
+      "desc_key": "relic.sharp_thorn.desc",
+      "desc_args": [["bonus", 100]]
+    },
+    {
+      "id": "quick_sprout",
+      "rarity": "common",
+      "stat": "spawn_cooldown",
+      "bonus": 0.05,
+      "name_key": "relic.quick_sprout.name",
+      "desc_key": "relic.quick_sprout.desc",
+      "desc_args": [["bonus", 100]]
+    },
+    {
+      "id": "cozy_mushroom",
+      "rarity": "common",
+      "stat": "unit_hp",
+      "bonus": 0.03,
+      "name_key": "relic.cozy_mushroom.name",
+      "desc_key": "relic.cozy_mushroom.desc",
+      "desc_args": [["bonus", 100]]
+    },
+    {
+      "id": "golden_dewdrop",
+      "rarity": "rare",
+      "stat": "coins",
+      "bonus": 0.08,
+      "name_key": "relic.golden_dewdrop.name",
+      "desc_key": "relic.golden_dewdrop.desc",
+      "desc_args": [["bonus", 100]]
+    },
+    {
+      "id": "echo_seashell",
+      "rarity": "rare",
+      "stat": "food_income",
+      "bonus": 0.08,
+      "name_key": "relic.echo_seashell.name",
+      "desc_key": "relic.echo_seashell.desc",
+      "desc_args": [["bonus", 100]]
+    },
+    {
+      "id": "mini_hourglass",
+      "rarity": "rare",
+      "stat": "power_cooldown",
+      "bonus": 0.06,
+      "name_key": "relic.mini_hourglass.name",
+      "desc_key": "relic.mini_hourglass.desc",
+      "desc_args": [["bonus", 100]]
+    },
+    {
+      "id": "wormina_daisy",
+      "rarity": "rare",
+      "stat": "unit_hp",
+      "bonus": 0.06,
+      "name_key": "relic.wormina_daisy.name",
+      "desc_key": "relic.wormina_daisy.desc",
+      "desc_args": [["bonus", 100]]
+    },
+    {
+      "id": "chrono_gear",
+      "rarity": "epic",
+      "stat": "food_income",
+      "bonus": 0.1,
+      "name_key": "relic.chrono_gear.name",
+      "desc_key": "relic.chrono_gear.desc",
+      "desc_args": [["bonus", 100]]
+    },
+    {
+      "id": "time_crown",
+      "rarity": "epic",
+      "stat": "unit_damage",
+      "bonus": 0.08,
+      "name_key": "relic.time_crown.name",
+      "desc_key": "relic.time_crown.desc",
+      "desc_args": [["bonus", 100]]
+    }
+  ]
+}

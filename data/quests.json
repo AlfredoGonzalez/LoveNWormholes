@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "_comment": "Reward amounts are proposed (spec gives the three examples and 'Coins and Gems'). Events are analytics-style counters.",
+  "quests": [
+    {
+      "id": "win_battles",
+      "name_key": "quest.win_battles.name",
+      "event": "battle_won",
+      "target": 3,
+      "reward": {"coins": 60, "gems": 5},
+      "desc_args": [["target", 1]],
+      "proposed": true
+    },
+    {
+      "id": "use_power",
+      "name_key": "quest.use_power.name",
+      "event": "power_used",
+      "target": 5,
+      "reward": {"coins": 50, "gems": 5},
+      "desc_args": [["target", 1]],
+      "proposed": true
+    },
+    {
+      "id": "spawn_units",
+      "name_key": "quest.spawn_units.name",
+      "event": "unit_spawned",
+      "target": 30,
+      "reward": {"coins": 40, "gems": 5},
+      "desc_args": [["target", 1]],
+      "proposed": true
+    }
+  ]
+}

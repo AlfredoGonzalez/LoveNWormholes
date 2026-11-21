@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "powers": [
+    {
+      "id": "squirm_slam",
+      "name_key": "power.squirm_slam.name",
+      "desc_key": "power.squirm_slam.desc",
+      "cooldown": 18,
+      "unlock": {"type": "start"},
+      "effect": {"damage": 60, "radius_units": 3, "stun_seconds": 1.5},
+      "scaled_params": ["damage"],
+      "desc_args": [["effect.damage", 1], ["effect.radius_units", 1], ["effect.stun_seconds", 1]]
+    },
+    {
+      "id": "apple_rain",
+      "name_key": "power.apple_rain.name",
+      "desc_key": "power.apple_rain.desc",
+      "cooldown": 40,
+      "unlock": {"type": "start"},
+      "effect": {"food": 150, "duration_s": 5},
+      "scaled_params": ["food"],
+      "desc_args": [["effect.food", 1], ["effect.duration_s", 1]]
+    },
+    {
+      "id": "time_freeze",
+      "name_key": "power.time_freeze.name",
+      "desc_key": "power.time_freeze.desc",
+      "cooldown": 45,
+      "unlock": {"type": "boss", "era": 1},
+      "effect": {"duration_s": 3, "boss_duration_s": 1.5},
+      "scaled_params": ["duration_s", "boss_duration_s"],
+      "desc_args": [["effect.duration_s", 1], ["effect.boss_duration_s", 1]]
+    },
+    {
+      "id": "rewind",
+      "name_key": "power.rewind.name",
+      "desc_key": "power.rewind.desc",
+      "cooldown": 60,
+      "unlock": {"type": "boss", "era": 2},
+      "effect": {"window_s": 6, "hp_fraction": 0.5},
+      "scaled_params": ["hp_fraction"],
+      "desc_args": [["effect.window_s", 1], ["effect.hp_fraction", 100]],
+      "param_caps": {"hp_fraction": 1.0}
+    },
+    {
+      "id": "dirt_shield",
+      "name_key": "power.dirt_shield.name",
+      "desc_key": "power.dirt_shield.desc",
+      "cooldown": 50,
+      "unlock": {"type": "boss", "era": 3},
+      "effect": {"absorb_fraction": 0.25, "duration_s": 8},
+      "scaled_params": ["absorb_fraction"],
+      "desc_args": [["effect.absorb_fraction", 100], ["effect.duration_s", 1]]
+    },
+    {
+      "id": "fast_forward",
+      "name_key": "power.fast_forward.name",
+      "desc_key": "power.fast_forward.desc",
+      "cooldown": 40,
+      "unlock": {"type": "boss", "era": 4},
+      "effect": {"speed_bonus": 0.3, "duration_s": 8},
+      "scaled_params": ["speed_bonus"],
+      "desc_args": [["effect.speed_bonus", 100], ["effect.duration_s", 1]]
+    }
+  ]
+}

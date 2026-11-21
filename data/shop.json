@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "_comment": "USD reference tiers. Numeric effects of golden_pass (offline cap hours) live in balance.json offline.",
+  "products": [
+    {
+      "id": "gems_80",
+      "type": "consumable",
+      "price_usd": 0.99,
+      "name_key": "product.gems_80.name",
+      "desc_key": "product.gems_80.desc",
+      "contents": {"gems": 80}
+    },
+    {
+      "id": "gems_450",
+      "type": "consumable",
+      "price_usd": 4.99,
+      "name_key": "product.gems_450.name",
+      "desc_key": "product.gems_450.desc",
+      "contents": {"gems": 450}
+    },
+    {
+      "id": "gems_1000",
+      "type": "consumable",
+      "price_usd": 9.99,
+      "name_key": "product.gems_1000.name",
+      "desc_key": "product.gems_1000.desc",
+      "contents": {"gems": 1000}
+    },
+    {
+      "id": "gems_2200",
+      "type": "consumable",
+      "price_usd": 19.99,
+      "name_key": "product.gems_2200.name",
+      "desc_key": "product.gems_2200.desc",
+      "contents": {"gems": 2200}
+    },
+    {
+      "id": "starter_pack",
+      "type": "non_consumable",
+      "price_usd": 1.99,
+      "name_key": "product.starter_pack.name",
+      "desc_key": "product.starter_pack.desc",
+      "contents": {"gems": 300, "capsules": 3, "cosmetics": ["starter_cap"]},
+      "one_time": true
+    },
+    {
+      "id": "golden_pass",
+      "type": "non_consumable",
+      "price_usd": 4.99,
+      "name_key": "product.golden_pass.name",
+      "desc_key": "product.golden_pass.desc",
+      "contents": {"entitlements": ["golden_pass"], "cosmetics": ["golden_cap"]}
+    },
+    {
+      "id": "skin_pirate",
+      "type": "non_consumable",
+      "price_usd": 1.99,
+      "name_key": "product.skin_pirate.name",
+      "desc_key": "product.skin_pirate.desc",
+      "contents": {"skins": ["pirate"]}
+    },
+    {
+      "id": "skin_knight",
+      "type": "non_consumable",
+      "price_usd": 1.99,
+      "name_key": "product.skin_knight.name",
+      "desc_key": "product.skin_knight.desc",
+      "contents": {"skins": ["knight"]}
+    },
+    {
+      "id": "skin_astronaut",
+      "type": "non_consumable",
+      "price_usd": 1.99,
+      "name_key": "product.skin_astronaut.name",
+      "desc_key": "product.skin_astronaut.desc",
+      "contents": {"skins": ["astronaut"]}
+    }
+  ],
+  "capsules": {"gem_price_single": 60, "gem_price_bundle": 540, "bundle_count": 10},
+  "gem_items": [{"id": "squad_preset_slot", "gems": 200, "name_key": "shop.squad_preset_slot", "proposed": true}],
+  "free_daily": [
+    {
+      "id": "daily_gift",
+      "name_key": "shop.daily_gift",
+      "reward_from_balance": "daily.login_gems",
+      "reward_type": "gems",
+      "desc_args": [["balance.daily.login_gems", 1]]
+    }
+  ],
+  "proposed_keys": {
+    "gem_items.squad_preset_slot.gems": "Spec says gems buy extra preset slots without a price.",
+    "products.starter_pack.contents.cosmetics": "Cosmetic cap id is a placeholder."
+  }
+}
