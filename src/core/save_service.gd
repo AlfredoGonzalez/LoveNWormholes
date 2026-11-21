@@ -47,7 +47,7 @@ func default_profile() -> Dictionary:
 		},
 		"units": {},                            # unit id -> level
 		"upgrades": {"food_burrow": 1, "base": 1, "powers": {}},
-		"loadout": {"equipped_powers": [], "squad_presets": [[], []], "active_preset": 0},
+		"loadout": {"equipped_powers": [], "squad_presets": [[], []], "active_preset": 0, "equipped_relics": []},
 		"relics": {},                           # relic id -> level
 		"pity": {"since_rare": 0, "since_epic": 0, "rng_state": 0},
 		"settings": {"language": "en", "music": 0.7, "sfx": 1.0, "muted": false, "vibration": true, "text_size": 1.0},

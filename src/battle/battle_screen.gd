@@ -123,7 +123,7 @@ func _make_opts() -> Dictionary:
 		"burrow_level": Game.economy.burrow_level(), "base_level": Game.economy.base_level(),
 		"powers": power_ids, "power_levels": power_levels,
 		"underdog_stacks": int(Game.economy.underdog(era, stage).get("stacks", 0)),
-		"food_boost": food_boost,
+		"food_boost": food_boost, "relics": Relics.modifiers(Game.save.profile),
 	}
 
 
