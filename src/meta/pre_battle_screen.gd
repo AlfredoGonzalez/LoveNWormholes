@@ -332,5 +332,6 @@ func _on_ad_failed(placement: String, _reason: String) -> void:
 
 
 func start_battle() -> void:
-	Game.nav.go("battle", {"era": era, "stage": stage, "squad": squad.duplicate(), "powers": powers.duplicate(),
-			"food_boost": food_boost})
+	var route := Story.before_battle(Game.save.profile, era, stage, {"era": era, "stage": stage, "squad": squad.duplicate(),
+			"powers": powers.duplicate(), "food_boost": food_boost})   # stage 1 of an era: opening comic once
+	Game.nav.go(route[0], route[1])

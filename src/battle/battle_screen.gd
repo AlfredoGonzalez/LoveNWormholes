@@ -42,6 +42,8 @@ var hud: BattleHud
 var effects: BattleEffects
 var overlay: PauseOverlay
 var rule_layer: RuleLayer
+var tutorial: TutorialDirector     # guided first battles (null when there is nothing to teach)
+var tutorial_hold := false         # a blocking tutorial step is up: the sim clock waits (view-only, the sim is untouched)
 
 var _bg: BattleBackground
 var _world: Node2D
@@ -100,6 +102,7 @@ func _begin() -> void:
 	else:
 		Game.analytics.log_event("stage_start", {"stage": _stage_id, "squad": squad_ids, "powers": power_ids,
 				"tries": _tries(), "food_boost": food_boost})
+		tutorial = TutorialDirector.make(self)
 	_update_visuals(0.0)
 
 
@@ -182,7 +185,9 @@ func step(delta: float) -> void:
 		return
 	var dt := clampf(delta, 0.0, MAX_FRAME_DT)
 	hud.tick_toast(dt)
-	if paused:
+	if tutorial != null:
+		tutorial.update(dt)
+	if paused or tutorial_hold:
 		return
 	if ending:
 		_end_timer -= dt
@@ -333,7 +338,8 @@ func _finish() -> void:
 		"second_wind_used": bool(params.get("resume", false)),
 	}
 	battle_finished.emit(out)
-	Game.nav.go("result", out)
+	var route := Story.after_battle(Game.save.profile, sim.result, era, stage, out)   # boss: era closing comic first
+	Game.nav.go(route[0], route[1])
 
 
 ## Second Wind (rewarded ad): the player base comes back at a fraction of its HP and the fight goes on.

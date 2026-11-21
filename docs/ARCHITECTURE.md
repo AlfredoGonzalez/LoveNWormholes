@@ -136,3 +136,13 @@ nothing is mute. Buses `Music`/`SFX` are created at runtime and follow the Setti
 crossfades on screen change (`Game.nav.changed`), era battle start and boss spawn; stingers and boss warnings duck
 the music; SFX use a pool of `max_voices` slots with per-id cooldowns. `UI.button` plays `ui_tap`. How to swap in
 real files: `docs/AUDIO_CANDIDATES.md`.
+# Fase 4 – Historia, tutorial y créditos
+| Pieza | Archivo | Notas |
+|---|---|---|
+| `Story` | `src/core/story.gd`, `data/story.json` | Secuencias de paneles (`intro`, `era_N_open`, `era_N_close`, `ending`), flags en `profile.seen["story"]`, rutas `route` / `before_battle` / `after_battle`, `replay_ids` sin spoilers |
+| `StoryScreen` | `src/meta/story_screen.gd` (ruta `story`) | Params `{seq, next, next_params}`; `seq: "replay"` reproduce lo desbloqueado (Ajustes > Ver historia). Saltar siempre visible. Arte: cada panel tiene `art` (id del manifest, p. ej. `story_intro_1`); sin arte muestra color + caption |
+| `Tutorial` | `src/core/tutorial.gd`, `data/tutorial.json` | Pasos de 1-1..1-3 y flags en `profile.seen["tutorial"] = {armed, skipped, steps}`. Se arma al ver/saltar la intro; no se muestra en etapas ya superadas |
+| `TutorialDirector` / `TutorialOverlay` | `src/battle/tutorial_director.gd`, `tutorial_overlay.gd` | Capa de UI sobre la batalla: solo LEE `BattleSim`; bloquea el reloj con `BattleScreen.tutorial_hold` y usa `press_card/press_power`. Analítica `tutorial_step` |
+| `CreditsScreen` | `src/meta/credits_screen.gd` (ruta `credits`) | Ajustes > Créditos; lista de licencias de `assets/audio/CREDITS.md` |
+
+Flujo: Título > (consentimiento) > intro > Home. Comic de apertura al empezar la etapa 1 de cada era (`PreBattleScreen.start_battle`), comic de cierre tras ganar el jefe (antes de `result`, en `BattleScreen._finish`), final cuando `profile.progress.game_completed` (lo comprueba `HomeScreen._ready`; tolerante si el flag no existe). Los comics de era solo se activan si el perfil ya pasó por la intro (`profile.seen` tiene `story`).

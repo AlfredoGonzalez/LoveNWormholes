@@ -10,7 +10,6 @@ const TEXT_SIZES := [["settings.text_small", 0.85], ["settings.text_normal", 1.0
 var _body: VBoxContainer
 var _status: Label
 var _show_privacy := false
-var _show_credits := false
 var _confirm_delete := false
 var _restore_wait := false
 var _status_text := ""
@@ -99,6 +98,15 @@ func open_consent_screen() -> void:
 	Game.nav.go("consent", {"from": "settings", "next": "settings", "next_params": params.duplicate()})
 
 
+## Replays the story the player has unlocked (comic panels, skippable), then comes back here.
+func open_story() -> void:
+	Game.nav.go("story", {"seq": Story.REPLAY, "next": "settings", "next_params": params.duplicate()})
+
+
+func open_credits() -> void:
+	Game.nav.go("credits", {"from": str(params.get("from", ""))})
+
+
 func restore_purchases() -> void:
 	_restore_wait = true
 	_status_text = Game.t("settings.restore_wait")
@@ -128,7 +136,7 @@ func delete_local_data() -> void:
 	Game.nav.go("title")
 
 
-func credits_lines() -> Array:
+static func credits_lines() -> Array:
 	var out: Array = []
 	var f := FileAccess.open(CREDITS_PATH, FileAccess.READ)
 	if f == null:
@@ -240,20 +248,15 @@ func _build() -> void:
 		_status = UI.label(_status_text, 15, UI.TEAL)
 		_body.add_child(_status)
 
-	# Credits
+	# Story replay and credits
+	var story := _link_row(Game.t("settings.story_replay"))
+	story.name = "story_button"
+	story.pressed.connect(open_story)
+	_body.add_child(story)
 	var cred := _link_row(Game.t("settings.credits"))
-	cred.pressed.connect(func(): _show_credits = not _show_credits; _build())
+	cred.name = "credits_button"
+	cred.pressed.connect(open_credits)
 	_body.add_child(cred)
-	if _show_credits:
-		var cp := UI.panel()
-		_body.add_child(cp)
-		var cv := VBoxContainer.new()
-		cv.add_theme_constant_override("separation", 4)
-		cp.add_child(cv)
-		var lines := credits_lines()
-		for l in lines:
-			cv.add_child(UI.label(str(l), 14))
-		cv.add_child(UI.label(Game.t("settings.credits_audio_note"), 14, UI.LOCKED_INK))
 
 	# Delete local data
 	var del := _link_row(Game.t("settings.delete_data"))

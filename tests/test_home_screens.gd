@@ -331,6 +331,7 @@ func test_title_goes_home_and_spanish_builds() -> void:
 		return
 	var nav = _fresh()
 	_g().save.profile["consent"]["state"] = "granted"
+	Story.mark_seen(_g().save.profile, "intro")   # the intro comic plays once before Home (test_story covers it)
 	var t = _make("res://src/meta/title_screen.gd")
 	t.play_button.pressed.emit()
 	assert_eq(nav.calls[-1][0], "home")
