@@ -5,16 +5,19 @@ const P := "user://t_econ.json"
 
 func _balance() -> Dictionary:
 	return {
-		"unit": {"max_level": 20, "stat_per_level": 0.10, "cost_base": 60, "cost_growth": 1.18},
-		"food_burrow": {"max_level": 10, "income_per_level": 1.2, "cap_per_level": 60, "cost_base": 80, "cost_growth": 1.45},
-		"base": {"max_level": 10, "hp_per_level": 0.10, "cost_base": 100, "cost_growth": 1.45},
-		"power": {"max_level": 5, "effect_per_level": 0.12, "cooldown_per_level": 0.04, "cost_base": 150, "cost_growth": 1.6},
-		"rewards": {"win_base": 30, "win_growth": 1.06, "first_clear_coin_mult": 2, "first_clear_gems": 5,
+		"scaling": {"unit_level_step": 0.10},
+		"upgrades": {
+			"unit": {"max_level": 20, "cost_start": 60, "cost_growth": 1.18},
+			"burrow": {"max_level": 10, "income_per_level": 1.2, "cap_per_level": 60, "cost_start": 80, "cost_growth": 1.45},
+			"base": {"max_level": 10, "hp_per_level": 0.10, "cost_start": 100, "cost_growth": 1.45},
+			"power": {"max_level": 5, "effect_per_level": 0.12, "cooldown_per_level": 0.04, "cost_start": 150, "cost_growth": 1.6},
+		},
+		"rewards": {"win_coins_base": 30, "win_coins_growth": 1.06, "first_clear_coins_mult": 2, "first_clear_gems": 5,
 			"boss_first_clear_gems": 20, "boss_first_clear_capsules": 1, "loss_fraction": 0.4},
-		"underdog": {"losses_before": 2, "food_per_stack": 0.10, "base_hp_per_stack": 0.10, "max_stacks": 3},
-		"offline": {"base_coins_per_min": 2, "coins_per_min_per_stage": 0.4, "base_cap_hours": 3,
-			"hours_per_boss": 1, "max_cap_hours": 8},
-		"daily": {"capsules": 1, "gems": 10, "streak_day": 7, "streak_bonus": {"gems": 50, "capsules": 1}},
+		"underdog": {"losses_to_trigger": 2, "food_per_stack": 0.10, "base_hp_per_stack": 0.10, "max_stacks": 3},
+		"offline": {"coins_per_min_base": 2, "coins_per_min_per_stage": 0.4, "cap_hours_base": 3,
+			"cap_hours_per_boss": 1, "cap_hours_max": 8},
+		"daily": {"login_capsules": 1, "login_gems": 10, "streak_day": 7, "streak_bonus_gems": 50, "streak_bonus_capsules": 1},
 	}
 
 func _clean() -> void:
@@ -145,8 +148,10 @@ func test_underdog_stacks() -> void:
 	e.settle_battle(1, 3, false)
 	assert_eq(e.underdog(1, 3)["stacks"], 0, "1 loss: nothing")
 	e.settle_battle(1, 3, false)
+	assert_eq(e.underdog(1, 3)["stacks"], 0, "2 losses: still nothing (stacks = losses - 2)")
+	e.settle_battle(1, 3, false)
 	var u := e.underdog(1, 3)
-	assert_eq(u["stacks"], 1, "after 2 consecutive losses the first stack applies")
+	assert_eq(u["stacks"], 1, "3rd consecutive loss: first stack")
 	assert_near(u["food_pct"], 0.10)
 	assert_near(u["base_hp_pct"], 0.10)
 	e.settle_battle(1, 3, false)
@@ -185,7 +190,7 @@ func test_offline_cap_max_8h() -> void:
 	for era in ["1", "2", "3", "4", "5"]:
 		e.save_service.profile["progress"]["highest_stage_cleared"][era] = 10
 	assert_near(e.offline_cap_hours(), 8.0, 0.0001, "3 + 5 bosses = 8")
-	e.balance["offline"]["hours_per_boss"] = 3
+	e.balance["offline"]["cap_hours_per_boss"] = 3
 	assert_near(e.offline_cap_hours(), 8.0, 0.0001, "never above 8")
 	assert_near(e.offline_cap_hours(2.0), 10.0, 0.0001, "IAP hours add on top")
 	_clean()

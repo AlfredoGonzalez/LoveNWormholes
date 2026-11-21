@@ -1,8 +1,8 @@
 class_name Economy
 extends RefCounted
 ## Single source of truth for currencies and economy formulas (spec 6, 8.3). Never touches UI; emits signals.
-## Driven by a `balance` Dictionary (shape documented in tests/test_economy.gd; missing keys fall back to the
-## spec 6 values). Every state change is persisted through SaveService (write on every reward).
+## Driven by the `balance` Dictionary of data/balance.json (DataDB.balance(); missing keys fall back to the
+## spec 6 values and are recorded in `missing_keys`). Every state change is persisted through SaveService (write on every reward).
 ## Gems never convert to coins: there is no conversion API and spend() is per currency.
 
 signal currency_changed(currency: String, new_value: int, delta: int)
@@ -17,6 +17,8 @@ const BOSS_STAGE := 10
 
 var balance: Dictionary
 var save_service: SaveService
+## Every balance key that was asked for but absent from `balance` (the default was used). Tests assert it is empty.
+var missing_keys: Array[String] = []
 
 func _init(p_balance: Dictionary, p_save: SaveService) -> void:
 	balance = p_balance
@@ -25,11 +27,13 @@ func _init(p_balance: Dictionary, p_save: SaveService) -> void:
 var profile: Dictionary:
 	get: return save_service.profile
 
-## Dotted-path lookup in the balance dictionary, e.g. _b("unit.cost_base", 60).
+## Dotted-path lookup in the balance dictionary, e.g. _b("upgrades.unit.cost_start", 60).
 func _b(key_path: String, default):
 	var cur = balance
 	for part in key_path.split("."):
 		if typeof(cur) != TYPE_DICTIONARY or not cur.has(part):
+			if not missing_keys.has(key_path):
+				missing_keys.append(key_path)
 			return default
 		cur = cur[part]
 	return cur
@@ -82,7 +86,7 @@ static func _geo(base: float, growth: float, level: int) -> int:
 	return int(round(base * pow(growth, level - 2)))
 
 func unit_max_level() -> int:
-	return int(_b("unit.max_level", 20))
+	return int(_b("upgrades.unit.max_level", 20))
 
 func unit_level(unit_id: String) -> int:
 	return int(profile["units"].get(unit_id, 1))
@@ -90,10 +94,10 @@ func unit_level(unit_id: String) -> int:
 func unit_upgrade_cost(to_level: int) -> int:
 	if to_level < 2 or to_level > unit_max_level():
 		return -1
-	return _geo(float(_b("unit.cost_base", 60)), float(_b("unit.cost_growth", 1.18)), to_level)
+	return _geo(float(_b("upgrades.unit.cost_start", 60)), float(_b("upgrades.unit.cost_growth", 1.18)), to_level)
 
 func unit_stat_multiplier(level: int) -> float:
-	return 1.0 + float(_b("unit.stat_per_level", 0.10)) * (level - 1)
+	return 1.0 + float(_b("scaling.unit_level_step", 0.10)) * (level - 1)
 
 func upgrade_unit(unit_id: String) -> bool:
 	var next := unit_level(unit_id) + 1
@@ -109,19 +113,19 @@ func burrow_level() -> int:
 	return int(profile["upgrades"].get("food_burrow", 1))
 
 func burrow_max_level() -> int:
-	return int(_b("food_burrow.max_level", 10))
+	return int(_b("upgrades.burrow.max_level", 10))
 
 func burrow_cost(to_level: int) -> int:
 	if to_level < 2 or to_level > burrow_max_level():
 		return -1
-	return _geo(float(_b("food_burrow.cost_base", 80)), float(_b("food_burrow.cost_growth", 1.45)), to_level)
+	return _geo(float(_b("upgrades.burrow.cost_start", 80)), float(_b("upgrades.burrow.cost_growth", 1.45)), to_level)
 
 ## Extra Food per second at `level` (level 1 is the unupgraded baseline, so +1.2 per level above 1).
 func burrow_income_bonus(level: int) -> float:
-	return float(_b("food_burrow.income_per_level", 1.2)) * (level - 1)
+	return float(_b("upgrades.burrow.income_per_level", 1.2)) * (level - 1)
 
 func burrow_cap_bonus(level: int) -> float:
-	return float(_b("food_burrow.cap_per_level", 60)) * (level - 1)
+	return float(_b("upgrades.burrow.cap_per_level", 60)) * (level - 1)
 
 func upgrade_burrow() -> bool:
 	return _upgrade_simple("food_burrow", burrow_level(), burrow_cost(burrow_level() + 1))
@@ -130,15 +134,15 @@ func base_level() -> int:
 	return int(profile["upgrades"].get("base", 1))
 
 func base_max_level() -> int:
-	return int(_b("base.max_level", 10))
+	return int(_b("upgrades.base.max_level", 10))
 
 func base_cost(to_level: int) -> int:
 	if to_level < 2 or to_level > base_max_level():
 		return -1
-	return _geo(float(_b("base.cost_base", 100)), float(_b("base.cost_growth", 1.45)), to_level)
+	return _geo(float(_b("upgrades.base.cost_start", 100)), float(_b("upgrades.base.cost_growth", 1.45)), to_level)
 
 func base_hp_multiplier(level: int) -> float:
-	return 1.0 + float(_b("base.hp_per_level", 0.10)) * (level - 1)
+	return 1.0 + float(_b("upgrades.base.hp_per_level", 0.10)) * (level - 1)
 
 func upgrade_base() -> bool:
 	return _upgrade_simple("base", base_level(), base_cost(base_level() + 1))
@@ -155,18 +159,18 @@ func power_level(power_id: String) -> int:
 	return int(profile["upgrades"]["powers"].get(power_id, 1))
 
 func power_max_level() -> int:
-	return int(_b("power.max_level", 5))
+	return int(_b("upgrades.power.max_level", 5))
 
 func power_cost(to_level: int) -> int:
 	if to_level < 2 or to_level > power_max_level():
 		return -1
-	return _geo(float(_b("power.cost_base", 150)), float(_b("power.cost_growth", 1.6)), to_level)
+	return _geo(float(_b("upgrades.power.cost_start", 150)), float(_b("upgrades.power.cost_growth", 1.6)), to_level)
 
 func power_effect_multiplier(level: int) -> float:
-	return 1.0 + float(_b("power.effect_per_level", 0.12)) * (level - 1)
+	return 1.0 + float(_b("upgrades.power.effect_per_level", 0.12)) * (level - 1)
 
 func power_cooldown_multiplier(level: int) -> float:
-	return 1.0 - float(_b("power.cooldown_per_level", 0.04)) * (level - 1)
+	return 1.0 - float(_b("upgrades.power.cooldown_per_level", 0.04)) * (level - 1)
 
 func upgrade_power(power_id: String) -> bool:
 	var level := power_level(power_id)
@@ -187,7 +191,7 @@ static func stage_id(era: int, stage: int) -> String:
 	return "%d-%d" % [era, stage]
 
 func win_reward(n: int) -> int:
-	return int(round(float(_b("rewards.win_base", 30)) * pow(float(_b("rewards.win_growth", 1.06)), n - 1)))
+	return int(round(float(_b("rewards.win_coins_base", 30)) * pow(float(_b("rewards.win_coins_growth", 1.06)), n - 1)))
 
 func loss_reward(n: int) -> int:
 	return int(round(win_reward(n) * float(_b("rewards.loss_fraction", 0.4))))
@@ -214,14 +218,12 @@ func bosses_cleared() -> int:
 func loss_streak(era: int, stage: int) -> int:
 	return int(profile["progress"]["loss_streak"].get(stage_id(era, stage), 0))
 
-## Underdog Bonus (6.4): once a stage has `losses_before` consecutive losses, the next attempt gets the first
-## stack and every further loss adds one, up to max_stacks. Returns {stacks, food_pct, base_hp_pct} (fractions).
+## Underdog Bonus (6.4), same rule as DataDB.underdog_stacks: nothing until `losses_to_trigger` consecutive losses,
+## then each further loss adds one stack (clamp(losses - trigger, 0, max_stacks)). Returns {stacks, food_pct, base_hp_pct} (fractions).
 func underdog(era: int, stage: int) -> Dictionary:
 	var losses := loss_streak(era, stage)
-	var before := int(_b("underdog.losses_before", 2))
-	var stacks := 0
-	if losses >= before:
-		stacks = clampi(losses - before + 1, 0, int(_b("underdog.max_stacks", 3)))
+	var before := int(_b("underdog.losses_to_trigger", 2))
+	var stacks := clampi(losses - before, 0, int(_b("underdog.max_stacks", 3)))
 	return {
 		"stacks": stacks,
 		"food_pct": stacks * float(_b("underdog.food_per_stack", 0.10)),
@@ -239,7 +241,7 @@ func settle_battle(era: int, stage: int, won: bool, stars := 0, coin_multiplier 
 		var coins := win_reward(n)
 		var first := is_first_clear(era, stage)
 		if first:
-			coins *= int(_b("rewards.first_clear_coin_mult", 2))
+			coins *= int(_b("rewards.first_clear_coins_mult", 2))
 			result["gems"] = int(_b("rewards.first_clear_gems", 5))
 			result["first_clear"] = true
 			if stage == BOSS_STAGE:
@@ -264,19 +266,19 @@ func settle_battle(era: int, stage: int, won: bool, stars := 0, coin_multiplier 
 # ---------------------------------------------------------------- offline Worm Farm (6.5)
 
 func offline_rate_per_minute() -> float:
-	return float(_b("offline.base_coins_per_min", 2)) + float(_b("offline.coins_per_min_per_stage", 0.4)) * highest_stage_cleared()
+	return float(_b("offline.coins_per_min_base", 2)) + float(_b("offline.coins_per_min_per_stage", 0.4)) * highest_stage_cleared()
 
 ## Cap in hours: min(base + 1 per boss, max) plus IAP hours (Golden Pass +2).
 func offline_cap_hours(extra_hours := 0.0) -> float:
-	var h := float(_b("offline.base_cap_hours", 3)) + float(_b("offline.hours_per_boss", 1)) * bosses_cleared()
-	return minf(h, float(_b("offline.max_cap_hours", 8))) + extra_hours
+	var h := float(_b("offline.cap_hours_base", 3)) + float(_b("offline.cap_hours_per_boss", 1)) * bosses_cleared()
+	return minf(h, float(_b("offline.cap_hours_max", 8))) + extra_hours
 
 func offline_pending(now: float, extra_hours := 0.0) -> int:
 	var last := float(profile["timestamps"].get("offline_farm", 0))
 	if last <= 0.0 or now <= last:
 		return 0
 	var minutes := minf((now - last) / 60.0, offline_cap_hours(extra_hours) * 60.0)
-	return int(round(minutes * offline_rate_per_minute()))
+	return floori(minutes * offline_rate_per_minute())
 
 ## Claims the offline coins (multiplier 2 for the Double Farm ad) and restarts the timer.
 func claim_offline(now: float, extra_hours := 0.0, multiplier := 1) -> int:
@@ -304,15 +306,14 @@ func claim_daily(now: float) -> Dictionary:
 	var streak := int(ts.get("daily_streak", 0))
 	streak = streak + 1 if (last > 0.0 and day_index(now) == day_index(last) + 1) else 1
 	var bundle := {
-		"capsules": int(_b("daily.capsules", 1)),
-		"gems": int(_b("daily.gems", 10)),
+		"capsules": int(_b("daily.login_capsules", 1)),
+		"gems": int(_b("daily.login_gems", 10)),
 	}
 	var cycle := int(_b("daily.streak_day", 7))
 	var streak_bonus := cycle > 0 and streak % cycle == 0
 	if streak_bonus:
-		var extra: Dictionary = _b("daily.streak_bonus", {"gems": 50, "capsules": 1})
-		for k in extra:
-			bundle[k] = int(bundle.get(k, 0)) + int(extra[k])
+		bundle["gems"] = int(bundle["gems"]) + int(_b("daily.streak_bonus_gems", 50))
+		bundle["capsules"] = int(bundle["capsules"]) + int(_b("daily.streak_bonus_capsules", 1))
 	ts["daily_claim"] = now
 	ts["daily_streak"] = streak
 	add_bundle(bundle, false)
