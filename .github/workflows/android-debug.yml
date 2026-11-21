@@ -1,0 +1,35 @@
+name: android-debug
+
+on:
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.6.1"
+
+jobs:
+  export-debug-apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot
+        run: sudo -E tools/setup_godot.sh
+
+      - name: Install Android toolchain (JDK 17, SDK, templates, debug keystore, editor settings)
+        run: tools/setup_android.sh
+
+      - name: Import project
+        run: godot --headless --path . --import
+
+      - name: Export debug APK
+        run: |
+          mkdir -p build
+          godot --headless --path . --export-debug "Android" build/lovenwormholes-debug.apk
+          ls -l build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lovenwormholes-debug-apk
+          path: build/lovenwormholes-debug.apk
+          if-no-files-found: error
