@@ -93,7 +93,7 @@ func _on_play() -> void:
 	if consent_state() == "unknown":
 		_show_consent()
 	else:
-		Game.nav.go("levels")
+		Game.nav.go("home")
 
 
 func _show_consent() -> void:
@@ -134,4 +134,4 @@ func _finish_consent(state: String) -> void:
 	if consent_overlay != null:
 		consent_overlay.queue_free()
 		consent_overlay = null
-	Game.nav.go("levels")
+	Game.nav.go("home")

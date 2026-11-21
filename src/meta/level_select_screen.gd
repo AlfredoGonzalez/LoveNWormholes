@@ -1,18 +1,16 @@
 class_name LevelSelectScreen
 extends Screen
 ## World map (mockup WorldMap): currency chips, era tabs, zigzag stage path with stars, Play, bottom bar.
-
+## World Map (mockup WorldMap): back to Home, currency chips, era tabs 1-5 (locked / coming soon notes), zigzag stage path with stars, boss node, Wormina echo markers and hint.
 const OFFSETS := [-90, 0, 90, 0]
 const NODE_SIZE := 68.0
 const BOSS_SIZE := 92.0
-const BAR_FEATURES := ["upgrades", "squad", "shop", "capsules"]
 
 var selected_era := 1
-var play_button: Button
+var back_button: Button
 var stage_buttons := {}       # stage index -> Button (selected era)
-var bar_buttons := {}         # "upgrades" / "squad" / "shop" / "capsules" / "settings" -> Button
-var bar_notes := {}           # feature -> Label (unlock note / coming soon)
 var era_buttons := {}         # era -> Button
+var echo_hint: Control
 var _scroll: ScrollContainer
 var _path_box: VBoxContainer
 var _profile: Dictionary
@@ -25,17 +23,24 @@ func _ready() -> void:
 	var v := MetaUI.scaffold(self, 12)
 
 	var top := HBoxContainer.new()
-	top.add_theme_constant_override("separation", 8)
-	top.add_child(MetaUI.currency_bar())
-	var title := UI.label(Game.t("map.title"), 20, UI.INK, HORIZONTAL_ALIGNMENT_RIGHT)
+	top.add_theme_constant_override("separation", 10)
+	back_button = UI.button("‹", "ghost", Vector2(52, 52), 28)
+	back_button.name = "back_button"
+	back_button.tooltip_text = Game.t("ui.back")
+	back_button.pressed.connect(func(): Game.nav.go("home"))
+	top.add_child(back_button)
+	var title := UI.label(Game.t("map.title"), 28, UI.INK)
+	title.name = "map_title"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	top.add_child(title)
 	v.add_child(top)
+	v.add_child(MetaUI.currency_bar())
 
 	var tabs := HBoxContainer.new()
 	tabs.add_theme_constant_override("separation", 6)
 	for era in range(1, DataDB.bal_i("campaign.eras", 5) + 1):
-		var b := UI.button(Game.t("map.era_tab", [era]), "ghost", Vector2(0, UI.MIN_TOUCH), 16)
+		var b := UI.button("", "ghost", Vector2(0, UI.MIN_TOUCH), 18)
 		b.name = "era_%d" % era
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.pressed.connect(select_era.bind(era))
@@ -52,11 +57,10 @@ func _ready() -> void:
 	_path_box.add_theme_constant_override("separation", 4)
 	_scroll.add_child(_path_box)
 
-	play_button = UI.button("", "primary", Vector2(0, 64), 26)
-	play_button.name = "play_button"
-	play_button.pressed.connect(_on_play)
-	v.add_child(play_button)
-	v.add_child(_build_bottom_bar())
+	echo_hint = UI.panel()
+	echo_hint.name = "echo_hint"
+	echo_hint.add_child(UI.label("♥ " + Game.t("map.echo_hint", [5]), 16, UI.RED, HORIZONTAL_ALIGNMENT_CENTER))
+	v.add_child(echo_hint)
 	select_era(selected_era)
 
 
@@ -65,10 +69,11 @@ func select_era(era: int) -> void:
 	for e in era_buttons:
 		var locked := not Progress.is_era_unlocked(_profile, e)
 		var b: Button = era_buttons[e]
-		b.text = Game.t("map.era_tab", [e])
+		b.text = ("🔒 %d" if locked else "%d") % e
+		b.tooltip_text = Game.t("map.locked_era", [e - 1]) if locked else Game.t("map.era_tab", [e])
 		b.add_theme_stylebox_override("normal", UI.style(UI.ORANGE if e == era else (UI.LOCKED if locked else UI.PANEL)))
+		b.add_theme_color_override("font_color", UI.LOCKED_INK if locked else UI.INK)
 	_rebuild_path()
-	_refresh_play()
 
 
 func _rebuild_path() -> void:
@@ -76,7 +81,7 @@ func _rebuild_path() -> void:
 		_path_box.remove_child(c)
 		c.queue_free()
 	stage_buttons.clear()
-	_path_box.add_child(UI.label(Game.t("era.%d.name" % selected_era), 20, UI.TEAL, HORIZONTAL_ALIGNMENT_CENTER))
+	_path_box.add_child(UI.label(Game.t("home.era_line", [selected_era, Game.t("era.%d.short" % selected_era)]), 22, UI.TEAL, HORIZONTAL_ALIGNMENT_CENTER))
 	if not Progress.is_era_unlocked(_profile, selected_era):
 		var l := UI.label(Game.t("map.locked_era", [selected_era - 1]), 22, UI.LOCKED_INK, HORIZONTAL_ALIGNMENT_CENTER)
 		l.name = "era_locked_note"
@@ -142,7 +147,8 @@ func _make_row(idx: int, pos: int, is_current: bool) -> Control:
 	col.add_child(info)
 	if boss:
 		col.add_child(UI.label(Game.t("glossary.boss"), 14, UI.RED, HORIZONTAL_ALIGNMENT_CENTER))
-	if idx == 5:
+	var rw: Dictionary = DataDB.stage(selected_era, idx).get("rewards", {})
+	if bool(rw.get("echo", idx == 5)):
 		var echo := UI.label("♥ " + Game.t("hero.wormina"), 14, UI.RED, HORIZONTAL_ALIGNMENT_CENTER)
 		echo.name = "echo_marker"
 		col.add_child(echo)
@@ -171,52 +177,6 @@ func _scroll_to_current(next: Dictionary) -> void:
 		_scroll.scroll_vertical = maxi(int(b.global_position.y - _scroll.global_position.y + _scroll.scroll_vertical - _scroll.size.y * 0.5), 0)
 
 
-func _refresh_play() -> void:
-	var next := Progress.next_stage(_profile)
-	play_button.text = Game.t("map.play_stage", [next["era"], next["stage"]])
-
-
 func open_stage(era: int, stage: int) -> void:
 	if Progress.is_stage_unlocked(_profile, era, stage):
 		Game.nav.go("prebattle", {"era": era, "stage": stage})
-
-
-func _on_play() -> void:
-	var next := Progress.next_stage(_profile)
-	open_stage(int(next["era"]), int(next["stage"]))
-
-
-func _build_bottom_bar() -> Control:
-	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 6)
-	var entries := BAR_FEATURES.duplicate()
-	entries.append("settings")
-	for f in entries:
-		var col := VBoxContainer.new()
-		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_theme_constant_override("separation", 2)
-		var label_key: String = "title.settings" if f == "settings" else "nav." + f
-		var b := UI.button(Game.t(label_key), "ghost", Vector2(0, 56), 14)
-		b.name = "bar_" + f
-		b.clip_text = true
-		col.add_child(b)
-		bar_buttons[f] = b
-		var note: Control = null
-		if f == "settings":
-			b.pressed.connect(func(): Game.nav.go("settings"))
-		elif not Progress.feature_unlocked(_profile, f):
-			b.disabled = true
-			note = UI.locked_note(Progress.feature_unlock_stage(f))
-		elif f == "upgrades" or Game.nav.can_go(f):
-			b.pressed.connect(func(): Game.nav.go(f))
-		else:
-			b.disabled = true
-			note = UI.label(Game.t("meta.coming_soon"), 14, UI.LOCKED_INK, HORIZONTAL_ALIGNMENT_CENTER)
-		var nl: Label = note if note is Label else UI.label("", 14)
-		nl.name = "note_" + f
-		nl.add_theme_font_size_override("font_size", 12)
-		nl.custom_minimum_size = Vector2(0, 30)
-		col.add_child(nl)
-		bar_notes[f] = nl
-		h.add_child(col)
-	return h

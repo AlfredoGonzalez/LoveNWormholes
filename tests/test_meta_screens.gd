@@ -93,12 +93,12 @@ func test_title_consent_once() -> void:
 	assert_eq(nav.calls.size(), 0, "no navigation before choosing")
 	s.consent_accept.pressed.emit()
 	assert_eq(_g().save.profile["consent"]["state"], "granted")
-	assert_eq(nav.calls[0][0], "levels")
+	assert_eq(nav.calls[0][0], "home")
 	_drop(s)
 	var s2 = _make("res://src/meta/title_screen.gd")
 	s2.play_button.pressed.emit()
 	assert_true(s2.consent_overlay == null, "consent is shown only once")
-	assert_eq(nav.calls[1][0], "levels")
+	assert_eq(nav.calls[1][0], "home")
 	_drop(s2)
 
 
@@ -111,16 +111,10 @@ func test_levels_fresh_profile() -> void:
 	assert_eq(s.stage_buttons.size(), 10)
 	assert_true(not (s.stage_buttons[1] as Button).disabled)
 	assert_true((s.stage_buttons[2] as Button).disabled, "stage 2 locked at start")
-	# locked features show the unlock note with the right level
-	for f in ["upgrades", "squad", "shop", "capsules"]:
-		assert_true((s.bar_buttons[f] as Button).disabled, f)
-		assert_eq((s.bar_notes[f] as Label).text, _g().t("ui.unlocks_level", [Progress.feature_unlock_stage(f)]), f)
-	assert_true(not (s.bar_buttons["settings"] as Button).disabled)
-	s.bar_buttons["settings"].pressed.emit()
-	assert_eq(nav.calls[-1][0], "settings")
-	s.play_button.pressed.emit()
-	assert_eq(nav.calls[-1][0], "prebattle")
-	assert_eq(nav.calls[-1][1], {"era": 1, "stage": 1})
+	s.back_button.pressed.emit()
+	assert_eq(nav.calls[-1][0], "home")
+	s.stage_buttons[1].pressed.emit()
+	assert_eq(nav.calls[-1], ["prebattle", {"era": 1, "stage": 1}])
 	# era 2 tab is locked and says why
 	s.era_buttons[2].pressed.emit()
 	assert_true(s.find_child("era_locked_note", true, false) != null)
@@ -141,17 +135,6 @@ func test_levels_progress_unlocks() -> void:
 	for i in range(1, 11):
 		var expect_open = Progress.is_stage_unlocked(p, 1, i)
 		assert_eq(not (s.stage_buttons[i] as Button).disabled, expect_open, "stage %d" % i)
-	assert_true(not (s.bar_buttons["upgrades"] as Button).disabled, "upgrades unlocked")
-	s.bar_buttons["upgrades"].pressed.emit()
-	assert_eq(nav.calls[-1][0], "upgrades")
-	for f in ["squad", "shop", "capsules"]:
-		var unlocked = Progress.feature_unlocked(p, f)
-		assert_true((s.bar_buttons[f] as Button).disabled or _g().nav.can_go(f))
-		if not unlocked:
-			assert_eq((s.bar_notes[f] as Label).text, _g().t("ui.unlocks_level", [Progress.feature_unlock_stage(f)]))
-	var nxt = Progress.next_stage(p)
-	s.play_button.pressed.emit()
-	assert_eq(nav.calls[-1][1], {"era": 1, "stage": int(nxt["stage"])})
 	s.stage_buttons[2].pressed.emit()
 	assert_eq(nav.calls[-1], ["prebattle", {"era": 1, "stage": 2}])
 	_drop(s)
