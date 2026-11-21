@@ -24,7 +24,6 @@ static func ensure_loaded() -> void:
 	if _loaded:
 		return
 	load_csv(CSV_PATH)
-	_load_extras()
 	if _lang == "":
 		_lang = detect_device_language()
 
@@ -52,6 +51,8 @@ static func load_csv(path: String = CSV_PATH) -> int:
 		es[key] = _unescape(row[2])
 	_tables = {"en": en, "es": es}
 	_loaded = true
+	if path == CSV_PATH:
+		_load_extras()
 	return en.size()
 
 

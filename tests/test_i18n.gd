@@ -82,7 +82,7 @@ func test_no_empty_strings_and_matching_placeholders() -> void:
 		pe.sort()
 		ps.sort()
 		assert_eq(pe, ps, "placeholders differ in " + row[0])
-	assert_eq(rows, Localization.key_count())
+	assert_true(Localization.key_count() >= rows, "csv keys all loaded (extras add more)")
 
 func test_every_data_key_exists_in_en_and_es() -> void:
 	_reload_real()

@@ -260,11 +260,13 @@ func test_result_defeat_underdog_and_second_wind() -> void:
 	var squad = ["p1_club_worm", "p1_slinger_worm"]
 	var params = {"result": "lose", "era": 1, "stage": 4, "time": 50.0, "base_hp_fraction": 0.0,
 			"squad": squad, "powers": ["squirm_slam"]}
-	# two losses first so the Underdog badge appears on the third result
+	# Underdog (spec 6.4, literal reading): the first stack exists after the 3rd consecutive loss,
+	# so two losses are settled here and the result screen settles the third.
+	_g().economy.settle_battle(1, 4, false)
 	_g().economy.settle_battle(1, 4, false)
 	var s = _make("res://src/meta/result_screen.gd", params)
-	assert_eq(_g().economy.get_amount("coins"), coins0 + _g().economy.loss_reward(4) * 2)
-	assert_eq(_g().economy.loss_streak(1, 4), 2)
+	assert_eq(_g().economy.get_amount("coins"), coins0 + _g().economy.loss_reward(4) * 3)
+	assert_eq(_g().economy.loss_streak(1, 4), 3)
 	assert_eq(s.stars, 0)
 	assert_true(_g().economy.underdog(1, 4)["stacks"] >= 1)
 	assert_true(s.find_child("underdog_panel", true, false) != null)
@@ -282,7 +284,7 @@ func test_result_defeat_underdog_and_second_wind() -> void:
 	var n = nav.calls.size()
 	s.wind_button.pressed.emit()
 	assert_eq(nav.calls.size(), n, "second wind only once per battle")
-	assert_eq(_g().economy.loss_streak(1, 4), 2, "ad buttons never settle again")
+	assert_eq(_g().economy.loss_streak(1, 4), 3, "ad buttons never settle again")
 	_drop(s)
 
 
