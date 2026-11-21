@@ -8,6 +8,7 @@ signal changed(screen_name: String)
 
 const SCREENS := {
 	"title": "res://src/meta/title_screen.gd",
+	"consent": "res://src/meta/consent_screen.gd",
 	"home": "res://src/meta/home_screen.gd",
 	"levels": "res://src/meta/level_select_screen.gd",   # the World Map (kept under its original route name)
 	"squad": "res://src/meta/squad_screen.gd",

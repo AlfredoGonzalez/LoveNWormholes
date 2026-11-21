@@ -2,7 +2,7 @@ class_name SettingsScreen
 extends Screen
 ## Settings (spec 8.7, 9.3, 9.4, mockup Settings.dc.html). Every change goes through the set_* methods, which apply
 ## it to the running services and persist it in Game.save.profile["settings"] (+ Game.save.save()).
-## Consent is a MOCK here: profile["consent"]["state"] is "unknown" | "accepted" | "declined".
+## Consent goes through Game.consent (ConsentService): profile["consent"]["state"] is "unknown" | "accepted" | "declined".
 
 const CREDITS_PATH := "res://assets/audio/CREDITS.md"
 const TEXT_SIZES := [["settings.text_small", 0.85], ["settings.text_normal", 1.0], ["settings.text_large", 1.25]]
@@ -90,9 +90,13 @@ func set_language(lang: String) -> void:
 func set_consent(state: String) -> void:
 	if not state in ["unknown", "accepted", "declined"]:
 		return
-	Game.save.profile["consent"]["state"] = state
-	Game.save.save()
+	Game.consent.set_state(state)
 	_build()
+
+
+## Re-opens the full consent screen (spec 8.7 "Privacy options"); it returns here when done.
+func open_consent_screen() -> void:
+	Game.nav.go("consent", {"from": "settings", "next": "settings", "next_params": params.duplicate()})
 
 
 func restore_purchases() -> void:
@@ -203,7 +207,7 @@ func _build() -> void:
 		var pv := VBoxContainer.new()
 		pv.add_theme_constant_override("separation", 8)
 		pp.add_child(pv)
-		var state := str(Game.save.profile["consent"].get("state", "unknown"))
+		var state := Game.consent.state()
 		pv.add_child(UI.label(Game.t("settings.privacy_state", [Game.t("settings.consent_" + state)]), 18))
 		pv.add_child(UI.label(Game.t("settings.privacy_note"), 14, UI.LOCKED_INK))
 		var cr := HBoxContainer.new()
@@ -217,6 +221,15 @@ func _build() -> void:
 		dec.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		dec.pressed.connect(set_consent.bind("declined"))
 		cr.add_child(dec)
+		var review := UI.button(Game.t("privacy.reopen"), "ghost", Vector2(0, 48), 18)
+		review.name = "privacy_review"
+		review.pressed.connect(open_consent_screen)
+		pv.add_child(review)
+		if ConsentScreen.policy_url() != "":
+			var pol := UI.button(Game.t("settings.privacy_policy"), "ghost", Vector2(0, 48), 18)
+			pol.name = "privacy_policy"
+			pol.pressed.connect(func(): OS.shell_open(ConsentScreen.policy_url()))
+			pv.add_child(pol)
 
 	# Restore purchases
 	var rest := _link_row(Game.t("settings.restore"))

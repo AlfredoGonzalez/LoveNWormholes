@@ -1,5 +1,5 @@
 extends Control
-## Entry point (spec 9.1 boot order): studio intro -> consent (mock) -> title. Built in code.
+## Entry point (spec 9.1 boot order): studio intro -> consent (if needed) -> title. Built in code.
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -8,14 +8,21 @@ func _ready() -> void:
 	Game.nav.host = self
 	Game.start_services()
 	if bool(OS.get_environment("LNW_SKIP_INTRO") != "") or not ResourceLoader.exists("res://assets/video/studio_intro.ogv"):
-		_to_title()
+		_after_intro()
 		return
 	var intro := StudioIntro.new()
 	intro.muted = bool(Game.save.profile["settings"].get("muted", false))
 	add_child(intro)
 	intro.finished.connect(func():
 		intro.queue_free()
-		_to_title())
+		_after_intro())
+
+
+## Spec 9.1: consent (UMP-like) comes after the intro, only when the choice is still unknown.
+func _after_intro() -> void:
+	if Game.consent.needs_prompt() and Game.nav.go("consent", {"next": "title"}):
+		return
+	_to_title()
 
 
 func _to_title() -> void:

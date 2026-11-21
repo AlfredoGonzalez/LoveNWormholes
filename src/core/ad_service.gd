@@ -7,6 +7,11 @@ extends RefCounted
 ##    and claimed once;
 ##  - placements and `enabled` flags come from a config dictionary (config/ads.json shape:
 ##    placement id -> {"enabled": bool, "reward": {...optional default reward}});
+##  - no ads before the consent state is resolved (start(false) does nothing);
+##  - per-placement limits from the config: `daily_cap` (rewards per UTC day) and `cooldown_s` (seconds between
+##    two rewards of the placement), plus `global_cooldown_s` between any two ads; counters live in
+##    profile.seen.ad_limits and are written together with the pending reward;
+##  - never an interstitial, banner or app-open ad: the only show path is show_ad(), called from a button;
 ##  - no ads before the player cleared stage `min_stage_for_ads` (stage number 1..50, default 3);
 ##  - the next ad is preloaded after one finishes/fails, with exponential backoff (driven by update() and an
 ##    injectable clock, so it is testable); the player is never blocked or penalized when no ad is ready.
@@ -29,10 +34,12 @@ var config: Dictionary
 var analytics: AnalyticsService
 var min_stage_for_ads: int
 var clock: Callable
+var global_cooldown_s := 0.0
 
 var _showing := {}      # placement -> reward Dictionary requested for the ad on screen
 var _fails := {}        # placement -> consecutive failures
 var _next_at := {}      # placement -> earliest clock time for the next preload call
+var _offered := {}      # placement -> true while an offer was already logged (one ad_offered per window)
 var _started := false
 var _connected := false
 
@@ -61,9 +68,13 @@ func shutdown() -> void:
 		provider.ready_changed.disconnect(_on_ready_changed)
 		_connected = false
 
-## Call once at app start, after the consent state is known. Re-delivers undelivered rewards.
-func start(consent_known: bool) -> void:
+## Call once the consent state is known (accepted or declined). With consent_known == false nothing is
+## initialized or loaded. `personalized` false = non-personalized ads. Re-delivers undelivered rewards.
+func start(consent_known: bool, personalized := true) -> void:
+	if not consent_known:
+		return
 	_started = true
+	provider.set_personalized(personalized)
 	provider.initialize(consent_known)
 	deliver_pending()
 	update()
@@ -88,7 +99,54 @@ func placement_enabled(placement: String) -> bool:
 
 ## True when the UI should show an active ad button for this placement.
 func is_available(placement: String) -> bool:
-	return placement_enabled(placement) and ads_unlocked() and not _showing.has(placement) and provider.is_ready(placement)
+	return _started and placement_enabled(placement) and ads_unlocked() and within_limits(placement) \
+		and not _showing.has(placement) and provider.is_ready(placement)
+
+func set_personalized(personalized: bool) -> void:
+	provider.set_personalized(personalized)
+
+# ---------------------------------------------------------------- daily caps and cooldowns
+
+func _limits() -> Dictionary:
+	var seen: Dictionary = save_service.profile["seen"]
+	if typeof(seen.get("ad_limits")) != TYPE_DICTIONARY:
+		seen["ad_limits"] = {}
+	return seen["ad_limits"]
+
+## Rewards granted today for the placement.
+func rewards_today(placement: String) -> int:
+	var e = _limits().get(placement)
+	if typeof(e) == TYPE_DICTIONARY and int(e.get("day", -1)) == Economy.day_index(float(clock.call())):
+		return int(e.get("n", 0))
+	return 0
+
+func within_limits(placement: String) -> bool:
+	var now := float(clock.call())
+	var c = config.get(placement, {})
+	var cap := int(c.get("daily_cap", 0))
+	if cap > 0 and rewards_today(placement) >= cap:
+		return false
+	var cool := float(c.get("cooldown_s", 0.0))
+	var e = _limits().get(placement)
+	if cool > 0.0 and typeof(e) == TYPE_DICTIONARY and now - float(e.get("last", -1.0e12)) < cool:
+		return false
+	var any = _limits().get("_any")
+	if global_cooldown_s > 0.0 and typeof(any) == TYPE_DICTIONARY and now - float(any.get("last", -1.0e12)) < global_cooldown_s:
+		return false
+	return true
+
+func _count_reward(placement: String) -> void:
+	var now := float(clock.call())
+	var lim := _limits()
+	lim[placement] = {"day": Economy.day_index(now), "n": rewards_today(placement) + 1, "last": now}
+	lim["_any"] = {"last": now}
+
+## The UI calls this when it shows an active ad button: logs `ad_offered` once per availability window.
+func note_offered(placement: String) -> void:
+	if _offered.has(placement):
+		return
+	_offered[placement] = true
+	_log("ad_offered", {"placement": placement})
 
 # ---------------------------------------------------------------- show
 
@@ -99,6 +157,7 @@ func show_ad(placement: String, reward := {}) -> bool:
 		return false
 	var r: Dictionary = reward if not reward.is_empty() else config[placement].get("reward", {})
 	_showing[placement] = r.duplicate(true)
+	_offered.erase(placement)
 	_log("ad_started", {"placement": placement})
 	provider.show(placement)
 	return true
@@ -109,6 +168,7 @@ func _on_rewarded(placement: String) -> void:
 	var reward: Dictionary = _showing[placement]
 	_showing.erase(placement)
 	var p := save_service.profile
+	_count_reward(placement)
 	p["reward_seq"] = int(p["reward_seq"]) + 1
 	var entry := {"id": p["reward_seq"], "placement": placement, "reward": reward}
 	p["pending_rewards"].append(entry)
@@ -118,6 +178,7 @@ func _on_rewarded(placement: String) -> void:
 
 func _on_closed(placement: String) -> void:
 	_showing.erase(placement)
+	_offered.erase(placement)
 	_fails[placement] = 0
 	_preload_now(placement)
 

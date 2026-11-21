@@ -27,6 +27,7 @@ Todo es GDScript construido por código. Las reglas están en `docs/spec.md`; lo
 
 | Pantalla | Archivo | `params` de entrada | Siguiente |
 |---|---|---|---|
+| `consent` | `src/meta/consent_screen.gd` | `{next, next_params, from}` | `title` (arranque), `settings` (re-abrir) |
 | `title` | `src/meta/title_screen.gd` | – | `home` |
 | `home` | `src/meta/home_screen.gd` | – | `prebattle`, `levels` (mapa), `squad`, `upgrades`, `settings` |
 | `levels` | `src/meta/level_select_screen.gd` | – (Mapa Mundial) | `prebattle {era, stage}`, `home` |
@@ -116,3 +117,10 @@ Cápsulas del Tiempo, reliquias y Polvo Crono (spec 7.4). Sin tienda: la UI de c
 **balance.json (claves nuevas, en `proposed_keys`).** `capsule.relic_slots` = 4 (el spec no fija un límite de equipables: todas las reliquias se aplican con tope +25%; pon 12 para el comportamiento literal del spec) y `capsule.open_many` = 10 (botón "Abrir N").
 
 **Reglas de la tienda.** Probabilidades, pity y conversión a Polvo se muestran siempre en `CapsuleScreen`; los anuncios son opcionales y la cápsula gratis tiene camino sin anuncio (login diario, jefes). Sin temporizadores ni cuentas atrás.
+# Fase 3 — anuncios, consentimiento, analítica y Android (contrato)
+
+- Orden de arranque: intro del estudio, `consent` (solo si `Game.consent.needs_prompt()`), `title`. Re-abrir desde Ajustes > Opciones de privacidad.
+- `ConsentService` (`Game.consent`, estado en `profile.consent`: `unknown | accepted | declined`, `version`, `updated_at`) sobre `ConsentProvider` (mock / `UmpConsentProvider`). Los anuncios no se inicializan ni cargan hasta que el estado esté resuelto (`Game._try_start_ads`).
+- Selección de implementaciones: `PlatformFactory` (`src/platform/platform_factory.gd`): mock salvo en Android con el flag `native_services` (adaptadores en `src/platform/android/`, sin referencias estáticas a plugins; compilan en headless).
+- `AdService`: solo rewarded; límites `daily_cap` / `cooldown_s` por colocación y `global_cooldown_s` (`config/ads.json`), contadores en `profile.seen.ad_limits`; `note_offered` registra `ad_offered`.
+- Analítica: tabla de eventos y Data safety en `docs/ANALYTICS.md`. Android: `docs/ANDROID.md`.

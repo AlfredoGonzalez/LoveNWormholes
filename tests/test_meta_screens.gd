@@ -89,17 +89,13 @@ func test_title_consent_once() -> void:
 	var s = _make("res://src/meta/title_screen.gd")
 	assert_eq(_g().save.profile["consent"]["state"], "unknown")
 	s.play_button.pressed.emit()
-	assert_true(s.consent_overlay != null, "first Play shows consent")
-	assert_eq(nav.calls.size(), 0, "no navigation before choosing")
-	s.consent_accept.pressed.emit()
-	assert_eq(_g().save.profile["consent"]["state"], "granted")
-	assert_eq(nav.calls[0][0], "home")
+	assert_eq(nav.calls[0][0], "consent", "unknown consent routes to the consent screen first")
+	assert_eq(nav.calls[0][1]["next"], "home")
+	_g().consent.set_choice(true)
+	assert_eq(_g().save.profile["consent"]["state"], "accepted")
+	s.play_button.pressed.emit()
+	assert_eq(nav.calls[1][0], "home", "consent is asked only once")
 	_drop(s)
-	var s2 = _make("res://src/meta/title_screen.gd")
-	s2.play_button.pressed.emit()
-	assert_true(s2.consent_overlay == null, "consent is shown only once")
-	assert_eq(nav.calls[1][0], "home")
-	_drop(s2)
 
 
 func test_levels_fresh_profile() -> void:

@@ -92,6 +92,7 @@ static func refresh_ad_button(b: Button, placement: String, reward_text: String,
 	if Game.ads != null and Game.ads.is_available(placement):
 		b.text = "%s %s" % [Game.t("meta.video_icon"), reward_text]
 		b.disabled = false
+		Game.ads.note_offered(placement)   # analytics ad_offered, once per availability window
 	else:
 		b.text = "%s\n%s" % [reward_text, Game.t("ui.not_available")]
 		b.disabled = true

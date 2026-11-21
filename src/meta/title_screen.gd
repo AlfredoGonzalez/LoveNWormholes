@@ -1,14 +1,11 @@
 class_name TitleScreen
 extends Screen
-## Title: logo placeholder, Play, language toggle, settings, version. The first Play shows the MOCK consent
-## dialog (spec 8.7, UMP-style) once; the choice is stored in profile consent.state.
+## Title: logo placeholder, Play, language toggle, settings, version. Consent is asked by ConsentScreen right
+## after the intro (Main); if it is somehow still unknown at Play, Play routes there before Home.
 
 var play_button: Button
 var lang_button: Button
 var settings_button: Button
-var consent_overlay: Control
-var consent_accept: Button
-var consent_options: Button
 var _title: Label
 var _subtitle: Label
 var _tagline: Label
@@ -74,10 +71,6 @@ func refresh_texts() -> void:
 	var other := "es" if Localization.get_language() == "en" else "en"
 	lang_button.text = Game.t("settings.lang_" + other)
 	_version.text = Game.t("title.version", [str(ProjectSettings.get_setting("application/config/version", "0.1.0"))])
-	if consent_overlay != null and is_instance_valid(consent_overlay):
-		consent_overlay.queue_free()
-		consent_overlay = null
-		_show_consent()
 
 
 func toggle_language() -> void:
@@ -86,52 +79,11 @@ func toggle_language() -> void:
 
 
 func consent_state() -> String:
-	return str(Game.save.profile["consent"].get("state", "unknown"))
+	return Game.consent.state()
 
 
 func _on_play() -> void:
-	if consent_state() == "unknown":
-		_show_consent()
+	if Game.consent.needs_prompt():
+		Game.nav.go("consent", {"next": "home"})
 	else:
 		Game.nav.go("home")
-
-
-func _show_consent() -> void:
-	consent_overlay = Control.new()
-	consent_overlay.name = "consent_overlay"
-	consent_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	var dim := ColorRect.new()
-	dim.color = Color(0, 0, 0, 0.55)
-	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	consent_overlay.add_child(dim)
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	consent_overlay.add_child(center)
-	var panel := UI.panel()
-	panel.custom_minimum_size = Vector2(440, 0)
-	center.add_child(panel)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 12)
-	panel.add_child(box)
-	box.add_child(UI.label(Game.t("consent.title"), 26, UI.INK, HORIZONTAL_ALIGNMENT_CENTER))
-	var body := UI.label(Game.t("consent.body"), 18)
-	body.custom_minimum_size = Vector2(390, 0)
-	box.add_child(body)
-	consent_accept = UI.button(Game.t("consent.accept"), "primary", Vector2(0, 56), 22)
-	consent_accept.name = "consent_accept"
-	consent_accept.pressed.connect(func(): _finish_consent("granted"))
-	box.add_child(consent_accept)
-	consent_options = UI.button(Game.t("settings.privacy_options"), "ghost", Vector2(0, 52), 20)
-	consent_options.name = "consent_options"
-	consent_options.pressed.connect(func(): _finish_consent("limited"))
-	box.add_child(consent_options)
-	add_child(consent_overlay)
-
-
-func _finish_consent(state: String) -> void:
-	Game.save.profile["consent"]["state"] = state
-	Game.save.save()
-	if consent_overlay != null:
-		consent_overlay.queue_free()
-		consent_overlay = null
-	Game.nav.go("home")
