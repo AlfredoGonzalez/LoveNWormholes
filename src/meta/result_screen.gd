@@ -113,6 +113,7 @@ func _settle_once() -> void:
 		return
 	settled = Game.economy.settle_battle(era, stage, won, stars if won else 0, 1)
 	params["_settled"] = settled
+	Game.quests.record_battle_stats(params.get("stats", {}))   # daily quests + profile.stats (once per battle)
 
 
 # ------------------------------------------------------------------ layouts

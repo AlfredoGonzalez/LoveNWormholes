@@ -11,6 +11,7 @@ var ads: AdService
 var billing: BillingService
 var analytics: AnalyticsService
 var audio: AudioService
+var quests: Quests
 var nav: Navigator
 var last_sim: BattleSim            # the battle that just ended (Second Wind resumes it)
 var _ad_timer := 0.0
@@ -46,6 +47,10 @@ func boot(save_path := "user://save.json") -> void:
 	audio.apply_settings(save.profile["settings"])
 	var lang: String = str(save.profile["settings"].get("language", ""))
 	Localization.set_language(lang if lang in ["en", "es"] else Localization.detect_device_language())
+	if quests != null:
+		quests.shutdown()
+	quests = Quests.new(save, economy)
+	ads.reward_granted.connect(_on_reward_granted)
 	nav = Navigator.new()
 	booted_ok = true
 	booted.emit()
@@ -53,6 +58,7 @@ func boot(save_path := "user://save.json") -> void:
 
 func start_services() -> void:
 	## Called by Main once consent state is known (mock: immediately).
+	mark_seen()
 	ads.start(true)
 	billing.start()
 
@@ -75,3 +81,31 @@ func set_language(lang: String) -> void:
 	Localization.set_language(lang)
 	save.profile["settings"]["language"] = lang
 	save.save()
+
+
+## App open / close bookkeeping: timestamps.last_seen, and the Worm Farm timer starts the first time the app opens.
+func mark_seen(now := -1.0) -> void:
+	var t := Time.get_unix_time_from_system() if now < 0.0 else now
+	var ts: Dictionary = save.profile["timestamps"]
+	ts["last_seen"] = t
+	if float(ts.get("offline_farm", 0)) <= 0.0:
+		ts["offline_farm"] = t
+	save.save()
+
+
+func _notification(what: int) -> void:
+	if booted_ok and (what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_WM_CLOSE_REQUEST):
+		mark_seen()
+
+
+## Global listener for ad rewards that no screen owns (Double Farm, Bonus Capsule, and a Double Coins reward
+## re-delivered after an app kill). AdService emits each reward exactly once. When a ResultScreen is listening,
+## it applies Double Coins itself, so this skips it then (a reward is never applied twice).
+func _on_reward_granted(placement: String, reward: Dictionary) -> void:
+	if placement == "double_coins":
+		for c in ads.reward_granted.get_connections():
+			var o = (c["callable"] as Callable).get_object()
+			if o != null and o != self and o is Screen and o.get_script() != null \
+					and str(o.get_script().get_global_name()) == "ResultScreen":
+				return
+	quests.apply_reward(placement, reward)
