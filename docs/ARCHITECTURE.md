@@ -27,6 +27,7 @@ Todo es GDScript construido por código. Las reglas están en `docs/spec.md`; lo
 
 | Pantalla | Archivo | `params` de entrada | Siguiente |
 |---|---|---|---|
+| `consent` | `src/meta/consent_screen.gd` | `{next, next_params, from}` | `title` (arranque), `settings` (re-abrir) |
 | `title` | `src/meta/title_screen.gd` | – | `home` |
 | `home` | `src/meta/home_screen.gd` | – | `prebattle`, `levels` (mapa), `squad`, `upgrades`, `settings` |
 | `levels` | `src/meta/level_select_screen.gd` | – (Mapa Mundial) | `prebattle {era, stage}`, `home` |
@@ -65,3 +66,12 @@ Guardado **v2** (`SaveService.CURRENT_VERSION = 2`, migración `_migrate_1_to_2`
 
 ## Reglas de Era 2 en la simulación (agente Sim)
 `stage_def.rule` = `{"type": "none" | "sand_patch" | ...}`; `BattleSetup` pasa la regla a `BattleSim`; la vista la dibuja (`src/battle`).
+
+---
+# Fase 3 — anuncios, consentimiento, analítica y Android (contrato)
+
+- Orden de arranque: intro del estudio, `consent` (solo si `Game.consent.needs_prompt()`), `title`. Re-abrir desde Ajustes > Opciones de privacidad.
+- `ConsentService` (`Game.consent`, estado en `profile.consent`: `unknown | accepted | declined`, `version`, `updated_at`) sobre `ConsentProvider` (mock / `UmpConsentProvider`). Los anuncios no se inicializan ni cargan hasta que el estado esté resuelto (`Game._try_start_ads`).
+- Selección de implementaciones: `PlatformFactory` (`src/platform/platform_factory.gd`): mock salvo en Android con el flag `native_services` (adaptadores en `src/platform/android/`, sin referencias estáticas a plugins; compilan en headless).
+- `AdService`: solo rewarded; límites `daily_cap` / `cooldown_s` por colocación y `global_cooldown_s` (`config/ads.json`), contadores en `profile.seen.ad_limits`; `note_offered` registra `ad_offered`.
+- Analítica: tabla de eventos y Data safety en `docs/ANALYTICS.md`. Android: `docs/ANDROID.md`.

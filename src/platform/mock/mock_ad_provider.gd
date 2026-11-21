@@ -5,6 +5,7 @@ extends AdProvider
 
 var initialized := false
 var consent_known := false
+var personalized = null             # null until set_personalized is called
 var ready_placements := {}          # placement -> bool
 var preload_calls := {}             # placement -> count
 var show_calls := {}                # placement -> count
@@ -16,6 +17,9 @@ var manual := false                 # show() waits; the test calls finish_reward
 var duplicate_rewarded := false     # emit `rewarded` twice
 var simulate_kill_after_callback := false  # emit rewarded, then never close
 var showing := ""                   # placement currently on screen (manual mode)
+
+func set_personalized(p_personalized: bool) -> void:
+	personalized = p_personalized
 
 func initialize(p_consent_known: bool) -> void:
 	initialized = true

@@ -13,6 +13,7 @@
     "consent_flow": true,
     "speed_x2": true,
     "analytics": true,
+    "native_services": true,
     "debug_menu": false,
     "endless_rift": false,
     "daily_challenge": false

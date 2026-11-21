@@ -19,6 +19,9 @@ jobs:
       - name: Install Android toolchain (JDK 17, SDK, templates, debug keystore, editor settings)
         run: tools/setup_android.sh
 
+      - name: Install Android build template (Gradle build is ON)
+        run: tools/setup_android_gradle.sh
+
       - name: Import project
         run: godot --headless --path . --import
 

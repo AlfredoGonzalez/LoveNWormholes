@@ -48,6 +48,8 @@ func start() -> void:
 func purchase(product_id: String) -> bool:
 	if not products.has(product_id) or (is_non_consumable(product_id) and owns(product_id)):
 		return false
+	if analytics != null:
+		analytics.iap_view(product_id)   # the player opened the purchase flow for this product
 	provider.purchase(product_id)
 	return true
 

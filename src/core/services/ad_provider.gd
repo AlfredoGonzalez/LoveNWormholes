@@ -9,6 +9,12 @@ signal closed(placement: String)
 signal failed(placement: String, reason: String)
 signal ready_changed(placement: String, is_ready: bool)
 
+## Called by AdService before initialize() and whenever the player changes the consent choice.
+## false = non-personalized ads. Audience 13+ (see ConsentProvider constants for the request configuration).
+func set_personalized(_personalized: bool) -> void:
+	pass
+
+## Only called once the consent state is resolved (AdService never calls it earlier).
 func initialize(_consent_known: bool) -> void:
 	pass
 

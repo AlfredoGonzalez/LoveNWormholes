@@ -1,7 +1,8 @@
 {
   "version": 1,
   "rewarded_only": true,
-  "_comment": "Remote-config style switches (spec 7.1). Reward amounts are in balance.json ads. Production ids go in the untracked ads.prod.json.",
+  "_comment": "Remote-config style switches (spec 7.1). Reward amounts are in balance.json ads. Production ids go in the untracked ads.prod.json. Limits: daily_cap = rewards per UTC day (daily_cap_from_balance reads it from balance.json instead), cooldown_s = seconds between two rewards of that placement, global_cooldown_s = seconds between any two ads (0 = none). Only rewarded ads exist: never add interstitial/banner/app-open.",
+  "global_cooldown_s": 10,
   "placements": [
     {
       "id": "double_coins",
@@ -31,6 +32,7 @@
       "id": "bonus_capsule",
       "enabled": true,
       "where": "shop_home",
+      "daily_cap_from_balance": "ads.bonus_capsule_per_day",
       "name_key": "ads.bonus_capsule.name",
       "desc_key": "ads.bonus_capsule.desc",
       "desc_args": [["balance.ads.bonus_capsule_count", 1]]
@@ -45,8 +47,10 @@
     }
   ],
   "debug_test_ids": {
+    "_comment": "Google's official public sample ids (AdMob docs, Android). Debug builds and any build without ads.prod.json use ONLY these; never put real ids here.",
     "verify_at_build_time": true,
     "app_id_android": "ca-app-pub-3940256099942544~3347511713",
     "rewarded_android": "ca-app-pub-3940256099942544/5224354917"
-  }
+  },
+  "prod_ids_file": "res://config/ads.prod.json"
 }

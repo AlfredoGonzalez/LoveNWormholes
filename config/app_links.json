@@ -1,0 +1,4 @@
+{
+  "_comment": "Store/legal links. Leave privacy_policy_url empty until the page is live (the Settings and consent buttons stay hidden while it is empty). Needed for the Play listing and the Data safety form.",
+  "privacy_policy_url": ""
+}
