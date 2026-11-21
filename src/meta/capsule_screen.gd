@@ -148,7 +148,8 @@ func buy(bundle: bool) -> bool:
 
 
 func _watch_bonus_ad() -> void:
-	capsules.request_bonus_ad(Game.ads, Game.quests)
+	if Game.quests.bonus_capsule_available():
+		Game.claim_bonus("bonus_capsule", {"capsules": DataDB.bal_i("ads.bonus_capsule_count", 1)})   # no ad with the Golden Pass
 
 
 # ---------------------------------------------------------------- building

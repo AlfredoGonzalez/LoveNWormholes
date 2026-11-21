@@ -170,6 +170,17 @@ func _notification(what: int) -> void:
 		mark_seen()
 
 
+## Single entry point of every rewarded-bonus button (spec R11). With the Golden Pass the bonus is claimed
+## at once without an ad; otherwise it is the normal opt-in rewarded ad. The reward is applied by the
+## `ads.reward_granted` listeners in both cases. Returns whether a claim or an ad request started.
+func claim_bonus(placement: String, reward := {}) -> bool:
+	if ads == null:
+		return false
+	if shop != null and shop.golden_pass_active():
+		return ads.grant_without_ad(placement, reward)
+	return ads.show_ad(placement, reward)
+
+
 ## Global listener for ad rewards that no screen owns (Double Farm, Bonus Capsule, and a Double Coins reward
 ## re-delivered after an app kill). AdService emits each reward exactly once. When a ResultScreen is listening,
 ## it applies Double Coins itself, so this skips it then (a reward is never applied twice).

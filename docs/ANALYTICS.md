@@ -31,9 +31,9 @@ recording so tests can assert on events.
 | `ad_started` | `placement` | `AdService.show_ad` | The player tapped the button and the ad is requested |
 | `ad_rewarded` | `placement` | `AdService` (`rewarded` signal) | The reward was earned (persisted first) |
 | `ad_failed` | `placement`, `reason` | `AdService` | The ad failed to show (no reward, nothing penalized) |
-| `iap_view` | `product` | `BillingService.purchase` | A purchase flow is opened (no shop screen yet) |
+| `iap_view` | `product` | `shop_screen.gd` | The Shop opens: one event per real-money product shown (not logged on purchase) |
 | `iap_purchase` | `product` | `BillingService` | A purchase was granted (once per purchase token) |
-| `capsule_open` | `rarity`, `pity` | helper `AnalyticsService.capsule_open`; no caller until the Capsules screen exists | A Time Capsule is opened |
+| `capsule_open` | `rarity`, `pity` | `capsule_screen.gd` (`AnalyticsService.capsule_open`) | A Time Capsule is opened |
 | `era_unlocked` | `era` | `Game._connect_analytics` (after `battle_settled`) | The Era boss is cleared and the next Era unlocks |
 | `daily_claim` (extra) | `streak` | `Game._connect_analytics` | Daily login claimed |
 | `offline_claim` (extra) | `coins` | `Game._connect_analytics` | Worm Farm offline claim |

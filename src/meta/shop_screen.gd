@@ -77,6 +77,10 @@ func ensure_built() -> void:
 	Game.shop.purchase_error.connect(_on_purchase_error)
 	Game.economy.currency_changed.connect(_on_currency_changed)
 	refresh()
+	# iap_view: the player opened the Shop and sees these real-money products (not logged on purchase).
+	if Game.analytics != null:
+		for pid in buy_buttons:
+			Game.analytics.iap_view(str(pid))
 
 
 func _request_refresh() -> void:
@@ -154,10 +158,7 @@ func claim_bonus_capsule() -> void:
 	if not Game.quests.bonus_capsule_available(_now()):
 		return
 	var reward := {"capsules": DataDB.bal_i("ads.bonus_capsule_count", 1)}
-	if Game.shop.ads_removed():
-		Game.quests.apply_reward("bonus_capsule", reward, _now())
-	else:
-		Game.ads.show_ad("bonus_capsule", reward)
+	Game.claim_bonus("bonus_capsule", reward)
 	_request_refresh()
 
 

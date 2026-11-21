@@ -177,7 +177,7 @@ func bonus_capsule_available(now := -1.0) -> bool:
 
 ## Applies a granted ad reward that is not owned by a screen. Called by Game's global reward listener;
 ## AdService hands each reward out exactly once. Returns true when it was handled here.
-##   double_farm   {coins, multiplier}: claims the pending farm coins x multiplier, or, if the player already
+##   double_farm   {coins, multiplier, extra_hours?}: (extra_hours = Golden Pass cap hours, same as the popup) claims the pending farm coins x multiplier, or, if the player already
 ##                 claimed them meanwhile, pays only the missing extra (coins x (multiplier - 1)).
 ##   bonus_capsule {capsules}: capsules, counted for today (the player is never refused a reward already granted).
 ##   double_coins  {coins}: the extra Coins of a battle whose result screen is gone (re-delivery after a kill).
@@ -186,8 +186,9 @@ func apply_reward(placement: String, reward: Dictionary, now := -1.0) -> bool:
 	match placement:
 		"double_farm":
 			var mult := maxi(int(reward.get("multiplier", DataDB.bal_i("ads.double_farm_mult", 2))), 1)
-			if economy.offline_pending(t) > 0:
-				economy.claim_offline(t, 0.0, mult)
+			var extra_h := float(reward.get("extra_hours", 0.0))   # Golden Pass hours the popup showed
+			if economy.offline_pending(t, extra_h) > 0:
+				economy.claim_offline(t, extra_h, mult)
 			else:
 				economy.add("coins", int(reward.get("coins", 0)) * (mult - 1))
 			return true

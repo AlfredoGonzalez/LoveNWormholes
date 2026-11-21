@@ -96,7 +96,9 @@ Guardado **v2** (`SaveService.CURRENT_VERSION = 2`, migración `_migrate_1_to_2`
 - Textos nuevos en `i18n/strings_shop.tsv` (los de producto ya estaban en `strings.csv`).
 - `MockBillingProvider`: `prices` (id -> texto localizado, vacío por defecto => precio de referencia), `refund(id)`.
 
-Pendiente: aplicar el Golden Pass en los demás puntos de anuncio (Result: Monedas x2 / Segundo Aliento, Prebatalla: Comida +30%, Popup offline: Granja x2, Home: Cápsula Extra) y `Quests.apply_reward("double_farm")` con las horas extra; mostrar skins/gorras equipados (solo se guardan en `profile.skins` / `profile.cosmetics`); proveedores reales de Android/iOS.
+**Golden Pass en los 5 puntos de anuncio**: todos los botones llaman a `Game.claim_bonus(placement, reward)`; con el pase llama a `AdService.grant_without_ad` (mismo flujo persistir-primero/entrega única, sin anuncio ni límites de anuncio) y si no, a `show_ad`. `MetaUI.refresh_ad_button` muestra el botón activo con ★ aunque no haya anuncio cargado. `double_farm` lleva `extra_hours` en el reward y `Quests.apply_reward` lo usa. `iap_view` se emite al abrir la Tienda (por producto mostrado), no al comprar.
+
+Pendiente: mostrar skins/gorras equipados (solo se guardan en `profile.skins` / `profile.cosmetics`); proveedores reales de Android/iOS.
 ## Fase 3 – Cápsulas
 Cápsulas del Tiempo, reliquias y Polvo Crono (spec 7.4). Sin tienda: la UI de compra es de otro agente; aquí solo hay lógica y las pantallas de apertura y colección.
 

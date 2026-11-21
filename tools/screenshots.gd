@@ -26,9 +26,22 @@ func _initialize() -> void:
 		["settings", {"from": "levels"}, 3],
 		["result", {"result": "win", "era": 1, "stage": 1, "time": 95.0, "base_hp_fraction": 0.7, "squad": ["p1_club_worm"], "powers": []}, 3],
 		["result", {"result": "lose", "era": 1, "stage": 2, "time": 60.0, "base_hp_fraction": 0.0, "squad": ["p1_club_worm"], "powers": []}, 3],
+		["shop", {"from": "home"}, 4, "progress"],
+		["capsules", {"from": "home"}, 4],
+		["relics", {}, 4, "relics"],
+		["consent", {}, 3],
 	]
 	var n := 0
 	for sh in shots:
+		if sh.size() > 3:
+			if sh[3] == "progress":   # shop / capsules need unlocked features and some currency
+				for st in range(1, 11):
+					Game.economy.settle_battle(1, st, true, 2, 1)
+				Game.economy.add("gems", 300)
+				Game.economy.add("capsules", 12)
+			elif sh[3] == "relics":
+				Capsules.new(Game.economy).open_many(12)
+				Game.economy.add("chrono_dust", 80)
 		Game.nav.go(sh[0], sh[1])
 		if sh[0] == "battle":
 			var b = Game.nav.current

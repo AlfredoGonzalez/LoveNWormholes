@@ -45,7 +45,7 @@ func test_game_instruments_session_upgrades_and_era_unlock() -> void:
 	g.boot(path)
 	_rm(path)
 
-func test_purchase_start_logs_iap_view() -> void:
+func test_purchase_logs_only_iap_purchase_view_is_the_shops() -> void:
 	var mock := MockAnalyticsProvider.new()
 	var path := "user://t_iap_view.json"
 	var save := SaveService.new(path)
@@ -53,6 +53,6 @@ func test_purchase_start_logs_iap_view() -> void:
 	var b := BillingService.new(MockBillingProvider.new(), save, {"gems_80": {"type": "consumable", "grants": {"gems": 80}}},
 			AnalyticsService.new(mock))
 	b.purchase("gems_80")
-	assert_eq(mock.names(), ["iap_view", "iap_purchase"])
+	assert_eq(mock.names(), ["iap_purchase"], "iap_view belongs to opening the Shop, not to buying")
 	b.shutdown()
 	_rm(path)

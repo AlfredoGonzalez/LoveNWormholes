@@ -89,7 +89,10 @@ static func refresh_ad_button(b: Button, placement: String, reward_text: String,
 		b.text = done_text
 		b.disabled = true
 		return
-	if Game.ads != null and Game.ads.is_available(placement):
+	if Game.shop != null and Game.shop.golden_pass_active() and Game.ads != null and Game.ads.placement_enabled(placement):
+		b.text = "%s %s" % [Game.t("meta.golden_icon"), reward_text]   # Golden Pass: claim without an ad
+		b.disabled = false
+	elif Game.ads != null and Game.ads.is_available(placement):
 		b.text = "%s %s" % [Game.t("meta.video_icon"), reward_text]
 		b.disabled = false
 		Game.ads.note_offered(placement)   # analytics ad_offered, once per availability window

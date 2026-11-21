@@ -281,7 +281,7 @@ func battle_params(resume: bool) -> Dictionary:
 func _on_double_pressed() -> void:
 	if _doubled:
 		return
-	Game.ads.show_ad("double_coins", {"coins": _double_amount(), "multiplier": _double_mult()})
+	Game.claim_bonus("double_coins", {"coins": _double_amount(), "multiplier": _double_mult()})
 
 
 ## Second Wind is once per battle: also spent when this result comes from an already resumed battle.
@@ -292,7 +292,7 @@ func _wind_spent() -> bool:
 func _on_wind_pressed() -> void:
 	if _wind_spent():
 		return
-	Game.ads.show_ad("second_wind", {"base_hp_fraction": DataDB.bal_f("ads.second_wind_base_hp_fraction", 0.25)})
+	Game.claim_bonus("second_wind", {"base_hp_fraction": DataDB.bal_f("ads.second_wind_base_hp_fraction", 0.25)})
 
 
 func _on_reward(placement: String, reward: Dictionary) -> void:

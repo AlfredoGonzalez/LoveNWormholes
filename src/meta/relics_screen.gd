@@ -110,7 +110,9 @@ func _add_card(id: String) -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	panel.add_child(row)
-	row.add_child(UI.placeholder(Game.t("rarity." + rarity), RARITY_COLORS.get(rarity, UI.LOCKED), Vector2(64, 64)))
+	var badge := UI.placeholder(Game.t("rarity." + rarity), RARITY_COLORS.get(rarity, UI.LOCKED), Vector2(64, 64))
+	badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER   # stay square when the card grows with its buttons
+	row.add_child(badge)
 	var mid := VBoxContainer.new()
 	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	mid.add_theme_constant_override("separation", 2)

@@ -429,7 +429,7 @@ func _on_offline_claim() -> void:
 
 ## The reward is granted ONLY from Game.ads.reward_granted (applied by the global listener).
 func _on_offline_double() -> void:
-	Game.ads.show_ad("double_farm", {"coins": _offline_pending, "multiplier": _double_mult()})
+	Game.claim_bonus("double_farm", {"coins": _offline_pending, "multiplier": _double_mult(), "extra_hours": Game.shop.offline_extra_hours()})
 
 
 func _on_offline_claimed(_coins: int) -> void:
@@ -583,4 +583,4 @@ func _on_quest_claim(id: String) -> void:
 
 func _on_bonus_pressed() -> void:
 	if Game.quests.bonus_capsule_available(_now()):
-		Game.ads.show_ad("bonus_capsule", {"capsules": DataDB.bal_i("ads.bonus_capsule_count", 1)})
+		Game.claim_bonus("bonus_capsule", {"capsules": DataDB.bal_i("ads.bonus_capsule_count", 1)})

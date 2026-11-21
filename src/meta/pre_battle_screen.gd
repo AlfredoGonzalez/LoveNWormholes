@@ -312,7 +312,7 @@ func _refresh_boost() -> void:
 func _on_boost_pressed() -> void:
 	if food_boost:
 		return
-	Game.ads.show_ad("food_boost", {"food_fraction": _boost_fraction})
+	Game.claim_bonus("food_boost", {"food_fraction": _boost_fraction})
 
 
 func _on_reward(placement: String, _reward: Dictionary) -> void:

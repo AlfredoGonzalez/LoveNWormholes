@@ -162,6 +162,22 @@ func show_ad(placement: String, reward := {}) -> bool:
 	provider.show(placement)
 	return true
 
+## Golden Pass path (spec R11): grants the placement's reward WITHOUT showing an ad, through the same
+## persist-first / deliver-once pipeline as a watched ad (so every `reward_granted` listener is reused).
+## Not counted against ad caps and cooldowns (no ad was shown) and logs no ad events. `reward` overrides the
+## configured default. Returns false only for an unknown placement or while its ad is on screen.
+func grant_without_ad(placement: String, reward := {}) -> bool:
+	if not config.has(placement) or _showing.has(placement):
+		return false
+	var r: Dictionary = reward if not reward.is_empty() else config[placement].get("reward", {})
+	var p := save_service.profile
+	p["reward_seq"] = int(p["reward_seq"]) + 1
+	var entry := {"id": p["reward_seq"], "placement": placement, "reward": r.duplicate(true)}
+	p["pending_rewards"].append(entry)
+	save_service.save()
+	_deliver(entry)
+	return true
+
 func _on_rewarded(placement: String) -> void:
 	if not _showing.has(placement):
 		return   # duplicate or unsolicited callback: never grants
