@@ -76,7 +76,7 @@ Igual que units, con `id` `e<era>_...`, mas `behavior` (texto libre para el dire
 ```json
 { "version": 1,
   "stages": [
-    { "id": "s01_01", "era": 1, "index": 1,
+    { "id": "1-1", "era": 1, "index": 1,
       "enemy_base_hp": 1000, "food_budget": 600,
       "waves": [ { "t": 5.0, "enemy": "e1_ant_clubber", "count": 3, "interval": 1.5 } ],
       "rule": { "type": "none" },

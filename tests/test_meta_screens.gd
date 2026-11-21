@@ -167,8 +167,12 @@ func test_prebattle_builds_and_starts() -> void:
 	assert_eq(s.slot_notes.size(), 3, "two locked squad slots and the third power slot")
 	assert_eq((s.slot_notes[0] as Label).text, _g().t("ui.unlocks_level", [Progress.feature_unlock_stage("squad")]))
 	var mix = (load("res://src/meta/pre_battle_screen.gd") as GDScript).scout_mix(DataDB.stage(1, 3))
-	assert_eq(mix.get("fighter", 0), 3)
-	assert_eq(mix.get("shooter", 0), 2)
+	var expected := {}
+	for w in DataDB.stage(1, 3)["waves"]:
+		var role := str(DataDB.enemy(str(w["enemy"]))["role"])
+		expected[role] = int(expected.get(role, 0)) + int(w["count"])
+	for role in expected:
+		assert_eq(mix.get(role, 0), expected[role], "scout report counts %s from the waves" % role)
 	assert_true(s.boost_button.disabled, "no ads before stage 3 is cleared")
 	assert_true(s.boost_button.text.contains(_g().t("ui.not_available")))
 	s.start_button.pressed.emit()
