@@ -15,7 +15,7 @@
       "desc_args": [],
       "telegraph": {"id": "stomp", "stun_seconds": 1.0, "reach_units": 3},
       "phase2": {"id": "roar", "enemy_speed_mult": 1.2},
-      "escorts": [{"enemy": "e1_ant_clubber", "count": 4}, {"enemy": "e1_ant_spitter", "count": 2}],
+      "escorts": [{"enemy": "e1_ant_clubber", "count": 2}, {"enemy": "e1_ant_spitter", "count": 1}],
       "proposed": true,
       "proposed_fields": ["telegraph.reach_units", "escorts", "base stats (Heavy x boss.hp_mult)"]
     },
