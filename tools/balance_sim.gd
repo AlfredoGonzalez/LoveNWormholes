@@ -14,6 +14,8 @@ extends SceneTree
 ## Squad-picking policy per profile is in ERA_SQUADS, power picks in ERA_POWERS (see docs/BALANCE.md).
 ## All 10 stages of Era 2 (n = 11..20) are held to the 60-75% band; only Era 1 stages 1-2 are tutorial.
 ##
+## Era 5 (--era 5, n = 41..50): same idea with 5 squad slots and 3 powers; gravity wells from 5-3, final boss Count Magpie 3000 at 5-10.
+##
 ## Nothing about combat is re-implemented here: this file only decides WHAT to press and WHEN.
 ## All bot tunables are in PROFILES and in the Bot class, documented in docs/BALANCE.md.
 
@@ -49,6 +51,24 @@ const ERA_POWERS := {
 	1: {"casual": POWERS, "normal": POWERS, "optimized": POWERS},
 	2: {"casual": POWERS, "normal": POWERS, "optimized": ["squirm_slam", "time_freeze"]},
 }
+
+## Era 5 (Far Future, --era 5): the Time Squad has 5 slots (the 5th opened after the Era 2 boss), 3 power slots (3rd after the
+## Era 3 boss) and every power. Kept apart from ERA_SQUADS / ERA_POWERS so the Era 5 tuning has its own block (see docs/BALANCE.md).
+##   normal    Club Worm (cheap fighter, counters the Laser Bugs), Gear Gunner (fast shooter: the only answer to Drone Flies besides
+##             the Crossbow), Shield Bearer (blocks 20% of ranged vs the beams), Time Medic (heal 5%/s) and Laser Blade Worm.
+##   casual    the first units a player owns: Club, Slinger, Dino Rider, Shield Bearer, Knight (one weak shooter, no support).
+##   optimized same roles as normal but a Mecha Worm instead of the Shield Bearer and Time Freeze as the third power.
+const ERA5_SQUADS := {
+	"casual": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm", "p2_shield_bearer_worm", "p3_knight_worm"],
+	"normal": ["p1_club_worm", "p4_gear_gunner_worm", "p2_shield_bearer_worm", "p5_time_medic_worm", "p5_laser_blade_worm"],
+	"optimized": ["p1_club_worm", "p4_gear_gunner_worm", "p5_mecha_worm", "p5_time_medic_worm", "p5_laser_blade_worm"],
+}
+const ERA5_POWERS := {
+	"casual": ["squirm_slam", "apple_rain"],
+	"normal": ["squirm_slam", "apple_rain", "time_freeze"],
+	"optimized": ["squirm_slam", "apple_rain", "time_freeze"],
+}
+const ERA5_PROFILE_OVERRIDES := {"normal": {"save": 0.0}, "optimized": {"save_window": 2.5}}
 
 ## Profile definitions. `progress` multiplies the spec pacing (average squad level = 1 + 0.25 x progress x (n-1)).
 ## react / jitter: seconds between bot decisions (mean, +- uniform). skill: probability that a decision
@@ -258,8 +278,8 @@ static func profile_opts(prof: String, n: int, era: int = 1) -> Dictionary:
 	var k := float(n - 1)
 	var avg := 1.0 + DataDB.bal_f("scaling.target_avg_level_step") * float(p["progress"]) * k
 	var pl := clampi(1 + int(floor(float(p["power_step"]) * k)), 1, DataDB.bal_i("upgrades.power.max_level"))
-	var squad: Array = ERA_SQUADS[era][prof]
-	var powers: Array = ERA_POWERS[era][prof]
+	var squad: Array = ERA5_SQUADS[prof] if era == 5 else ERA_SQUADS[era][prof]
+	var powers: Array = ERA5_POWERS[prof] if era == 5 else ERA_POWERS[era][prof]
 	var power_levels := {}
 	for pid in powers:
 		power_levels[pid] = pl
@@ -297,7 +317,8 @@ func _play_stage(era: int, stage_index: int, prof: String, runs: int, base_seed:
 
 static func _profile(era: int, prof: String) -> Dictionary:
 	var p: Dictionary = (PROFILES[prof] as Dictionary).duplicate()
-	p.merge((ERA_PROFILE_OVERRIDES.get(era, {}) as Dictionary).get(prof, {}), true)
+	var ov: Dictionary = ERA5_PROFILE_OVERRIDES if era == 5 else (ERA_PROFILE_OVERRIDES.get(era, {}) as Dictionary)
+	p.merge(ov.get(prof, {}), true)
 	return p
 
 

@@ -86,7 +86,8 @@
   "era_rules": {
     "sand_patch": {"slow_fraction": 0.3},
     "walls": {"hp_fraction": 0.2, "damage_mult": 0.5},
-    "steam_vent": {"attack_speed_bonus": 0.25}
+    "steam_vent": {"attack_speed_bonus": 0.25},
+    "gravity_well": {"damage_loss": 0.35, "pierce_fraction": 0.5}
   },
   "boss": {"hp_mult": 6.0, "telegraph_interval_s": 10, "telegraph_warning_s": 1.5, "phase2_hp_fraction": 0.5},
   "roles": {
@@ -157,6 +158,7 @@
     }
   },
   "proposed_keys": {
+    "era_rules.gravity_well.*": "Spec 4.6 only says wells 'bend projectiles'. Proposed: every projectile (both sides) whose flight crosses a well loses damage_loss (35%) of its damage per well crossed (multiplicative); melee, boss bombs and powers are unaffected. pierce_fraction (50%) is the Laser Bug beam damage on the units it passes through.",
     "stars.*": "Spec shows stars on the map but never defines them: 3 stars if the player base keeps >= 80% HP at the win, 2 if >= 50%, else 1.",
     "battle.player_base_hp_era_mult": "Spec only says player base HP is 1000 in Era 1; per-era growth x1.6 (same as unit HP) is proposed.",
     "sim.max_catchup_ticks": "Implementation guard for the fixed-timestep loop, not in the spec.",

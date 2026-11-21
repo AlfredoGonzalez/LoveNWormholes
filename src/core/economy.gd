@@ -235,7 +235,7 @@ func underdog(era: int, stage: int) -> Dictionary:
 func settle_battle(era: int, stage: int, won: bool, stars := 0, coin_multiplier := 1) -> Dictionary:
 	var n := stage_number(era, stage)
 	var sid := stage_id(era, stage)
-	var result := {"won": won, "coins": 0, "gems": 0, "capsules": 0, "first_clear": false, "boss_first_clear": false}
+	var result := {"won": won, "coins": 0, "gems": 0, "capsules": 0, "first_clear": false, "boss_first_clear": false, "game_completed": false}
 	var prog: Dictionary = profile["progress"]
 	if won:
 		var coins := win_reward(n)
@@ -257,6 +257,11 @@ func settle_battle(era: int, stage: int, won: bool, stars := 0, coin_multiplier 
 		prog["highest_stage_cleared"][era_key] = maxi(int(prog["highest_stage_cleared"].get(era_key, 0)), stage)
 		prog["stars"][sid] = maxi(int(prog["stars"].get(sid, 0)), clampi(stars, 0, 3))
 		prog["loss_streak"].erase(sid)
+		# Final victory (5-10, Count Magpie 3000): the game is complete. `game_completed` in the result is true only
+		# the first time (the story screen shows the ending once); the profile flag stays true forever.
+		if era == int(_b("campaign.eras", 5)) and stage == BOSS_STAGE:
+			result["game_completed"] = not bool(prog.get("game_completed", false))
+			prog["game_completed"] = true
 	else:
 		result["coins"] = loss_reward(n)
 		prog["loss_streak"][sid] = loss_streak(era, stage) + 1

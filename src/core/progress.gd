@@ -11,6 +11,11 @@ const FEATURE_KEYS := {
 }
 
 
+## True once the final boss (5-10, Count Magpie 3000) has been beaten (profile.progress.game_completed).
+static func game_completed(profile: Dictionary) -> bool:
+	return bool((profile.get("progress", {}) as Dictionary).get("game_completed", false))
+
+
 static func highest_in_era(profile: Dictionary, era: int) -> int:
 	return int((profile["progress"]["highest_stage_cleared"] as Dictionary).get(str(era), 0))
 
