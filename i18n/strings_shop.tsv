@@ -1,0 +1,19 @@
+key	en	es
+shop.section_featured	Special offers	Ofertas especiales
+shop.section_gem_items	Spend Gems	Gasta Gemas
+shop.capsules_title	Time Capsules	Cápsulas del Tiempo
+shop.capsules_desc	Open capsules with Gems and find relics.	Abre cápsulas con Gemas y encuentra reliquias.
+shop.capsules_open	Go to Capsules	Ir a las Cápsulas
+shop.buy	Buy {0}	Comprar {0}
+shop.bought	Purchase complete! Thank you!	¡Compra completada! ¡Gracias!
+shop.err_cancelled	Purchase cancelled. You were not charged.	Compra cancelada. No se te cobró.
+shop.err_network	No connection to the store. Try again later. You were not charged.	Sin conexión con la tienda. Inténtalo más tarde. No se te cobró.
+shop.no_ads_note	The game has no forced ads. Golden Pass just skips the watching.	El juego no tiene anuncios forzados. El Pase Dorado solo te ahorra verlos.
+shop.one_time	One time only	Solo una vez
+shop.gem_price	{0} Gems	{0} Gemas
+shop.item_bought	Slot unlocked!	¡Espacio desbloqueado!
+shop.not_enough_gems	Not enough Gems	No hay suficientes Gemas
+shop.claim	Claim	Reclamar
+shop.daily_done	Come back tomorrow	Vuelve mañana
+shop.daily_claimed	Daily gift claimed!	¡Regalo diario reclamado!
+shop.bonus_capsule_auto	Free capsule x{0} (Golden Pass)	Cápsula gratis x{0} (Pase Dorado)

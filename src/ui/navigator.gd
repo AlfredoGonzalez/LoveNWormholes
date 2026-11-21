@@ -16,6 +16,7 @@ const SCREENS := {
 	"result": "res://src/meta/result_screen.gd",
 	"upgrades": "res://src/meta/upgrades_screen.gd",
 	"settings": "res://src/meta/settings_screen.gd",
+	"shop": "res://src/meta/shop_screen.gd",
 }
 
 var host: Control

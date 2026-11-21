@@ -9,6 +9,7 @@ var save: SaveService
 var economy: Economy
 var ads: AdService
 var billing: BillingService
+var shop: Shop
 var analytics: AnalyticsService
 var audio: AudioService
 var quests: Quests
@@ -41,7 +42,10 @@ func boot(save_path := "user://save.json") -> void:
 	var products := {}
 	for pr in DataDB.shop().get("products", []):
 		products[str(pr["id"])] = {"type": str(pr["type"]), "grants": pr.get("contents", {})}
+	if shop != null:
+		shop.shutdown()
 	billing = BillingService.new(_mock_billing, save, products, analytics)
+	shop = Shop.new(billing, economy, save)   # applies purchase_granted contents to the profile
 	if audio == null:
 		audio = AudioService.new()
 		add_child(audio)

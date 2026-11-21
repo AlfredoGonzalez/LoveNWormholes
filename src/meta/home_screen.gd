@@ -48,7 +48,7 @@ func _ready() -> void:
 	_build()
 	_connect_signals()
 	# Offline Worm Farm: shown once per Home visit, only when something is pending.
-	_offline_pending = Game.economy.offline_pending(_now())
+	_offline_pending = Game.economy.offline_pending(_now(), Game.shop.offline_extra_hours())
 	if _offline_pending > 0 and not Game.offline_popup_shown:
 		Game.offline_popup_shown = true
 		_show_offline()
@@ -389,7 +389,7 @@ func _show_offline() -> void:
 	offline_popup = shell[0]
 	var box: VBoxContainer = shell[1]
 	var e: Economy = Game.economy
-	var cap := e.offline_cap_hours()
+	var cap := e.offline_cap_hours(Game.shop.offline_extra_hours())
 	var last := float(_profile["timestamps"].get("offline_farm", 0))
 	var minutes := int(minf((_now() - last) / 60.0, cap * 60.0))
 	box.add_child(UI.label(Game.t("offline.title"), 28, UI.INK, HORIZONTAL_ALIGNMENT_CENTER))
@@ -424,7 +424,7 @@ func _refresh_double_farm() -> void:
 
 func _on_offline_claim() -> void:
 	offline_claim_button.disabled = true   # one tap, one payment
-	Game.economy.claim_offline(_now())
+	Game.economy.claim_offline(_now(), Game.shop.offline_extra_hours())
 
 
 ## The reward is granted ONLY from Game.ads.reward_granted (applied by the global listener).

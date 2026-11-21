@@ -13,6 +13,7 @@ signal purchase_granted(product_id: String, token: String, grants: Dictionary)
 signal purchase_failed(product_id: String, reason: String)
 signal purchase_pending(product_id: String)
 signal restore_finished(newly_owned: Array)
+signal purchase_refunded(product_id: String)
 
 const RESTORE_TOKEN_PREFIX := "restored:"
 
@@ -31,6 +32,7 @@ func _init(p_provider: BillingProvider, p_save: SaveService, p_products: Diction
 	provider.purchased.connect(_on_purchased)
 	provider.failed.connect(_on_failed)
 	provider.restored.connect(_on_restored)
+	provider.refunded.connect(_on_refunded)
 	_connected = true
 
 func shutdown() -> void:
@@ -38,6 +40,7 @@ func shutdown() -> void:
 		provider.purchased.disconnect(_on_purchased)
 		provider.failed.disconnect(_on_failed)
 		provider.restored.disconnect(_on_restored)
+		provider.refunded.disconnect(_on_refunded)
 		_connected = false
 
 ## On app start: initialize the store (which re-delivers unacknowledged purchases) and restore.
@@ -102,3 +105,12 @@ func _on_restored(owned: Array) -> void:
 	if not newly.is_empty():
 		save_service.save()
 	restore_finished.emit(newly)
+
+## A refunded non-consumable is no longer owned (entitlements such as the Golden Pass switch off). Currency that was
+## already granted stays (never clawed back), and the granted tokens are kept so a re-delivery cannot grant it twice.
+func _on_refunded(product_id: String) -> void:
+	if not products.has(product_id) or not is_non_consumable(product_id) or not owns(product_id):
+		return
+	save_service.profile["owned_products"].erase(product_id)
+	save_service.save()
+	purchase_refunded.emit(product_id)

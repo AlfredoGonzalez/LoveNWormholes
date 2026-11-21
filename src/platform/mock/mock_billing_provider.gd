@@ -16,6 +16,7 @@ var acknowledged: Array = []
 var purchase_calls := {}
 var restore_calls := 0
 var pending_product := ""
+var prices := {}                  # product id -> localized price text (tests/demo); missing = no store price
 
 func initialize() -> void:
 	initialized = true
@@ -55,5 +56,10 @@ func acknowledge(token: String) -> void:
 	unacked.erase(token)
 	acknowledged.append(token)
 
+## Simulates a store refund: the non-consumable is no longer owned in the store.
+func refund(product_id: String) -> void:
+	owned_non_consumables.erase(product_id)
+	refunded.emit(product_id)
+
 func local_price(product_id: String) -> String:
-	return "$0.99"
+	return str(prices.get(product_id, ""))

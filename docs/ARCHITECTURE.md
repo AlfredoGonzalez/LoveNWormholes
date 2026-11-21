@@ -65,3 +65,34 @@ Guardado **v2** (`SaveService.CURRENT_VERSION = 2`, migración `_migrate_1_to_2`
 
 ## Reglas de Era 2 en la simulación (agente Sim)
 `stage_def.rule` = `{"type": "none" | "sand_patch" | ...}`; `BattleSetup` pasa la regla a `BattleSim`; la vista la dibuja (`src/battle`).
+
+---
+# Fase 3 – Tienda
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| `Shop` | `src/core/shop.gd` (`Game.shop`) | Lógica sin UI: catálogo (`data/shop.json`), `price_text(id)` (precio localizado del provider; si viene vacío, referencia USD de `price_usd`), `buy`, `restore`, `apply_grants`, `golden_pass_active()`/`ads_removed()`, `offline_extra_hours()`, `buy_gem_item()` |
+| `ShopScreen` | `src/meta/shop_screen.gd` (ruta `shop`) | Destacados (Starter Pack, Golden Pass), hueco de Cápsulas, packs de gemas, ítems de gemas, skins, gratis (regalo diario, Cápsula Extra), Restaurar compras. Params: `{from}` |
+
+- **Flujo de compra**: `Shop.buy` → `BillingService.purchase` → el provider emite `purchased(id, token)` (o `failed(id, "pending")` si queda pendiente) →
+  `BillingService` registra el token en `purchases_granted` (y `owned_products` si es no consumible) → emite `purchase_granted` → `Shop`
+  suma el contenido (monedas vía `Economy.add_bundle` sin guardar; `cosmetics`/`skins`/`entitlements` como listas únicas en el perfil) →
+  `BillingService` guarda y recién entonces hace `acknowledge`. Un token ya registrado solo se reconoce (nunca se concede dos veces),
+  así que la re-entrega tras un cierre es idempotente. `Game.start_services` llama `billing.start()` (initialize + restore).
+- **Pendiente**: `Shop.pending[id]` mientras el store lo reporta; la tarjeta muestra "Compra pendiente..." y no se puede volver a comprar.
+  Al completarse llega el `purchased` normal.
+- **Errores**: `failed` con motivo de cancelación -> "cancelled", de red (`network_error`, `service_unavailable`, ...) -> "network", resto -> "failed";
+  `Shop.purchase_error(id, kind)` y la pantalla muestra el mensaje ("No se te cobró"). Nunca se concede nada.
+- **Reembolso**: nuevo `BillingProvider.refunded(id)` / `BillingService.purchase_refunded`: el no consumible deja de estar en `owned_products`
+  (el Golden Pass se apaga); las gemas/cápsulas ya entregadas no se retiran y los tokens se conservan.
+- **Restaurar**: `Shop.restore()` / botón de la tienda (y de Ajustes): concede una vez cada no consumible poseído (token `restored:<id>`).
+- **"Quitar anuncios"**: el spec no tiene esa compra (no hay banners ni interstitials, R11). El equivalente es el **Golden Pass**:
+  los bonos de anuncios recompensados se aplican sin ver el anuncio, los botones de anuncio se sustituyen por un reclamo directo
+  (hoy: Cápsula Extra en la Tienda, 1 por día) y +`offline.golden_pass_bonus_hours` h al tope de la Granja (Home ya lo usa vía `Game.shop.offline_extra_hours()`).
+- **Gemas**: el único ítem es el espacio extra de preajuste de escuadrón (`gem_items`, 200 gemas, hasta `squad.presets_max`). Las Cápsulas por gemas pertenecen a la pantalla `capsules`.
+- **Cápsulas**: la tienda deja `_build_capsules_slot()`, que solo dibuja la tarjeta si `Navigator.can_go("capsules")` y navega a `capsules` con `{from: "shop"}`.
+- **Navegación**: Home ya traía el botón Tienda (se desbloquea tras la etapa 4); la pantalla de Resultado añade un atajo "Tienda" tras la etapa 4.
+- Textos nuevos en `i18n/strings_shop.tsv` (los de producto ya estaban en `strings.csv`).
+- `MockBillingProvider`: `prices` (id -> texto localizado, vacío por defecto => precio de referencia), `refund(id)`.
+
+Pendiente: aplicar el Golden Pass en los demás puntos de anuncio (Result: Monedas x2 / Segundo Aliento, Prebatalla: Comida +30%, Popup offline: Granja x2, Home: Cápsula Extra) y `Quests.apply_reward("double_farm")` con las horas extra; mostrar skins/gorras equipados (solo se guardan en `profile.skins` / `profile.cosmetics`); proveedores reales de Android/iOS.

@@ -18,6 +18,7 @@ var retry_button: Button
 var change_squad_button: Button
 var double_button: Button
 var wind_button: Button
+var shop_button: Button
 var coins_shown := 0
 var _coins_label: Label
 var _doubled := false
@@ -260,6 +261,11 @@ func _build_buttons() -> Control:
 		retry_button.pressed.connect(func(): Game.nav.go("battle", battle_params(false)))
 		row.add_child(retry_button)
 		box.add_child(home_button)
+	if Progress.feature_unlocked(Game.save.profile, "shop") and Game.nav.can_go("shop"):
+		shop_button = UI.button(Game.t("nav.shop"), "ghost", Vector2(0, UI.MIN_TOUCH), 18)
+		shop_button.name = "shop_button"
+		shop_button.pressed.connect(func(): Game.nav.go("shop", {"from": "result"}))
+		box.add_child(shop_button)
 	return box
 
 

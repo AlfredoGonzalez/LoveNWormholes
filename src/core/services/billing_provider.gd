@@ -7,6 +7,7 @@ extends RefCounted
 signal purchased(product_id: String, token: String)
 signal failed(product_id: String, reason: String)
 signal restored(owned: Array)   # Array[String] of non-consumable product ids
+signal refunded(product_id: String)   # the store refunded/revoked a purchase
 
 func initialize() -> void:
 	pass
