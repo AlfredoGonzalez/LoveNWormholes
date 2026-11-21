@@ -1,0 +1,21 @@
+key	en	es
+settings.mute	Mute all sound	Silenciar todo el sonido
+settings.volume_pct	{0}%	{0}%
+settings.privacy_state	Ad consent: {0}	Consentimiento de anuncios: {0}
+settings.consent_unknown	not set	sin definir
+settings.consent_accepted	accepted	aceptado
+settings.consent_declined	declined	rechazado
+settings.privacy_note	Video ads are optional. You can change your choice at any time.	Los anuncios en video son opcionales. Puedes cambiar tu elección cuando quieras.
+settings.restore_done	Purchases restored: {0}	Compras restauradas: {0}
+settings.restore_none	No new purchases to restore.	No hay compras nuevas por restaurar.
+settings.restore_wait	Checking your purchases...	Revisando tus compras...
+settings.text_small	Small	Pequeño
+settings.text_normal	Normal	Normal
+settings.text_large	Large	Grande
+settings.credits_audio_note	Audio is currently generated in code, so there are no third-party files to credit yet.	El audio se genera por ahora en código, así que todavía no hay archivos de terceros que acreditar.
+settings.delete_yes	Yes, delete everything	Sí, borrar todo
+settings.delete_done	Local data deleted.	Datos locales borrados.
+upgrades.stat_change	{0}: {1} > {2}	{0}: {1} > {2}
+upgrades.era_role	Era {0} · {1}	Era {0} · {1}
+upgrades.level_of	Lv {0} / {1}	Nv {0} / {1}
+upgrades.upgrade_for	Upgrade · {0}	Mejorar · {0}
