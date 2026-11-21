@@ -4,10 +4,10 @@ extends RefCounted
 ## (temp file then rename), rolling backup (save.json + save.bak.json), versioned migrations.
 ## Load order: main file -> backup -> fresh default profile. Plain class, path injectable for tests.
 
-const CURRENT_VERSION := 1
+const CURRENT_VERSION := 2
 ## from_version -> migration. A migration is a Callable (or method name on this class) taking the profile
 ## Dictionary and returning the profile upgraded to from_version + 1 (it need not set schema_version).
-const MIGRATIONS := {}
+const MIGRATIONS := {1: "_migrate_1_to_2"}
 const CHECKSUM_SALT := "lnw-save-v1"
 const ERAS := 5
 
@@ -47,7 +47,7 @@ func default_profile() -> Dictionary:
 		},
 		"units": {},                            # unit id -> level
 		"upgrades": {"food_burrow": 1, "base": 1, "powers": {}},
-		"loadout": {"equipped_powers": [], "squad_presets": [[]], "active_preset": 0},
+		"loadout": {"equipped_powers": [], "squad_presets": [[], []], "active_preset": 0},
 		"relics": {},                           # relic id -> level
 		"pity": {"since_rare": 0, "since_epic": 0, "rng_state": 0},
 		"settings": {"language": "en", "music": 0.7, "sfx": 1.0, "muted": false, "vibration": true, "text_size": 1.0},
@@ -57,6 +57,9 @@ func default_profile() -> Dictionary:
 		"purchases_granted": [],                # tokens already granted
 		"owned_products": [],                   # non-consumable product ids owned
 		"timestamps": {"last_seen": 0, "daily_claim": 0, "daily_streak": 0, "offline_farm": 0},
+		"quests": {"day": 0, "items": [], "all_claimed_day": 0},   # v2: daily quests {id, progress, claimed}
+		"stats": {"battles_played": 0, "battles_won": 0, "units_spawned": 0, "powers_used": 0},   # v2
+		"seen": {},                                                # v2: one-shot flags (popups, intros)
 	}
 
 # ---------------------------------------------------------------- saving
@@ -139,6 +142,23 @@ func _parse(text: String):
 
 func _checksum(payload: String) -> String:
 	return (payload + CHECKSUM_SALT).sha256_text()
+
+## v1 -> v2 (phase 2): daily quests, lifetime stats, one-shot flags, and two squad presets at launch (spec 4.3).
+func _migrate_1_to_2(data: Dictionary) -> Dictionary:
+	if not data.has("quests"):
+		data["quests"] = {"day": 0, "items": [], "all_claimed_day": 0}
+	if not data.has("stats"):
+		data["stats"] = {"battles_played": 0, "battles_won": 0, "units_spawned": 0, "powers_used": 0}
+	if not data.has("seen"):
+		data["seen"] = {}
+	var lo: Dictionary = data.get("loadout", {})
+	var presets: Array = lo.get("squad_presets", [])
+	while presets.size() < 2:
+		presets.append([])
+	lo["squad_presets"] = presets
+	data["loadout"] = lo
+	return data
+
 
 func _migrate(data: Dictionary) -> Dictionary:
 	var v := int(data.get("schema_version", 1))
