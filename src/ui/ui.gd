@@ -85,7 +85,9 @@ static func panel(bg := PANEL) -> PanelContainer:
 static func chip(icon_text: String, value: String) -> PanelContainer:
 	var p := PanelContainer.new()
 	p.add_theme_stylebox_override("panel", style(PANEL, BORDER, 18, 2, false))
-	p.add_child(label("%s %s" % [icon_text, value], 18))
+	var l := label("%s %s" % [icon_text, value], 18)
+	l.autowrap_mode = TextServer.AUTOWRAP_OFF
+	p.add_child(l)
 	return p
 
 
