@@ -24,6 +24,7 @@ static func ensure_loaded() -> void:
 	if _loaded:
 		return
 	load_csv(CSV_PATH)
+	_load_extras()
 	if _lang == "":
 		_lang = detect_device_language()
 
@@ -52,6 +53,35 @@ static func load_csv(path: String = CSV_PATH) -> int:
 	_tables = {"en": en, "es": es}
 	_loaded = true
 	return en.size()
+
+
+## Per-module string files: res://i18n/strings_<module>.tsv (tab separated: key, en, es; first line is a header).
+## They are merged on top of strings.csv so parallel work never edits the same file. A key defined twice is a
+## check_i18n.py error.
+static func _load_extras() -> void:
+	var dir := DirAccess.open("res://i18n")
+	if dir == null:
+		return
+	var files: Array[String] = []
+	for f in dir.get_files():
+		if f.begins_with("strings_") and f.ends_with(".tsv"):
+			files.append(f)
+	files.sort()
+	for f in files:
+		var fa := FileAccess.open("res://i18n/" + f, FileAccess.READ)
+		if fa == null:
+			continue
+		var first := true
+		while not fa.eof_reached():
+			var line := fa.get_line()
+			if first:
+				first = false
+				continue
+			var cols := line.split("\t")
+			if cols.size() < 3 or cols[0].strip_edges() == "":
+				continue
+			(_tables["en"] as Dictionary)[cols[0].strip_edges()] = _unescape(cols[1])
+			(_tables["es"] as Dictionary)[cols[0].strip_edges()] = _unescape(cols[2])
 
 
 ## Replaces the tables directly (used by tests).

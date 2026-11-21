@@ -697,3 +697,35 @@ static func _validate_data() -> Array:
 		if not aids.has(ap):
 			errs.append("ads.json: placement '%s' missing" % ap)
 	return errs
+
+
+# ------------------------------------------------------------------ stages (data/stages.json)
+
+static var _stages: Dictionary = {}
+static var _stages_loaded := false
+
+
+static func _ensure_stages() -> void:
+	if _stages_loaded:
+		return
+	_stages_loaded = true
+	var raw := _read_json(DATA_DIR + "stages.json")
+	for st in raw.get("stages", []):
+		_stages["%d-%d" % [int(st["era"]), int(st["index"])]] = st
+
+
+## Stage definition for era/stage (1-based), or {} if there is none.
+static func stage(era: int, stage_index: int) -> Dictionary:
+	_ensure_stages()
+	return (_stages.get("%d-%d" % [era, stage_index], {}) as Dictionary).duplicate(true)
+
+
+## All stage definitions of an era, ordered by index.
+static func stages_of_era(era: int) -> Array:
+	_ensure_stages()
+	var out: Array = []
+	for st in _stages.values():
+		if int(st["era"]) == era:
+			out.append((st as Dictionary).duplicate(true))
+	out.sort_custom(func(a, b): return int(a["index"]) < int(b["index"]))
+	return out

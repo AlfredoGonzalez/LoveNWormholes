@@ -89,6 +89,29 @@ def check_json_refs(root: Path, strings: dict, errors: list):
                     errors.append(f"{path}.{field}: '{key}' has placeholders but the entry has no desc_args")
 
 
+def load_tsv(path: Path, errors: list):
+    """Per-module string file: tab separated key, en, es (first line is a header). Same value shape as load_strings."""
+    rows = {}
+    lines = path.read_text(encoding="utf-8").splitlines()
+    for lineno, line in enumerate(lines[1:], start=2):
+        if not line.strip():
+            continue
+        cols = line.split("\t")
+        if len(cols) != 3:
+            errors.append(f"{path.name}:{lineno}: expected 3 tab-separated columns, got {len(cols)}")
+            continue
+        key, en, es = cols[0].strip(), cols[1], cols[2]
+        if not key or not en.strip() or not es.strip():
+            errors.append(f"{path.name}:{lineno}: empty key or text ({key or '?'})")
+            continue
+        if key in rows:
+            errors.append(f"{path.name}:{lineno}: duplicate key {key}")
+        if set(PLACEHOLDER.findall(en)) != set(PLACEHOLDER.findall(es)):
+            errors.append(f"{path.name}:{lineno}: placeholders differ between en and es ({key})")
+        rows[key] = (en, es)
+    return rows
+
+
 def main() -> int:
     root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent
     errors: list = []
@@ -97,6 +120,12 @@ def main() -> int:
         print(f"FAIL: {csv_path} not found")
         return 1
     strings = load_strings(csv_path, errors)
+    for extra in sorted((root / "i18n").glob("strings_*.tsv")):
+        for key, val in load_tsv(extra, errors).items():
+            if key in strings:
+                errors.append(f"{extra.name}: key '{key}' already defined")
+            else:
+                strings[key] = val
     check_json_refs(root, strings, errors)
     if errors:
         print("check_i18n FAILED:")

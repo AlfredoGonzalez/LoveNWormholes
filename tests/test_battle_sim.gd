@@ -267,3 +267,17 @@ func test_determinism() -> void:
 			s.tick()
 		results.append("%d|%.4f|%.4f|%.4f|%d" % [s.tick_count, s.food, s.enemy_base_hp, s.player_base_hp, s.units.size()])
 	assert_eq(results[0], results[1])
+
+
+func test_battle_setup_from_stage_data() -> void:
+	var st := DataDB.stage(1, 10)
+	assert_true(not st.is_empty(), "stage 1-10 exists")
+	var setup := BattleSetup.make(st, {"squad": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"], "powers": ["squirm_slam", "apple_rain"]})
+	assert_eq(setup["squad"].size(), 3)
+	assert_true(setup["enemy_units"].has("b1_rexy"))
+	assert_true(setup["enemy_units"]["b1_rexy"]["is_boss"])
+	assert_true(setup["spawns"].size() > 3, "boss escorts are scheduled")
+	var s := BattleSim.new(setup)
+	s.spawn_player(0)
+	s.run(30.0)
+	assert_true(s.result != "win", "one club worm does not beat Rexy")
