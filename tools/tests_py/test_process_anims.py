@@ -52,7 +52,7 @@ def test_anim_sheets_per_animation(tmp_path):
     assert e["nominal_h"] == 256 and e["frame_h"] == 256
     idle, atk = e["anims"]["idle"], e["anims"]["attack"]
     assert idle["fps"] == 12 and idle["loop"] is True
-    assert atk["fps"] == 18 and atk["loop"] is False and atk["hit_frame"] == 10
+    assert atk["fps"] == 18 and atk["loop"] is False and atk["hit_frame"] == 12
     assert idle["frames"] == 25 and idle["frames_used"] == 25 and idle["x2"] is False
     im = Image.open(tmp_path / idle["path"])
     fw, fh = idle["frame_w"], idle["frame_h"]

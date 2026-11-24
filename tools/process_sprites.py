@@ -30,7 +30,7 @@ ANIM_FPS = {"idle": 12, "walk": 14, "attack": 18, "hurt": 15, "defeat": 14,
             "cast_slam": 16, "cast_power": 16, "celebrate": 12}
 ANIM_LOOP = {"idle": True, "walk": True, "celebrate": True}  # everything else: no loop
 FRAMES_USED_DEFAULT = 25  # of 25; a hand-set anims.<a>.frames_used in the manifest survives
-ATTACK_HIT_RATIO = 0.4    # default hit frame = frames_used * 0.4 (hand-set hit_frame survives)
+ATTACK_HIT_RATIO = 0.48   # default hit frame = frames_used * 0.48 (frame 13 of 25) (hand-set hit_frame survives)
 MANIFEST_VERSION = 2
 BOSS_IDS = {"count_magpie", "chrono_core"}
 CROP_PAD = 6
@@ -89,7 +89,7 @@ def classify(stem):
         return sid, "sheet", cat
     if sid.startswith("base_"):
         return sid, "static", "base"
-    if sid.startswith(("proj_", "icon_", "projectile_")):
+    if sid.startswith(("proj_", "icon_", "projectile_", "era_", "power_", "fx_")):
         return sid, "static", "icon"
     return sid, "static", "character"
 
@@ -224,8 +224,9 @@ def process_anim_file(root, src, info, sprites):
     a = {"path": rel, "frame_w": fw, "frame_h": fh, "anchor": list(anchor), "cols": GRID,
          "frames": n, "frames_used": used, "fps": old.get("fps", ANIM_FPS[anim]),
          "loop": ANIM_LOOP.get(anim, False), "x2": x2}
-    if anim == "attack":
-        a["hit_frame"] = old.get("hit_frame", max(0, min(n - 1, int(n * ATTACK_HIT_RATIO))))
+    if anim in ("attack", "cast_slam", "cast_power"):
+        ratio = {"cast_slam": 0.68, "cast_power": 0.64}.get(anim, ATTACK_HIT_RATIO)   # prompts: hit on frame 13 / 18 / 17 of 25
+        a["hit_frame"] = old.get("hit_frame", max(0, min(n - 1, int(n * ratio))))
     anims = dict(prev.get("anims", {}))
     anims[anim] = a
     order = sorted(anims, key=ALL_ANIMS.index)
