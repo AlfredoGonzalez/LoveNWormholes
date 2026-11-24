@@ -57,6 +57,42 @@ static func ids() -> Array:
 	_ensure_loaded()
 	return _sprites.keys()
 
+## True when the entry uses the per-animation format (one 5x5 sheet per animation).
+static func is_anim_format(entry: Dictionary) -> bool:
+	return typeof(entry.get("anims", null)) == TYPE_DICTIONARY
+
+## Animation names present in the entry's art (per-animation format; legacy: its rows).
+static func anim_names(id: String) -> Array:
+	var e := get_entry(id)
+	if is_anim_format(e):
+		return (e["anims"] as Dictionary).keys()
+	var rows: Variant = e.get("rows", [])
+	return rows if typeof(rows) == TYPE_ARRAY else []
+
+## Animation names the character is expected to have but whose art is not (yet) there.
+static func missing_anims(id: String) -> Array:
+	var e := get_entry(id)
+	var out := []
+	var expected: Variant = e.get("expected_anims", [])
+	if typeof(expected) != TYPE_ARRAY:
+		return out
+	var have := anim_names(id)
+	for a in expected:
+		if not (a in have):
+			out.append(a)
+	return out
+
+static func has_anim(id: String, anim: String) -> bool:
+	return anim in anim_names(id)
+
+## Per-animation info (path, frame_w, frame_h, anchor, frames, fps, loop, ...) or {}.
+static func get_anim(id: String, anim: String) -> Dictionary:
+	var e := get_entry(id)
+	if not is_anim_format(e):
+		return {}
+	var a: Variant = (e["anims"] as Dictionary).get(anim, {})
+	return a if typeof(a) == TYPE_DICTIONARY else {}
+
 ## Entry paths are "assets/..." relative to the project; res:// and user:// pass through.
 static func resolve_path(path: String) -> String:
 	if path.begins_with("res://") or path.begins_with("user://") or path.begins_with("/"):

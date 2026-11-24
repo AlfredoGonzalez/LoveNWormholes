@@ -12,5 +12,12 @@ run() {
 echo "== import"; run --import --quit
 echo "== unit tests"; run --script res://tools/run_tests.gd
 echo "== smoke"; run --script res://tools/smoke_test.gd
+if python3 -c "import PIL, numpy, pytest" >/dev/null 2>&1; then
+  echo "== sprite pipeline (python)"
+  out=$(python3 -m pytest -q -p no:cacheprovider tools/tests_py 2>&1) || status=1
+  echo "$out" | tail -3
+else
+  echo "== sprite pipeline (python): skipped (pip install pillow numpy pytest)"
+fi
 [ $status -eq 0 ] && echo "ALL OK" || echo "CHECK FAILED"
 exit $status

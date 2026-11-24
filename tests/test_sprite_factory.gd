@@ -81,6 +81,71 @@ func test_synthetic_sheet_builds_spriteframes() -> void:
 	assert_true(flipped.sprite.flip_h)
 	flipped.free()
 
+## Per-animation format: idle and attack have art, walk is listed but its file is missing.
+func _anim_entry(id: String, idle_path: String, atk_path: String) -> Dictionary:
+	return {"id": id, "kind": "sheet", "format": 2, "category": "unit", "frame_w": 32, "frame_h": 48,
+		"nominal_h": 48, "facing": "right", "expected_anims": ROWS,
+		"anims": {
+			"idle": {"path": idle_path, "frame_w": 32, "frame_h": 40, "anchor": [16, 38], "cols": 5,
+				"frames": 25, "fps": 12, "loop": true, "x2": false},
+			"attack": {"path": atk_path, "frame_w": 64, "frame_h": 80, "anchor": [32, 78], "cols": 5,
+				"frames": 10, "fps": 18, "loop": false, "x2": true, "hit_frame": 4},
+			"walk": {"path": TMP + "/missing_walk.png", "frame_w": 32, "frame_h": 40,
+				"anchor": [16, 38], "cols": 5, "frames": 25, "fps": 14, "loop": true}}}
+
+func _make_grid(path: String, fw: int, fh: int, n: int) -> void:
+	DirAccess.make_dir_recursive_absolute(TMP)
+	var img := Image.create(fw * 5, fh * int(ceil(n / 5.0)), false, Image.FORMAT_RGBA8)
+	img.fill(Color(0.3, 0.8, 0.3, 1.0))
+	img.save_png(path)
+
+func test_per_animation_sheets_and_partial_fallback() -> void:
+	var idle_p := TMP + "/p1_pa_idle_sheet.png"
+	var atk_p := TMP + "/p1_pa_attack_x2_sheet.png"
+	_make_grid(idle_p, 32, 40, 25)
+	_make_grid(atk_p, 64, 80, 10)
+	SpriteManifest.set_entries({"p1_pa": _anim_entry("p1_pa", idle_p, atk_p)})
+	assert_true(SpriteManifest.has_anim("p1_pa", "idle"))
+	var n := SpriteFactory.make_animated("p1_pa")
+	assert_true(not n.is_placeholder)
+	assert_eq(n.frame_size.y, 48, "scale basis is the nominal height, not the x2 canvas")
+	var frames: SpriteFrames = n.sprite.sprite_frames
+	assert_true(frames.has_animation("idle") and frames.has_animation("attack"))
+	assert_true(not frames.has_animation("walk"), "missing file: no walk animation")
+	assert_eq(frames.get_frame_count("idle"), 25)
+	assert_eq(frames.get_frame_count("attack"), 10)
+	assert_near(frames.get_animation_speed("attack"), 18.0)
+	assert_true(frames.get_animation_loop("idle") and not frames.get_animation_loop("attack"))
+	assert_eq((frames.get_frame_texture("attack", 7) as AtlasTexture).region, Rect2(128, 80, 64, 80))
+	# idle: sprite visible, placeholder hidden; offset follows the feet anchor.
+	assert_true(n.sprite.visible)
+	assert_eq(n.sprite.offset, Vector2(-16, -38))
+	assert_true(n.play_row("attack"))
+	assert_eq(n.sprite.offset, Vector2(-32, -78))
+	assert_eq(n.hit_frames["attack"], 4)
+	# walk has no art: falls back to the placeholder for that animation only.
+	assert_true(not n.play_row("walk"))
+	assert_true(not n.sprite.visible)
+	assert_true((n.get_node("PlaceholderBody") as CanvasItem).visible)
+	assert_true(n.play_row("idle"))
+	assert_true(n.sprite.visible)
+	assert_true(not (n.get_node("PlaceholderBody") as CanvasItem).visible)
+	n.free()
+	var f := SpriteFactory.make_animated("p1_pa", "left")
+	assert_eq(f.sprite.flip_h, true)
+	f.play_row("attack")
+	assert_eq(f.sprite.offset, Vector2(-(64 - 32), -78))
+	f.free()
+
+func test_per_animation_without_any_art_is_placeholder() -> void:
+	var e := _anim_entry("p1_none", TMP + "/no1.png", TMP + "/no2.png")
+	SpriteManifest.set_entries({"p1_none": e})
+	var n := SpriteFactory.make_animated("p1_none")
+	assert_true(n.is_placeholder)
+	assert_eq(n.frame_size, Vector2i(32, 48))
+	assert_true(not n.play_row("idle"))
+	n.free()
+
 func test_static_sprite() -> void:
 	DirAccess.make_dir_recursive_absolute(TMP)
 	var path := TMP + "/icon_test.png"

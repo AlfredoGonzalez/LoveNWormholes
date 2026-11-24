@@ -6,64 +6,108 @@ Prompts de Gemini (los 89, completos): `docs/ART_PROMPTS.md`. Estado de cada pie
 
 ## 1. Drop files in `art-inbox/`
 
-Put the raw images straight in `art-inbox/` (subfolders are fine, they are scanned
-recursively; `art-inbox/legacy/` is ignored). PNG, JPG or WEBP. The file name decides
-everything; the same names as the spec prompts, but folders do not matter:
+Put the raw images straight in `art-inbox/` (subfolders are fine, scanned recursively;
+`art-inbox/legacy/` is ignored). PNG, JPG or WEBP. The file name decides everything.
 
-| File name | Becomes | Final size |
-|---|---|---|
-| `p1_club_worm_sheet.png` (`p<era>_..._sheet`) | player unit sheet, id `p1_club_worm` | frames 256 px tall |
-| `e1_ant_clubber_sheet.png` (`e<era>_..._sheet`) | enemy sheet | 256 px tall |
-| `b1_rexy_sheet.png` (`b<era>_..._sheet`) | boss sheet | 512 px tall |
-| `squirmy_sheet.png`, `squirmy_skin_pirate_sheet.png` | hero sheet | 384 px tall |
-| `base_p1.png`, `base_e3.png` | static base | 512 px wide |
-| `proj_*.png`, `icon_*.png` | static projectile / icon | max side 128 px |
-| anything else without `_sheet` (e.g. `wormina.png`, `chrono_core.png`) | static character | 384 px tall |
+### Characters: one sheet per animation
 
-The id is the file name without `_sheet` / extension. A `_sheet` file whose name does not
-start with `squirmy`, `p<n>`, `e<n>` or `b<n>` is skipped with a message.
+Each **animation** is its own **5x5 sheet = 25 frames** (left to right, top to bottom) of that single
+animation. Name: `<id>_<anim>_sheet.png`.
 
-Sheets are **1:1 images, 5 columns x 5 rows** (columns = 5 frames, rows = animations).
-Rows: units / enemies / bosses = `idle, walk, attack, hurt, defeat`; hero =
-`idle, cast_slam, cast_power, hurt, celebrate`. The grid is cut by dividing the image into
-equal fifths, so ask Gemini for an even grid and regenerate when frames drift.
+| Kind | id examples | Animations | Frame height |
+|---|---|---|---|
+| player unit (`p<era>_`) | `p1_club_worm` | idle, walk, attack, hurt, defeat | 256 |
+| enemy (`e<era>_`) | `e1_ant_clubber` | idle, walk, attack, hurt, defeat | 256 |
+| boss (`b<era>_`, also `count_magpie`, `chrono_core`) | `b1_rexy` | idle, walk, attack, hurt, defeat (may be only idle) | 512 |
+| hero (`squirmy`, `squirmy_skin_<name>`) | `squirmy` | idle, cast_slam, cast_power, hurt, celebrate | 384 |
+| other characters (e.g. `wormina`) | `wormina` | any of the above (often only idle) | 384 |
 
-Background: flat magenta `#FF00FF`. Wormina (pink) uses flat blue `#0000FF`; this is built in
-for the id `wormina`. For any other asset that needs a different key, add the entry to
-`assets/manifest.json` by hand (`"key_color": "#00FF00"`); the script keeps it on re-runs.
+Examples: `p1_club_worm_idle_sheet.png`, `p1_club_worm_attack_sheet.png`,
+`squirmy_skin_pirate_cast_slam_sheet.png`, `wormina_idle_sheet.png`. Any animation may be missing:
+the game shows the placeholder rectangle for it until the art arrives.
+
+**Double canvas `_x2`**: when the motion sticks out of a normal cell, ask for a double-size cell and
+add `_x2` before `_sheet`: `p1_club_worm_attack_x2_sheet.png`. The character is drawn at the *same
+pixel size* as in a normal cell, so the frames are **not** reduced: the output frame is 2x the normal
+size (512 instead of 256 for a unit, 768 for the hero, 1024 for a boss), the whole canvas is kept (no
+crop) and the feet are anchored at the bottom centre. The game scales by the character's nominal
+height, so an `_x2` animation shows the same body size as the others.
+
+**`<id>_ref.png`**: static reference pose of the character. Not used in game; it is only reduced to a
+small portrait (max side 128) in `assets/sprites/refs/` and listed under `refs` in the manifest.
+
+Other files: `base_p1.png` / `base_e3.png` (static base, 512 px wide), `proj_*.png` / `icon_*.png`
+(max side 128), anything else without `_sheet` (e.g. `chrono_core.png`) is a static character, 384 px
+tall.
+
+**Deprecated**: the old single `<id>_sheet.png` (5 rows = 5 animations) is still processed (manifest
+entry with `rows`) but prints a deprecation note, and is skipped when per-animation sheets of the
+same id are present in the inbox.
+
+Background: flat magenta `#FF00FF`. Wormina (pink) uses flat blue `#0000FF` (built in for the id
+`wormina`). Another key: set `"key_color": "#00FF00"` by hand in `assets/manifest.json`; it survives
+re-runs.
 
 ## 2. Run the script
 
 ```
-pip install pillow numpy      # once
+pip install pillow numpy pytest      # once
 python3 tools/process_sprites.py
-python3 -m pytest tools/tests_py   # optional: script tests
+python3 -m pytest tools/tests_py     # script tests (tools/check.sh runs them when the deps exist)
 ```
 
-Then commit `assets/sprites/**` and `assets/manifest.json` (not `art-inbox/`).
-Running it again with no changes gives byte-identical output; running it on an empty inbox
-just keeps the manifest as is. Existing manifest entries are preserved (only re-processed
-files are replaced), and a hand-set `hit_frame` or `key_color` survives.
+Then commit `assets/sprites/**` and `assets/manifest.json` (not `art-inbox/`). Re-running with no
+changes gives byte-identical output; an empty inbox leaves the manifest as is. Existing entries are
+preserved (only re-processed files are replaced, each animation is merged into its character).
 
 ## 3. What it does
 
-1. Removes the key colour with a soft alpha (colour distance) and *decontaminates* edge
-   pixels, so there is no magenta halo.
-2. Sheets: uses one shared crop box for all 25 frames (so the animation does not jitter),
-   scales to the target height and writes one packed atlas
-   `assets/sprites/<units|enemies|bosses|hero>/<name>_sheet.png`.
-   Statics are trimmed and scaled (`bases/`, `icons/`, `characters/`).
-3. Writes `assets/manifest.json` entries: `id, kind, category, path, frame_w, frame_h, rows,
-   frames_per_row (5), fps per row, hit_frame (2 = 3rd frame of attack), facing, key_color`.
-   FPS: idle 6, walk 10, attack 12, hurt 10, defeat 8 (hero casts 12, celebrate 8).
-   Facing: right for hero/units, left for enemies/bosses.
+1. Removes the key colour with a soft alpha and decontaminates edge pixels (no magenta halo).
+2. Per animation sheet: cuts the 5x5 grid, scales every frame with the **same** factor
+   (`target_height / cell_height`; x2: `2 * target_height / cell_height`) and, for normal sheets,
+   crops with **one** box (union of the frames' opaque pixels + 6 px) shared by all 25 frames. Frames are
+   never cropped or rescaled one by one, so the character does not shake. The feet anchor (cell
+   centre x, lowest opaque pixel) is stored in the manifest. Output atlas:
+   `assets/sprites/<units|enemies|bosses|hero|characters>/<id>_<anim>[_x2]_sheet.png`, 5 columns.
+3. `frames_used` (default 25): a hand-set smaller number keeps evenly spaced frames (atlas gets
+   `ceil(n/5)` rows). It survives re-runs, like a hand-set `fps` or `hit_frame`.
+4. Manifest (`version` 2) entry per character:
+
+```
+"p1_club_worm": {"id", "kind": "sheet", "format": 2, "category", "facing", "key_color",
+  "nominal_h": 256, "frame_w": 256, "frame_h": 256,
+  "expected_anims": ["idle","walk","attack","hurt","defeat"],
+  "anims": {"idle": {"path", "frame_w", "frame_h", "anchor": [x, y], "cols": 5, "frames": 25,
+                      "frames_used": 25, "fps": 12, "loop": true, "x2": false},
+            "attack": {..., "x2": true, "hit_frame": 10}}}
+```
+
+   `anims` lists only the animations that exist; `expected_anims` minus `anims` = pending art.
+   FPS / loop: idle 12 loop, walk 14 loop, attack 18, hurt 15, defeat 14, cast_* 16, celebrate 12
+   loop (the rest do not loop). Default attack `hit_frame` = 40% of the frames (10 of 25).
+   Facing: right for hero / units / characters, left for enemies / bosses.
 
 ## 4. In the game
 
-`SpriteFactory.make_animated("p1_club_worm")` / `make_static("base_p1")` build the nodes
-from the manifest (`play_row("attack")`, signals `hit_frame_reached`, `row_finished`). Until
-the art exists they return a labelled placeholder rectangle (blue = player, red =
-enemy/boss), so the game is always playable.
+`SpriteFactory.make_animated("p1_club_worm")` builds an `AnimatedSprite2D` with one `SpriteFrames`
+animation per existing sheet; `make_static("base_p1")` builds statics. `Actor.play_row("attack")`,
+signals `hit_frame_reached`, `row_finished`. `SpriteManifest` reads the file tolerantly
+(`has_anim`, `get_anim`, `anim_names`, `missing_anims`) and understands both formats.
+
+Fallbacks: no art at all -> labelled rectangle (blue player, red enemy/boss); art for some animations
+only (idle but no attack) -> the sprite plays those and the rectangle is shown while a missing one
+would play. Battle views scale by `nominal_h`, never by the (possibly x2) frame size. Simulation is
+not involved.
+
+## 5. Try a new sprite in the game
+
+1. Drop the sheets in `art-inbox/`, run `python3 tools/process_sprites.py`, check the new
+   entry in `assets/manifest.json`.
+2. Capture: `xvfb-run -a godot --path . --rendering-method gl_compatibility --rendering-driver opengl3
+   --script res://tools/screenshots.gd` (see `docs/DEV.md`); the battle shots in `build/shots/` use the
+   squad `p1_club_worm`, `p1_slinger_worm`, `p1_dino_rider_worm`, so name the id in the `battle` entry
+   of `tools/screenshots.gd` you want to see.
+3. `tools/check.sh` must stay green.
 
 ## Studio intro video
 

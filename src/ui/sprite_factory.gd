@@ -22,6 +22,12 @@ class Actor extends Node2D:
 	var hit_frame := 2
 	var current_row := ""
 	var sprite: AnimatedSprite2D = null  ## null for placeholders and static sprites
+	## Per-animation format: row -> anchor (feet) in the frame, and the placeholder nodes shown
+	## for rows whose art is missing (the sprite is hidden then).
+	var anchors: Dictionary = {}
+	var hit_frames: Dictionary = {}
+	var placeholder_nodes: Array = []
+	var flipped := false
 
 	func has_row(row: String) -> bool:
 		return sprite != null and sprite.sprite_frames != null and sprite.sprite_frames.has_animation(row)
@@ -35,18 +41,35 @@ class Actor extends Node2D:
 	## (and does nothing) when the row does not exist, e.g. on a placeholder.
 	func play_row(row: String, restart := true) -> bool:
 		if not has_row(row):
+			# Partial art (idle but no attack...): show the placeholder for that animation.
+			if sprite != null and not placeholder_nodes.is_empty():
+				sprite.stop()
+				_show_sprite(false)
+				current_row = row
 			return false
+		_show_sprite(true)
+		if anchors.has(row):
+			var a: Vector2 = anchors[row]
+			var fr := sprite.sprite_frames.get_frame_texture(row, 0)
+			var w := float(fr.get_width()) if fr != null else a.x * 2.0
+			sprite.offset = Vector2(-(w - a.x) if flipped else -a.x, -a.y)
 		if restart or current_row != row:
 			sprite.play(row)
 		current_row = row
 		return true
+
+	func _show_sprite(on: bool) -> void:
+		if sprite != null:
+			sprite.visible = on
+		for n in placeholder_nodes:
+			(n as CanvasItem).visible = not on
 
 	func stop_row() -> void:
 		if sprite != null:
 			sprite.stop()
 
 	func _on_frame_changed() -> void:
-		if current_row == "attack" and sprite.frame == hit_frame:
+		if current_row == "attack" and sprite.frame == int(hit_frames.get("attack", hit_frame)):
 			hit_frame_reached.emit()
 
 	func _on_animation_finished() -> void:
@@ -58,6 +81,9 @@ static func make_animated(id: String, facing_override := "") -> Node2D:
 	actor.name = id if id != "" else "Sprite"
 	actor.id = id
 	actor.entry = entry
+	if SpriteManifest.is_anim_format(entry) and str(entry.get("kind", "sheet")) == "sheet":
+		_build_per_anim(actor, id, entry, facing_override)
+		return actor
 	var tex := _load_texture(entry)
 	if entry.is_empty() or tex == null or str(entry.get("kind", "sheet")) != "sheet":
 		_build_placeholder(actor, id, entry, facing_override)
@@ -97,6 +123,73 @@ static func make_animated(id: String, facing_override := "") -> Node2D:
 	spr.animation_finished.connect(actor._on_animation_finished)
 	actor.play_row(str(rows[0]))
 	return actor
+
+## Per-animation format: each animation has its own atlas. Animations whose file or data is
+## missing/invalid are simply left out (they show the placeholder); no usable animation at all
+## gives a plain placeholder.
+static func _build_per_anim(actor: Actor, id: String, entry: Dictionary, facing_override: String) -> void:
+	var frames := SpriteFrames.new()
+	if frames.has_animation("default"):
+		frames.remove_animation("default")
+	var anims: Dictionary = entry["anims"]
+	var order := ["idle"]
+	for k in anims.keys():
+		if k != "idle":
+			order.append(str(k))
+	var first := ""
+	for anim in order:
+		if typeof(anims.get(anim, null)) != TYPE_DICTIONARY:
+			continue
+		var a: Dictionary = anims[anim]
+		var tex := _load_texture(a)
+		var fw := int(a.get("frame_w", 0))
+		var fh := int(a.get("frame_h", 0))
+		var n := int(a.get("frames", 25))
+		var cols := maxi(1, int(a.get("cols", 5)))
+		if tex == null or fw <= 0 or fh <= 0 or n <= 0 \
+				or tex.get_width() < fw * mini(cols, n) or tex.get_height() < fh * int(ceil(float(n) / cols)):
+			continue
+		frames.add_animation(anim)
+		frames.set_animation_speed(anim, maxf(1.0, float(a.get("fps", 12))))
+		frames.set_animation_loop(anim, bool(a.get("loop", anim in LOOP_ROWS)))
+		for i in range(n):
+			var at := AtlasTexture.new()
+			at.atlas = tex
+			at.region = Rect2((i % cols) * fw, floori(float(i) / cols) * fh, fw, fh)
+			frames.add_frame(anim, at)
+		var anc: Variant = a.get("anchor", [fw / 2.0, fh])
+		var ax := fw / 2.0
+		var ay := float(fh)
+		if typeof(anc) == TYPE_ARRAY and (anc as Array).size() >= 2:
+			ax = float(anc[0])
+			ay = float(anc[1])
+		actor.anchors[anim] = Vector2(ax, ay)
+		if a.has("hit_frame"):
+			actor.hit_frames[anim] = int(a["hit_frame"])
+		if first == "":
+			first = anim
+	var nominal := int(entry.get("nominal_h", entry.get("frame_h", 0)))
+	if nominal > 0:
+		var e2 := entry.duplicate()
+		e2["frame_h"] = nominal
+		_build_placeholder(actor, id, e2, facing_override)
+	else:
+		_build_placeholder(actor, id, entry, facing_override)
+	if first == "":
+		return  # nothing usable: plain placeholder
+	actor.is_placeholder = false
+	actor.placeholder_nodes = actor.get_children()
+	var spr := AnimatedSprite2D.new()
+	spr.sprite_frames = frames
+	spr.centered = false
+	spr.flip_h = _needs_flip(entry, facing_override)
+	actor.flipped = spr.flip_h
+	actor.add_child(spr)
+	actor.sprite = spr
+	actor.hit_frame = int(entry.get("hit_frame", 2))
+	spr.frame_changed.connect(actor._on_frame_changed)
+	spr.animation_finished.connect(actor._on_animation_finished)
+	actor.play_row("idle" if frames.has_animation("idle") else first)
 
 static func make_static(id: String, facing_override := "") -> Node2D:
 	var entry := SpriteManifest.get_entry(id)

@@ -8,3 +8,5 @@ config/ads.prod.json
 .DS_Store
 android/build/
 android/.build_version
+__pycache__/
+.pytest_cache/
