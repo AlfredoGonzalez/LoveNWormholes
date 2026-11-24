@@ -1,6 +1,7 @@
 # Love 'n Wormholes: Lost in Time — Game Design & Build Spec
 
 > Copia de trabajo del documento de Alfredo (fuente: artifact de Claude Docs). Texto plano extraído; las tablas aparecen con celdas separadas por `|`. Los prompts de arte de la sección 10 a partir de E08 no están copiados (no se necesitan para el código). El nombre del juego en pantalla es **Love 'n Wormholes** (decisión del 2026-11-21); el paquete es com.am23studios.wormwarriors.
+> Los 89 prompts de arte completos están en `docs/ART_PROMPTS.md`.
 
 Worm Warriors: Lost in Time — Game Design & Build Spec (for Claude Code)
  · 

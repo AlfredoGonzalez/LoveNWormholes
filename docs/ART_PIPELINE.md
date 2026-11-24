@@ -2,6 +2,8 @@
 
 How raw Gemini art becomes game-ready sprites. Spec: `docs/spec.md` section 10.
 
+Prompts de Gemini (los 89, completos): `docs/ART_PROMPTS.md`. Estado de cada pieza: `docs/ART_STATUS.md` (`python3 tools/art_status.py`).
+
 ## 1. Drop files in `art-inbox/`
 
 Put the raw images straight in `art-inbox/` (subfolders are fine, they are scanned
