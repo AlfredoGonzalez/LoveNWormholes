@@ -2,7 +2,9 @@
 
 How raw Gemini art becomes game-ready sprites. Spec: `docs/spec.md` section 10.
 
-Prompts de Gemini (los 89, completos): `docs/ART_PROMPTS.md`. Estado de cada pieza: `docs/ART_STATUS.md` (`python3 tools/art_status.py`).
+Prompts de Gemini (formato nuevo, por fases): `docs/art-prompts/README.md` (una hoja 5x5 por animación, `<id>_<anim>_sheet.png`, referencia `<id>_ref.png`, sufijo `_x2` para lienzo doble). Los 89 prompts originales se conservan en `docs/ART_PROMPTS_ORIGINAL.md`. Estado de cada pieza: `docs/ART_STATUS.md` (`python3 tools/art_status.py`). Los prompts se regeneran con `python3 tools/gen_art_prompts.py`.
+
+Nota: las secciones 1 a 3 de abajo describen el pipeline antiguo (una hoja con 5 animaciones por fila); se actualizan cuando se implemente la convención nueva.
 
 ## 1. Drop files in `art-inbox/`
 

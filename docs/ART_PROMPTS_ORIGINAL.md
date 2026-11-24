@@ -1,4 +1,6 @@
-# Prompts de arte (Gemini)
+# Prompts de arte (Gemini): ORIGINAL
+
+> Archivo histórico. El formato vigente está en `docs/art-prompts/` (una hoja por animación, por fases). `tools/gen_art_prompts.py` lee este archivo para los textos de diseño y las filas de animación: no lo edites sin regenerar.
 
 Copia fiel de la sección 10 del spec de Alfredo (el documento original en Claude Docs), con **los 89 prompts completos**.
 Cada prompt es autónomo: copia un bloque, pégalo en Gemini y guarda el resultado con el nombre indicado sobre el bloque
