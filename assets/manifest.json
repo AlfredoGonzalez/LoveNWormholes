@@ -1,5 +1,57 @@
 {
-  "refs": {},
-  "sprites": {},
-  "version": 2
+ "refs": {},
+ "sprites": {
+  "squirmy": {
+   "anims": {
+    "cast_slam": {
+     "anchor": [
+      384,
+      710
+     ],
+     "cols": 5,
+     "fps": 16,
+     "frame_h": 768,
+     "frame_w": 768,
+     "frames": 25,
+     "frames_used": 25,
+     "hit_frame": 18,
+     "loop": false,
+     "path": "assets/sprites/hero/squirmy_cast_slam_x2_sheet.png",
+     "x2": true
+    },
+    "idle": {
+     "anchor": [
+      151,
+      305
+     ],
+     "cols": 5,
+     "fps": 12,
+     "frame_h": 310,
+     "frame_w": 265,
+     "frames": 25,
+     "frames_used": 25,
+     "loop": true,
+     "path": "assets/sprites/hero/squirmy_idle_sheet.png",
+     "x2": false
+    }
+   },
+   "category": "hero",
+   "expected_anims": [
+    "idle",
+    "cast_slam",
+    "cast_power",
+    "hurt",
+    "celebrate"
+   ],
+   "facing": "right",
+   "format": 2,
+   "frame_h": 384,
+   "frame_w": 265,
+   "id": "squirmy",
+   "key_color": "#FF00FF",
+   "kind": "sheet",
+   "nominal_h": 384
+  }
+ },
+ "version": 2
 }

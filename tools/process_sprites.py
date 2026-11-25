@@ -66,15 +66,18 @@ _BARE_ANIM_RE = re.compile(r"^(?P<id>.+?)_(?P<anim>" + "|".join(ALL_ANIMS) + r")
 
 
 def normalize_stem(stem):
-    """Tolerant file names: lowercase, spaces/dashes -> '_', a trailing '-v1' dropped, a '<anything>-gusanito_...'
-    prefix dropped, aliases mapped (gusanito -> squirmy), and '_sheet' optional after a known animation."""
+    """Tolerant file names: lowercase, spaces/dashes -> '_', a trailing '-v1' dropped, aliases mapped
+    (gusanito -> squirmy; a doubled "Gusanito-squirmy_idle" / "Gusanito-gusanito_idle" collapses to one id), and
+    '_sheet' optional after a known animation."""
     s = _VERSION_RE.sub("", stem.strip().lower())
-    for alias, real in ALIASES.items():
-        m = re.search(r"(^|[-_ ])" + alias + r"(?=_|$)", s)
-        if m:
-            s = real + s[m.end():]
-            break
     s = re.sub(r"[-\s]+", "_", s)
+    names = set(ALIASES) | set(ALIASES.values())
+    parts = s.split("_")
+    while len(parts) > 1 and parts[0] in names and parts[1] in names:   # "gusanito_squirmy_..." -> "squirmy_..."
+        parts = parts[1:]
+    if parts and parts[0] in ALIASES:
+        parts[0] = ALIASES[parts[0]]
+    s = "_".join(parts)
     m = _BARE_ANIM_RE.match(s)
     if m and not s.endswith("_sheet"):
         s += "_sheet"
@@ -118,8 +121,23 @@ def classify(stem):
     return sid, "static", "character"
 
 
+def open_image(src):
+    """RGBA when the file already has real transparency (more than 2% of pixels not opaque: the artist or the
+    generator already cut the background out), plain RGB otherwise (flat key colour to remove)."""
+    img = Image.open(src)
+    if img.mode in ("RGBA", "LA", "P") and "A" in img.convert("RGBA").getbands():
+        rgba = img.convert("RGBA")
+        alpha = np.asarray(rgba.getchannel("A"))
+        if (alpha < 250).mean() > 0.02:
+            return rgba
+    return img.convert("RGB")
+
+
 def remove_key(img, key_rgb, t0=70.0, t1=150.0):
-    """RGB -> RGBA: soft alpha from colour distance to the key, with edge decontamination."""
+    """RGB -> RGBA: soft alpha from colour distance to the key, with edge decontamination.
+    An image that is already RGBA (real transparency) is returned untouched."""
+    if img.mode == "RGBA":
+        return img
     a = np.asarray(img.convert("RGB"), dtype=np.float32)
     key = np.array(key_rgb, dtype=np.float32)
     dist = np.sqrt(((a - key) ** 2).sum(axis=2))
@@ -151,7 +169,7 @@ def bbox_union(frames):
 
 
 def process_sheet(src, key_rgb, cat):
-    img = Image.open(src).convert("RGB")
+    img = open_image(src)
     W, H = img.size
     cw, ch = W // GRID, H // GRID
     raw = []
@@ -185,7 +203,7 @@ def process_anim_sheet(src, key_rgb, cat, x2=False, frames_used=FRAMES_USED_DEFA
     """One animation = one 5x5 sheet of 25 frames. No per-frame crop/rescale: every frame uses
     the same scale, crop box and anchor, so the character does not jitter.
     Returns (atlas, frame_w, frame_h, (anchor_x, anchor_y), n_frames)."""
-    img = Image.open(src).convert("RGB")
+    img = open_image(src)
     W, H = img.size
     cw, ch = W // GRID, H // GRID
     idx = sample_indices(frames_used)
@@ -196,7 +214,10 @@ def process_anim_sheet(src, key_rgb, cat, x2=False, frames_used=FRAMES_USED_DEFA
     box = bbox_union(cells)
     if box is None:
         raise ValueError("sheet is empty after key removal")
-    ax, ay = cw / 2.0, float(box[3])  # feet: cell centre x, lowest opaque pixel
+    # Feet: cell centre x and the MEDIAN of each frame's lowest opaque pixel. The lowest pixel of the whole sheet would
+    # be set by effects (cracks, sparks, a body lying down) and make the standing frames float above the ground.
+    bottoms = sorted(b[3] for b in (alpha_bbox(c) for c in cells) if b is not None)
+    ax, ay = cw / 2.0, float(bottoms[len(bottoms) // 2])
     if x2:
         crop = (0, 0, cw, ch)  # double canvas: keep it whole (the movement overflows)
     else:
@@ -216,7 +237,7 @@ def process_anim_sheet(src, key_rgb, cat, x2=False, frames_used=FRAMES_USED_DEFA
 
 
 def process_static(src, key_rgb, cat):
-    img = remove_key(Image.open(src).convert("RGB"), key_rgb)
+    img = remove_key(open_image(src), key_rgb)
     box = alpha_bbox(img)
     if box is None:
         raise ValueError("image is empty after key removal")

@@ -128,3 +128,16 @@ def test_artist_names_are_normalised():
     assert ps.parse_name("gusanita_idle")["id"] == "wormina"
     assert ps.parse_name("p1_club_worm_attack_x2_sheet")["x2"] is True
     assert ps.parse_name("base_p1")["kind"] is None
+
+
+def test_already_transparent_png_keeps_its_alpha(tmp_path):
+    img = Image.new("RGBA", (500, 500), (0, 0, 0, 0))   # transparent background, a green blob per cell
+    d = ImageDraw.Draw(img)
+    for r in range(5):
+        for c in range(5):
+            d.ellipse((c * 100 + 30, r * 100 + 30, c * 100 + 70, r * 100 + 90), fill=(60, 200, 60, 255))
+    p = tmp_path / "a.png"
+    img.save(p)
+    out = ps.process_anim_sheet(p, (255, 0, 255), "unit")[0]
+    a = np.array(out)
+    assert (a[:, :, 3] == 0).mean() > 0.4   # background stayed transparent (was opaque black before the fix)
