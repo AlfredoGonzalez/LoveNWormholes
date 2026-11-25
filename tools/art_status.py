@@ -11,6 +11,7 @@ Uso: python3 tools/art_status.py
 import glob
 import json
 import os
+import sys
 import re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,13 +23,19 @@ SHEET_RE = re.compile(r"^(.*)_(idle|walk|attack|hurt|defeat|cast_slam|cast_power
 PHASE_TITLES = {}
 
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from process_sprites import normalize_stem  # noqa: E402
+
+
 def stems_under(*rel_dirs, skip=()):
     names = set()
     for rel in rel_dirs:
         for base, dirs, files in os.walk(os.path.join(ROOT, rel)):
             dirs[:] = [d for d in dirs if d not in skip]
             for f in files:
-                names.add(os.path.splitext(f)[0].lower())
+                stem = os.path.splitext(f)[0].lower()
+                names.add(stem)
+                names.add(normalize_stem(stem))   # "Gusanito-gusanito_idle-v1" counts as squirmy_idle_sheet
     return names
 
 

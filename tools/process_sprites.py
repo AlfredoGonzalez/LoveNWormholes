@@ -59,8 +59,31 @@ def category_of(sid):
     return None
 
 
+# Names the artist uses for characters -> internal ids (the files can say "gusanito", the game says "squirmy").
+ALIASES = {"gusanito": "squirmy", "gusanita": "wormina"}
+_VERSION_RE = re.compile(r"[-_ ]v\d+$")
+_BARE_ANIM_RE = re.compile(r"^(?P<id>.+?)_(?P<anim>" + "|".join(ALL_ANIMS) + r")(?P<x2>_x2)?$")
+
+
+def normalize_stem(stem):
+    """Tolerant file names: lowercase, spaces/dashes -> '_', a trailing '-v1' dropped, a '<anything>-gusanito_...'
+    prefix dropped, aliases mapped (gusanito -> squirmy), and '_sheet' optional after a known animation."""
+    s = _VERSION_RE.sub("", stem.strip().lower())
+    for alias, real in ALIASES.items():
+        m = re.search(r"(^|[-_ ])" + alias + r"(?=_|$)", s)
+        if m:
+            s = real + s[m.end():]
+            break
+    s = re.sub(r"[-\s]+", "_", s)
+    m = _BARE_ANIM_RE.match(s)
+    if m and not s.endswith("_sheet"):
+        s += "_sheet"
+    return s
+
+
 def parse_name(stem):
     """New-format names. Returns dict(kind='anim'|'ref'|None, id, anim, x2, category)."""
+    stem = normalize_stem(stem)
     m = ANIM_RE.match(stem)
     if m:
         sid = m.group("id")
@@ -73,6 +96,7 @@ def parse_name(stem):
 
 def classify(stem):
     """Legacy classifier. Return (id, kind, category). kind is 'sheet', 'static' or None."""
+    stem = normalize_stem(stem)
     sheet = stem.endswith("_sheet")
     sid = stem[:-6] if sheet else stem
     if sheet:

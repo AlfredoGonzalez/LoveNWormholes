@@ -2,11 +2,11 @@
 
 Generado por `python3 tools/art_status.py`. Prompts en `docs/art-prompts/` (ver su `README.md`).
 
-**0 de 324 piezas listas o en inbox.**
+**1 de 324 piezas listas o en inbox.**
 
 | Fase | Contenido | Total | Integrado | En inbox | Pendiente |
 |---|---|---|---|---|---|
-| A | Era 1 jugable | 58 | 0 | 0 | 58 |
+| A | Era 1 jugable | 58 | 0 | 1 | 57 |
 | B | Menús y Home | 16 | 0 | 0 | 16 |
 | C | Era 2 (Egipto) | 48 | 0 | 0 | 48 |
 | D | Tienda, cápsulas y reliquias | 40 | 0 | 0 | 40 |
@@ -14,14 +14,14 @@ Generado por `python3 tools/art_status.py`. Prompts en `docs/art-prompts/` (ver 
 | F | Era 4 (Industrial) | 49 | 0 | 0 | 49 |
 | G | Era 5 (Futuro lejano) | 48 | 0 | 0 | 48 |
 | H | Historia y tienda de Play | 16 | 0 | 0 | 16 |
-| | **Total** | **324** | **0** | **0** | **324** |
+| | **Total** | **324** | **0** | **1** | **323** |
 
 ## Fase A: Era 1 jugable
 
 | ID | Tipo | Pieza | Archivo esperado | Estado |
 |---|---|---|---|---|
 | A-001 | ref | Squirmy (héroe): referencia de personaje | `squirmy_ref.png` | pendiente |
-| A-002 | hoja | Squirmy (héroe): idle (reposo) | `squirmy_idle_sheet.png` | pendiente |
+| A-002 | hoja | Squirmy (héroe): idle (reposo) | `squirmy_idle_sheet.png` | en inbox |
 | A-003 | hoja | Squirmy (héroe): cast_slam (poder Squirm Slam) | `squirmy_cast_slam_x2_sheet.png` | pendiente |
 | A-004 | hoja | Squirmy (héroe): cast_power (poder genérico) | `squirmy_cast_power_x2_sheet.png` | pendiente |
 | A-005 | hoja | Squirmy (héroe): hurt (herido) | `squirmy_hurt_sheet.png` | pendiente |

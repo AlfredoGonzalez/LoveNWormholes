@@ -120,3 +120,11 @@ def test_legacy_skipped_when_new_format_exists(tmp_path):
     make_anim_sheet(inbox / "p1_club_worm_idle_sheet.png")
     e = run(tmp_path)["sprites"]["p1_club_worm"]
     assert e["format"] == 2 and "rows" not in e
+
+
+def test_artist_names_are_normalised():
+    assert ps.normalize_stem("Gusanito-gusanito_idle-v1") == "squirmy_idle_sheet"
+    assert ps.parse_name("Gusanito-gusanito_idle-v1")["id"] == "squirmy"
+    assert ps.parse_name("gusanita_idle")["id"] == "wormina"
+    assert ps.parse_name("p1_club_worm_attack_x2_sheet")["x2"] is True
+    assert ps.parse_name("base_p1")["kind"] is None
