@@ -7,6 +7,8 @@ signal finished
 
 const VIDEO_PATH := "res://assets/video/studio_intro.ogv"
 const SKIP_AFTER := 1.0
+const VIDEO_WIDTH_FRACTION := 0.6
+const VIDEO_ASPECT := 1280.0 / 720.0   # height / width of the video
 
 var muted := false
 var video_path := VIDEO_PATH
@@ -20,7 +22,7 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var bg := ColorRect.new()
-	bg.color = Color.BLACK
+	bg.color = Color8(13, 16, 17)   # same as the video background, so the 60%-wide video has no visible frame
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
@@ -34,7 +36,6 @@ func _ready() -> void:
 	player.stream = stream
 	player.expand = true
 	player.volume_db = -80.0 if muted else 0.0
-	player.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	player.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	player.finished.connect(_finish)
 	add_child(player)
@@ -72,6 +73,7 @@ func _start_playback() -> void:
 
 func _process(delta: float) -> void:
 	_elapsed += delta
+	_layout_video()
 	# Safety net: a video that never advances (no decoder, blocked audio clock) must not trap the player on a black screen.
 	if player != null and not _waiting_tap and not _done and _elapsed - _play_started > 4.0 and player.stream_position < 0.05:
 		_finish()
@@ -97,3 +99,14 @@ func _finish() -> void:
 	if player != null:
 		player.stop()
 	finished.emit()
+
+
+## The video (portrait 720x1280, black background) is shown centred at VIDEO_WIDTH_FRACTION of the screen width.
+func _layout_video() -> void:
+	if player == null or size.x <= 0.0:
+		return
+	var w := size.x * VIDEO_WIDTH_FRACTION
+	var h := w * VIDEO_ASPECT
+	player.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	player.position = Vector2((size.x - w) * 0.5, (size.y - h) * 0.5)
+	player.size = Vector2(w, h)

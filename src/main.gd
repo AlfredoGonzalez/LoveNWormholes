@@ -1,5 +1,5 @@
 extends Control
-## Entry point (spec 9.1 boot order): studio intro -> consent (if needed) -> title. Built in code.
+## Entry point (spec 9.1 boot order): studio video -> loading screen -> consent (if needed) -> title. Built in code.
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -8,13 +8,22 @@ func _ready() -> void:
 	Game.nav.host = self
 	Game.start_services()
 	if bool(OS.get_environment("LNW_SKIP_INTRO") != "") or not ResourceLoader.exists("res://assets/video/studio_intro.ogv"):
-		_after_intro()
+		_show_loading()
 		return
 	var intro := StudioIntro.new()
 	intro.muted = bool(Game.save.profile["settings"].get("muted", false))
 	add_child(intro)
 	intro.finished.connect(func():
 		intro.queue_free()
+		_show_loading())
+
+
+## Studio video -> loading screen (preloads the art) -> consent / title.
+func _show_loading() -> void:
+	var loading := LoadingScreen.new()
+	add_child(loading)
+	loading.finished.connect(func():
+		loading.queue_free()
 		_after_intro())
 
 
