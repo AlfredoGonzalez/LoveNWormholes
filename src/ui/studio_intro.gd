@@ -13,13 +13,15 @@ var video_path := VIDEO_PATH
 var player: VideoStreamPlayer = null
 var _elapsed := 0.0
 var _done := false
+var _waiting_tap := false     # web only: browsers block audio/video until the first tap
+var _play_started := 0.0
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var bg := ColorRect.new()
 	bg.color = Color.BLACK
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
 	var stream: VideoStream = null
@@ -32,18 +34,55 @@ func _ready() -> void:
 	player.stream = stream
 	player.expand = true
 	player.volume_db = -80.0 if muted else 0.0
-	player.set_anchors_preset(Control.PRESET_FULL_RECT)
+	player.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	player.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	player.finished.connect(_finish)
 	add_child(player)
+	if OS.has_feature("web") and not _web_unlocked:
+		_waiting_tap = true
+		_make_tap_label()
+		return
+	_start_playback()
+
+
+static var _web_unlocked := false
+
+
+func _make_tap_label() -> void:
+	var l := Label.new()
+	l.name = "TapLabel"
+	l.text = Localization.tr_key("intro.tap") if Localization.has_key("intro.tap") else "Tap to start"
+	l.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	l.add_theme_font_size_override("font_size", 28)
+	l.add_theme_color_override("font_color", Color.WHITE)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(l)
+
+
+func _start_playback() -> void:
+	_waiting_tap = false
+	var tap := get_node_or_null("TapLabel")
+	if tap != null:
+		tap.queue_free()
+	_play_started = _elapsed
 	player.play()
+
 
 func _process(delta: float) -> void:
 	_elapsed += delta
+	# Safety net: a video that never advances (no decoder, blocked audio clock) must not trap the player on a black screen.
+	if player != null and not _waiting_tap and not _done and _elapsed - _play_started > 4.0 and player.stream_position < 0.05:
+		_finish()
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton or event is InputEventScreenTouch:
 		if event.pressed:
+			if _waiting_tap:
+				_web_unlocked = true
+				_start_playback()
+				return
 			skip()
 
 ## Skips the video if at least SKIP_AFTER seconds have passed.

@@ -2,7 +2,7 @@ extends Control
 ## Entry point (spec 9.1 boot order): studio intro -> consent (if needed) -> title. Built in code.
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	if not Game.booted_ok:
 		Game.boot()
 	Game.nav.host = self
