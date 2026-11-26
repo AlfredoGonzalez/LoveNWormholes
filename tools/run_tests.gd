@@ -17,6 +17,9 @@ func _initialize() -> void:
 		if f.begins_with("test_") and f.ends_with(".gd"):
 			files.append(f)
 	files.sort()
+	var only := OS.get_environment("LNW_TEST_FILTER")   # e.g. LNW_TEST_FILTER=meta runs only matching files
+	if only != "":
+		files = files.filter(func(n): return n.contains(only))
 	for f in files:
 		var script: GDScript = load("res://tests/" + f)
 		var t = script.new()
@@ -34,4 +37,6 @@ func _initialize() -> void:
 						print("       - " + msg)
 		total_checks += t.checks
 	print("%d test files, %d checks, %d failing tests" % [files.size(), total_checks, failed])
+	SpriteFactory.clear_caches()
+	AssetPreloader.reset()
 	quit(1 if failed > 0 else 0)

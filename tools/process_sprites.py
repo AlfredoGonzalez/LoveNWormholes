@@ -236,7 +236,7 @@ def process_anim_sheet(src, key_rgb, cat, x2=False, frames_used=FRAMES_USED_DEFA
     return atlas, fw, fh, anchor, len(cells)
 
 
-IMAGE_PREFIXES = ("bg_", "story_", "logo", "app_icon", "feature_", "paper_", "title_", "map_")
+IMAGE_PREFIXES = ("bg_", "story_", "logo", "app_icon", "feature_", "paper_", "title_", "map_", "play_", "btn_")
 IMAGE_TARGET_W = {"bg_": 1080, "story_": 1920, "title_": 1080, "map_": 1080}
 
 
@@ -247,9 +247,18 @@ def image_rel(sid):
 
 
 def process_image(src, out, sid, rel):
-    """A finished picture: resized to its target width (never enlarged), no key removal. Backgrounds/panels -> JPEG."""
-    img = Image.open(src).convert("RGB")
+    """A finished picture: resized to its target width (never enlarged), no key removal. Backgrounds/panels -> JPEG.
+    A PNG/WEBP that already has transparency (logo, buttons) keeps its alpha and is trimmed to the visible area."""
+    img = open_image(src)
+    if out.suffix == ".jpg" or img.mode != "RGBA":
+        img = img.convert("RGB")
+    else:
+        box = alpha_bbox(img)
+        if box is not None:
+            img = img.crop(box)
     w = next((v for k, v in IMAGE_TARGET_W.items() if sid.startswith(k)), None)
+    if w is None and img.mode == "RGBA" and img.width > 1024:
+        w = 1024
     if w and img.width > w:
         img = img.resize((w, int(round(img.height * w / img.width))), Image.LANCZOS)
     if out.suffix == ".jpg":

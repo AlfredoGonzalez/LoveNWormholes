@@ -32,6 +32,14 @@
       "kind": "image",
       "path": "assets/images/backgrounds/bg_era1.jpg"
     },
+    "bg_home": {
+      "category": "image",
+      "frame_h": 1376,
+      "frame_w": 768,
+      "id": "bg_home",
+      "kind": "image",
+      "path": "assets/images/backgrounds/bg_home.jpg"
+    },
     "e1_ant_clubber": {
       "anims": {
         "attack": {
@@ -158,6 +166,14 @@
       "kind": "static",
       "path": "assets/sprites/icons/icon_food.png"
     },
+    "logo": {
+      "category": "image",
+      "frame_h": 812,
+      "frame_w": 827,
+      "id": "logo",
+      "kind": "image",
+      "path": "assets/images/ui/logo.png"
+    },
     "p1_club_worm": {
       "anims": {
         "attack": {
@@ -253,6 +269,22 @@
       "key_color": "#FF00FF",
       "kind": "sheet",
       "nominal_h": 256
+    },
+    "play_en": {
+      "category": "image",
+      "frame_h": 653,
+      "frame_w": 1024,
+      "id": "play_en",
+      "kind": "image",
+      "path": "assets/images/ui/play_en.png"
+    },
+    "play_es": {
+      "category": "image",
+      "frame_h": 685,
+      "frame_w": 1024,
+      "id": "play_es",
+      "kind": "image",
+      "path": "assets/images/ui/play_es.png"
     },
     "power_apple_rain": {
       "category": "icon",

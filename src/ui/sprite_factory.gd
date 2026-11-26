@@ -218,6 +218,13 @@ static func _needs_flip(entry: Dictionary, facing_override: String) -> bool:
 static var _tex_cache: Dictionary = {}   # resolved path -> Texture2D (hits only)
 static var _cache_gen := -1
 
+
+## Drops the cached textures (used at exit by the test runner so no RID is reported as leaked).
+static func clear_caches() -> void:
+	_tex_cache.clear()
+	_trim_cache.clear()
+	_cache_gen = -1
+
 static func _load_texture(entry: Dictionary) -> Texture2D:
 	var p := str(entry.get("path", ""))
 	if p == "":
