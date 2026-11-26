@@ -4,6 +4,8 @@ extends Screen
 ## after the intro (Main); if it is somehow still unknown at Play, Play routes there before Home.
 
 var play_button: Button
+var progress_bar: ProgressBar
+var _loading_label: Label
 var lang_button: Button
 var settings_button: Button
 var _title: Label
@@ -42,10 +44,17 @@ func _ready() -> void:
 	v.add_child(_tagline)
 	v.add_child(_spacer(true))
 
+	# One screen for loading and title: the bar fills while the art preloads, then Play takes its place.
+	progress_bar = UI.progress_bar(Vector2(0, 26))
+	progress_bar.name = "progress_bar"
+	v.add_child(progress_bar)
+	_loading_label = UI.label("", 18, UI.INK, HORIZONTAL_ALIGNMENT_CENTER)
+	v.add_child(_loading_label)
 	play_button = UI.button("", "primary", Vector2(0, 72), 32)
 	play_button.name = "play_button"
 	play_button.pressed.connect(_on_play)
 	v.add_child(play_button)
+	_set_loading(not AssetPreloader.is_done())
 	settings_button = UI.button("", "ghost", Vector2(0, UI.MIN_TOUCH), 20)
 	settings_button.name = "settings_button"
 	settings_button.pressed.connect(func(): Game.nav.go("settings"))
@@ -53,6 +62,20 @@ func _ready() -> void:
 	_version = UI.label("", 14, UI.LOCKED_INK, HORIZONTAL_ALIGNMENT_CENTER)
 	v.add_child(_version)
 	refresh_texts()
+
+
+func _set_loading(loading: bool) -> void:
+	progress_bar.visible = loading
+	_loading_label.visible = loading
+	play_button.visible = not loading
+	set_process(loading)
+
+
+func _process(_delta: float) -> void:
+	var p := AssetPreloader.progress()
+	progress_bar.value = p
+	if p >= 1.0:
+		_set_loading(false)
 
 
 func _spacer(expand: bool) -> Control:
@@ -67,6 +90,7 @@ func refresh_texts() -> void:
 	_subtitle.text = Game.t("app.subtitle")
 	_tagline.text = Game.t("title.tagline")
 	play_button.text = Game.t("title.play")
+	_loading_label.text = Game.t("title.loading")
 	settings_button.text = Game.t("title.settings")
 	var other := "es" if Localization.get_language() == "en" else "en"
 	lang_button.text = Game.t("settings.lang_" + other)

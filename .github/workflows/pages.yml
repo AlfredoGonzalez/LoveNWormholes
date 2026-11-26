@@ -30,9 +30,7 @@ jobs:
       - name: Import and export Web
         run: |
           godot --headless --path . --import || true
-          mkdir -p build/web
-          godot --headless --path . --export-release "Web" build/web/index.html
-          touch build/web/.nojekyll
+          tools/build_web.sh
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web

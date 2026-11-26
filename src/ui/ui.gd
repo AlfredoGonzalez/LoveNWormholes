@@ -135,3 +135,22 @@ static func background(color := BG) -> ColorRect:
 ## "Unlocks at level N" placeholder used by every locked feature (decision 5).
 static func locked_note(level: int) -> Label:
 	return label(Game.t("ui.unlocks_level", [level]), 14, LOCKED_INK, HORIZONTAL_ALIGNMENT_CENTER)
+
+
+## Progress bar in the game's palette (cream track, brown outline, orange fill), not the default blue theme.
+static func progress_bar(size := Vector2(0, 22)) -> ProgressBar:
+	var b := ProgressBar.new()
+	b.custom_minimum_size = size
+	b.max_value = 1.0
+	b.show_percentage = false
+	var track := StyleBoxFlat.new()
+	track.bg_color = PANEL
+	track.border_color = INK
+	track.set_border_width_all(3)
+	track.set_corner_radius_all(11)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = ORANGE
+	fill.set_corner_radius_all(9)
+	b.add_theme_stylebox_override("background", track)
+	b.add_theme_stylebox_override("fill", fill)
+	return b

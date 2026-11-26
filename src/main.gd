@@ -1,5 +1,5 @@
 extends Control
-## Entry point (spec 9.1 boot order): studio video -> loading screen -> consent (if needed) -> title. Built in code.
+## Entry point: studio video -> title screen (progress bar that becomes Play; consent is asked on Play). Built in code.
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -7,30 +7,21 @@ func _ready() -> void:
 		Game.boot()
 	Game.nav.host = self
 	Game.start_services()
-	if bool(OS.get_environment("LNW_SKIP_INTRO") != "") or not ResourceLoader.exists("res://assets/video/studio_intro.ogv"):
-		_show_loading()
+	AssetPreloader.start()   # loads the art in the background while the studio video plays
+	# On the web the video is played by the page itself (web/shell.html) before the engine is ready, so skip it here.
+	var web_handled := OS.has_feature("web")
+	if web_handled or bool(OS.get_environment("LNW_SKIP_INTRO") != "") or not ResourceLoader.exists("res://assets/video/studio_intro.ogv"):
+		_after_intro()
 		return
 	var intro := StudioIntro.new()
 	intro.muted = bool(Game.save.profile["settings"].get("muted", false))
 	add_child(intro)
 	intro.finished.connect(func():
 		intro.queue_free()
-		_show_loading())
-
-
-## Studio video -> loading screen (preloads the art) -> consent / title.
-func _show_loading() -> void:
-	var loading := LoadingScreen.new()
-	add_child(loading)
-	loading.finished.connect(func():
-		loading.queue_free()
 		_after_intro())
 
 
-## Spec 9.1: consent (UMP-like) comes after the intro, only when the choice is still unknown.
 func _after_intro() -> void:
-	if Game.consent.needs_prompt() and Game.nav.go("consent", {"next": "title"}):
-		return
 	_to_title()
 
 
