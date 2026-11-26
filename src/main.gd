@@ -21,6 +21,10 @@ func _ready() -> void:
 		_after_intro())
 
 
+func _process(_delta: float) -> void:
+	AssetPreloader.pump(6.0)   # keeps loading the art during the studio video
+
+
 func _after_intro() -> void:
 	_to_title()
 

@@ -72,6 +72,7 @@ func _set_loading(loading: bool) -> void:
 
 
 func _process(_delta: float) -> void:
+	AssetPreloader.pump(8.0)
 	var p := AssetPreloader.progress()
 	progress_bar.value = p
 	if p >= 1.0:

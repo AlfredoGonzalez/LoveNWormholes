@@ -99,6 +99,15 @@ body { background-color: #0d1011; }
 	transition: opacity 0.4s ease;
 }
 #intro.hide { opacity: 0; pointer-events: none; }
+#boot {
+	position: fixed; inset: 0; z-index: 15; background: #F5EBD3; color: #3B2A1E;
+	display: none; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+}
+#boot.show { display: flex; }
+#boot h1 { margin: 0; font-size: 34px; }
+#boot .track { width: min(300px, 60vw); height: 22px; border: 3px solid #3B2A1E; border-radius: 12px; background: #FFF7E6; overflow: hidden; }
+#boot .fill { width: 0%; height: 100%; background: #F28C28; transition: width 0.15s linear; }
 #introvideo { width: 60vw; max-width: 60vh; height: auto; max-height: 100vh; background: #0d1011; }
 		</style>
 		$GODOT_HEAD_INCLUDE
@@ -118,6 +127,7 @@ body { background-color: #0d1011; }
 			<div id="status-notice"></div>
 		</div>
 
+		<div id="boot"><h1>Love 'n Wormholes</h1><div class="track"><div class="fill" id="bootfill"></div></div><div id="boottext">Loading...</div></div>
 		<div id="intro"><video id="introvideo" playsinline preload="auto"><source src="studio_intro.mp4" type="video/mp4"><source src="studio_intro.webm" type="video/webm"></video></div>
 		<script>
 /* Studio video (spec: first thing the player sees). Tries sound; browsers that block unmuted autoplay get it muted.
@@ -130,6 +140,10 @@ body { background-color: #0d1011; }
 	function finish() {
 		if (done) return;
 		done = true;
+		if (!window.lnwEngineStarted) {   // engine still downloading/starting: show the loading panel instead of a frozen screen
+			document.getElementById('boot').classList.add('show');
+			if (/^es/i.test(navigator.language)) document.getElementById('boottext').textContent = 'Cargando...';
+		}
 		intro.classList.add('hide');
 		setTimeout(function () { intro.remove(); }, 500);
 	}
@@ -240,12 +254,16 @@ const engine = new Engine(GODOT_CONFIG);
 				if (current > 0 && total > 0) {
 					statusProgress.value = current;
 					statusProgress.max = total;
+					document.getElementById('bootfill').style.width = Math.round(100 * current / total) + '%';
 				} else {
 					statusProgress.removeAttribute('value');
 					statusProgress.removeAttribute('max');
 				}
 			},
 		}).then(() => {
+			window.lnwEngineStarted = true;
+			const boot = document.getElementById('boot');
+			if (boot) boot.remove();
 			setStatusMode('hidden');
 		}, displayFailureNotice);
 	}

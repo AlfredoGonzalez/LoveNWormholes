@@ -8,21 +8,34 @@ static var _paths: Array = []
 static var _started := false
 
 
+static var _next := 0
+
+
 static func start() -> void:
 	if _started:
 		return
 	_started = true
+	_next = 0
 	_paths = _collect_paths()
-	var ok: Array = []
-	for p in _paths:
-		if ResourceLoader.load_threaded_request(p) == OK:
-			ok.append(p)
-	_paths = ok
 
 
 static func reset() -> void:
 	_paths = []
 	_started = false
+	_next = 0
+
+
+## Loads textures one by one until `budget_ms` is spent, so a frame is never blocked for long (web has no threads:
+## a threaded request there would freeze the whole screen and the progress bar could not move).
+static func pump(budget_ms: float = 8.0) -> void:
+	if not _started:
+		return
+	var t0 := Time.get_ticks_msec()
+	while _next < _paths.size():
+		ResourceLoader.load(str(_paths[_next]))   # cached by ResourceLoader; later `load()` calls are instant
+		_next += 1
+		if float(Time.get_ticks_msec() - t0) >= budget_ms:
+			break
 
 
 ## Every texture path the manifest lists that exists as a resource.
@@ -48,12 +61,7 @@ static func _collect_paths() -> Array:
 static func progress() -> float:
 	if not _started or _paths.is_empty():
 		return 1.0
-	var done := 0
-	for p in _paths:
-		var st := ResourceLoader.load_threaded_get_status(p)
-		if st != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-			done += 1
-	return float(done) / float(_paths.size())
+	return float(_next) / float(_paths.size())
 
 
 static func is_done() -> bool:
