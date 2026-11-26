@@ -236,6 +236,29 @@ def process_anim_sheet(src, key_rgb, cat, x2=False, frames_used=FRAMES_USED_DEFA
     return atlas, fw, fh, anchor, len(cells)
 
 
+IMAGE_PREFIXES = ("bg_", "story_", "logo", "app_icon", "feature_", "paper_", "title_", "map_")
+IMAGE_TARGET_W = {"bg_": 1080, "story_": 1920, "title_": 1080, "map_": 1080}
+
+
+def image_rel(sid):
+    sub = "backgrounds" if sid.startswith(("bg_", "title_", "map_")) else "story" if sid.startswith("story_") else "ui"
+    ext = "jpg" if sid.startswith(("bg_", "story_", "title_", "map_")) else "png"
+    return f"assets/images/{sub}/{sid}.{ext}"
+
+
+def process_image(src, out, sid, rel):
+    """A finished picture: resized to its target width (never enlarged), no key removal. Backgrounds/panels -> JPEG."""
+    img = Image.open(src).convert("RGB")
+    w = next((v for k, v in IMAGE_TARGET_W.items() if sid.startswith(k)), None)
+    if w and img.width > w:
+        img = img.resize((w, int(round(img.height * w / img.width))), Image.LANCZOS)
+    if out.suffix == ".jpg":
+        img.save(out, quality=90, optimize=True)
+    else:
+        img.save(out, optimize=True)
+    return {"id": sid, "kind": "image", "category": "image", "path": rel, "frame_w": img.width, "frame_h": img.height}
+
+
 def process_static(src, key_rgb, cat):
     img = remove_key(open_image(src), key_rgb)
     box = alpha_bbox(img)
@@ -285,7 +308,8 @@ def process_anim_file(root, src, info, sprites):
                     "frame_w": base["frame_w"] // (2 if base["x2"] else 1), "frame_h": nominal,
                     "nominal_h": nominal, "expected_anims": expected,
                     "anims": {k: anims[k] for k in order},
-                    "facing": "left" if cat in ("enemy", "boss") else "right",
+                    # A hand-set facing survives re-runs: it says which way the ART looks (the game flips by side).
+                    "facing": (sprites.get(sid) or {}).get("facing") or ("left" if cat in ("enemy", "boss") else "right"),
                     "key_color": key}
 
 
@@ -347,12 +371,16 @@ def main(argv=None):
             print(f"skip (unknown name): {src.name}")
             continue
         prev = sprites.get(sid, {})
+        if kind == "static" and sid.startswith(IMAGE_PREFIXES):
+            kind, cat = "image", "image"   # finished pictures (backgrounds, story panels...): no background to key out
         key = prev.get("key_color") or KEY_OVERRIDES.get(sid, DEFAULT_KEY)
-        rel = f"assets/sprites/{CATEGORY_DIR[cat]}/{src.stem}.png"
+        rel = f"assets/sprites/{CATEGORY_DIR[cat]}/{src.stem}.png" if kind != "image" else image_rel(sid)
         out = root / rel
         out.parent.mkdir(parents=True, exist_ok=True)
         try:
-            if kind == "sheet":
+            if kind == "image":
+                entry = process_image(src, out, sid, rel)
+            elif kind == "sheet":
                 atlas, fw, fh = process_sheet(src, hex_to_rgb(key), cat)
                 atlas.save(out, optimize=True)
                 rows = ROWS_HERO if cat == "hero" else ROWS_STD

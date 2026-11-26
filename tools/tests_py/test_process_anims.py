@@ -141,3 +141,11 @@ def test_already_transparent_png_keeps_its_alpha(tmp_path):
     out = ps.process_anim_sheet(p, (255, 0, 255), "unit")[0]
     a = np.array(out)
     assert (a[:, :, 3] == 0).mean() > 0.4   # background stayed transparent (was opaque black before the fix)
+
+
+def test_background_is_an_image_not_a_sprite(tmp_path):
+    (tmp_path / "art-inbox").mkdir()
+    (tmp_path / "assets").mkdir()
+    Image.new("RGB", (1536, 2752), (160, 210, 240)).save(tmp_path / "art-inbox" / "bg_era1.jpg")
+    e = run(tmp_path)["sprites"]["bg_era1"]
+    assert e["kind"] == "image" and e["path"].endswith("backgrounds/bg_era1.jpg") and e["frame_w"] == 1080

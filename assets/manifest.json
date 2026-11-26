@@ -1,6 +1,289 @@
 {
-  "refs": {},
+  "refs": {
+    "e1_ant_clubber": "assets/sprites/refs/e1_ant_clubber_ref.png",
+    "p1_club_worm": "assets/sprites/refs/p1_club_worm_ref.png"
+  },
   "sprites": {
+    "base_e1": {
+      "category": "base",
+      "facing": "left",
+      "frame_h": 463,
+      "frame_w": 512,
+      "id": "base_e1",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/bases/base_e1.png"
+    },
+    "base_p1": {
+      "category": "base",
+      "facing": "right",
+      "frame_h": 371,
+      "frame_w": 512,
+      "id": "base_p1",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/bases/base_p1.png"
+    },
+    "bg_era1": {
+      "category": "image",
+      "frame_h": 1935,
+      "frame_w": 1080,
+      "id": "bg_era1",
+      "kind": "image",
+      "path": "assets/images/backgrounds/bg_era1.jpg"
+    },
+    "e1_ant_clubber": {
+      "anims": {
+        "attack": {
+          "anchor": [
+            256,
+            488
+          ],
+          "cols": 5,
+          "fps": 18,
+          "frame_h": 512,
+          "frame_w": 512,
+          "frames": 25,
+          "frames_used": 25,
+          "hit_frame": 12,
+          "loop": false,
+          "path": "assets/sprites/enemies/e1_ant_clubber_attack_x2_sheet.png",
+          "x2": true
+        },
+        "defeat": {
+          "anchor": [
+            100,
+            206
+          ],
+          "cols": 5,
+          "fps": 14,
+          "frame_h": 220,
+          "frame_w": 228,
+          "frames": 25,
+          "frames_used": 25,
+          "loop": false,
+          "path": "assets/sprites/enemies/e1_ant_clubber_defeat_sheet.png",
+          "x2": false
+        },
+        "hurt": {
+          "anchor": [
+            97,
+            221
+          ],
+          "cols": 5,
+          "fps": 15,
+          "frame_h": 224,
+          "frame_w": 225,
+          "frames": 25,
+          "frames_used": 25,
+          "loop": false,
+          "path": "assets/sprites/enemies/e1_ant_clubber_hurt_sheet.png",
+          "x2": false
+        },
+        "idle": {
+          "anchor": [
+            101,
+            210
+          ],
+          "cols": 5,
+          "fps": 12,
+          "frame_h": 212,
+          "frame_w": 166,
+          "frames": 25,
+          "frames_used": 25,
+          "loop": true,
+          "path": "assets/sprites/enemies/e1_ant_clubber_idle_sheet.png",
+          "x2": false
+        },
+        "walk": {
+          "anchor": [
+            92,
+            204
+          ],
+          "cols": 5,
+          "fps": 14,
+          "frame_h": 208,
+          "frame_w": 194,
+          "frames": 25,
+          "frames_used": 25,
+          "loop": true,
+          "path": "assets/sprites/enemies/e1_ant_clubber_walk_sheet.png",
+          "x2": false
+        }
+      },
+      "category": "enemy",
+      "expected_anims": [
+        "idle",
+        "walk",
+        "attack",
+        "hurt",
+        "defeat"
+      ],
+      "facing": "right",
+      "format": 2,
+      "frame_h": 256,
+      "frame_w": 166,
+      "id": "e1_ant_clubber",
+      "key_color": "#FF00FF",
+      "kind": "sheet",
+      "nominal_h": 256
+    },
+    "fx_impact": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 128,
+      "frame_w": 126,
+      "id": "fx_impact",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/fx_impact.png"
+    },
+    "icon_coin": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 128,
+      "frame_w": 128,
+      "id": "icon_coin",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/icon_coin.png"
+    },
+    "icon_food": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 128,
+      "frame_w": 121,
+      "id": "icon_food",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/icon_food.png"
+    },
+    "p1_club_worm": {
+      "anims": {
+        "attack": {
+          "anchor": [
+            256,
+            476
+          ],
+          "cols": 5,
+          "fps": 18,
+          "frame_h": 512,
+          "frame_w": 512,
+          "frames": 25,
+          "frames_used": 25,
+          "hit_frame": 12,
+          "loop": false,
+          "path": "assets/sprites/units/p1_club_worm_attack_x2_sheet.png",
+          "x2": true
+        },
+        "defeat": {
+          "anchor": [
+            99,
+            152
+          ],
+          "cols": 5,
+          "fps": 14,
+          "frame_h": 162,
+          "frame_w": 206,
+          "frames": 25,
+          "frames_used": 25,
+          "loop": false,
+          "path": "assets/sprites/units/p1_club_worm_defeat_sheet.png",
+          "x2": false
+        },
+        "hurt": {
+          "anchor": [
+            88,
+            138
+          ],
+          "cols": 5,
+          "fps": 15,
+          "frame_h": 140,
+          "frame_w": 172,
+          "frames": 25,
+          "frames_used": 25,
+          "loop": false,
+          "path": "assets/sprites/units/p1_club_worm_hurt_sheet.png",
+          "x2": false
+        },
+        "idle": {
+          "anchor": [
+            98,
+            197
+          ],
+          "cols": 5,
+          "fps": 12,
+          "frame_h": 202,
+          "frame_w": 182,
+          "frames": 25,
+          "frames_used": 25,
+          "loop": true,
+          "path": "assets/sprites/units/p1_club_worm_idle_sheet.png",
+          "x2": false
+        },
+        "walk": {
+          "anchor": [
+            94,
+            174
+          ],
+          "cols": 5,
+          "fps": 14,
+          "frame_h": 178,
+          "frame_w": 191,
+          "frames": 25,
+          "frames_used": 25,
+          "loop": true,
+          "path": "assets/sprites/units/p1_club_worm_walk_sheet.png",
+          "x2": false
+        }
+      },
+      "category": "unit",
+      "expected_anims": [
+        "idle",
+        "walk",
+        "attack",
+        "hurt",
+        "defeat"
+      ],
+      "facing": "right",
+      "format": 2,
+      "frame_h": 256,
+      "frame_w": 182,
+      "id": "p1_club_worm",
+      "key_color": "#FF00FF",
+      "kind": "sheet",
+      "nominal_h": 256
+    },
+    "power_apple_rain": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 128,
+      "frame_w": 110,
+      "id": "power_apple_rain",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/power_apple_rain.png"
+    },
+    "power_squirm_slam": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 124,
+      "frame_w": 128,
+      "id": "power_squirm_slam",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/power_squirm_slam.png"
+    },
+    "proj_stone": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 99,
+      "frame_w": 128,
+      "id": "proj_stone",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/proj_stone.png"
+    },
     "squirmy": {
       "anims": {
         "cast_slam": {
