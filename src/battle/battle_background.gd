@@ -16,6 +16,8 @@ var size := Vector2(540, 960)
 var lane_y := 557.0
 var era := 1
 var _t := 0.0
+var art: Texture2D = null   ## bg_era<N> from the manifest (one tall 9:16 image); null = code-drawn background
+const ART_ZOOM := 1.04      ## slight overscan so the sway never shows an edge
 var _clouds: Array = [Vector2(60, 90), Vector2(300, 150), Vector2(470, 70)]
 
 
@@ -23,6 +25,7 @@ func setup(p_size: Vector2, p_lane_y: float, p_era: int) -> void:
 	size = p_size
 	lane_y = p_lane_y
 	era = clampi(p_era, 1, 5)
+	art = SpriteFactory.texture_of("bg_era%d" % era)
 	queue_redraw()
 
 
@@ -31,7 +34,20 @@ func drift(dt: float) -> void:
 	queue_redraw()
 
 
+## Cover rect for the art: fills the screen without distortion, centred, with a slow horizontal sway.
+func _art_rect() -> Rect2:
+	var ts := Vector2(art.get_width(), art.get_height())
+	var sc := maxf(size.x / ts.x, size.y / ts.y) * ART_ZOOM
+	var dsz := ts * sc
+	var slack := dsz - size
+	var sway := sin(_t * 0.15) * 0.5 * slack.x
+	return Rect2(Vector2(-slack.x * 0.5 + sway, -slack.y * 0.5), dsz)
+
+
 func _draw() -> void:
+	if art != null:
+		draw_texture_rect(art, _art_rect(), false)
+		return
 	var pal: Array = SKY[era - 1]
 	var top: Color = pal[0]
 	var mid: Color = pal[1]

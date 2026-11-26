@@ -88,13 +88,26 @@ static func panel(bg := PANEL) -> PanelContainer:
 	return p
 
 
-## Currency chip like the top bar of the mockup: "icon value".
-static func chip(icon_text: String, value: String) -> PanelContainer:
+## Currency chip like the top bar of the mockup: "icon value". `icon_id` (manifest id such as
+## icon_coin) replaces the symbol with the art when it exists; otherwise the symbol text stays.
+static func chip(icon_text: String, value: String, icon_id := "") -> PanelContainer:
 	var p := PanelContainer.new()
 	p.add_theme_stylebox_override("panel", style(PANEL, BORDER, 18, 2, false))
-	var l := label("%s %s" % [icon_text, value], 18)
-	l.autowrap_mode = TextServer.AUTOWRAP_OFF
-	p.add_child(l)
+	var art := SpriteFactory.icon(icon_id, 26.0) if icon_id != "" else null
+	if art == null:
+		var l := label("%s %s" % [icon_text, value], 18)
+		l.autowrap_mode = TextServer.AUTOWRAP_OFF
+		p.add_child(l)
+		return p
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 5)
+	art.name = "IconArt"
+	h.add_child(art)
+	var l2 := label(value, 18)
+	l2.autowrap_mode = TextServer.AUTOWRAP_OFF
+	l2.name = "Value"
+	h.add_child(l2)
+	p.add_child(h)
 	return p
 
 

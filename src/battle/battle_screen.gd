@@ -149,18 +149,18 @@ func _build_ui() -> void:
 	add_child(_world)
 	_player_base = BaseView.new()
 	_player_base.position = Vector2(PLAYER_BASE_X, LANE_Y + 30.0)
-	_player_base.setup(BattleSim.PLAYER, Game.t("battle.base_player_short"))
+	_player_base.setup(BattleSim.PLAYER, Game.t("battle.base_player_short"), era)
 	_world.add_child(_player_base)
 	_enemy_base = BaseView.new()
 	_enemy_base.position = Vector2(ENEMY_BASE_X, LANE_Y + 30.0)
-	_enemy_base.setup(BattleSim.ENEMY, Game.t("era.%d.enemy_base" % era))
+	_enemy_base.setup(BattleSim.ENEMY, Game.t("era.%d.enemy_base" % era), era)
 	_world.add_child(_enemy_base)
 	_unit_layer = Node2D.new()
 	_unit_layer.name = "Units"
 	_unit_layer.y_sort_enabled = true
 	_world.add_child(_unit_layer)
 	effects = BattleEffects.new()
-	effects.z_index = 500
+	effects.z_index = 700   # above the units (their z is their foot y, ~557)
 	effects.flash_rect = Rect2(0, 0, SCREEN_W, SCREEN_H)
 	_world.add_child(effects)
 	hud = BattleHud.new()
@@ -431,7 +431,13 @@ func _update_visuals(dt: float) -> void:
 	for p in sim.projectiles:
 		var f := clampf(float(p["t"]) / maxf(0.001, float(p["dur"])), 0.0, 1.0)
 		var px := _sx(lerpf(float(p["x0"]), float(p["x1"]), f))
-		pr.append({"pos": Vector2(px, LANE_Y - 30.0 - sin(f * PI) * 16.0), "side": int(p["side"])})
+		var pd := {"pos": Vector2(px, LANE_Y - 30.0 - sin(f * PI) * 16.0), "side": int(p["side"])}
+		var src_view: UnitView = unit_views.get(int(p.get("src", -1)))
+		var art_id := BattleEffects.projectile_art_id(src_view.unit_id if src_view != null else "", era)
+		if art_id != "":
+			pd["tex"] = SpriteFactory.texture_of(art_id)
+			pd["art_left"] = SpriteFactory.facing_of(art_id) == "left"
+		pr.append(pd)
 	effects.projectiles = pr
 	effects.advance(dt)
 	_bg.drift(dt)
@@ -467,7 +473,7 @@ func _handle_event(e: Dictionary) -> void:
 			var pos := Vector2(_sx(float(e["x"])), LANE_Y - 50.0)
 			var col := Color(1, 0.35, 0.3) if side2 == BattleSim.PLAYER else Color.WHITE
 			effects.add_number(pos, str(int(round(float(e["damage"])))), col)
-			effects.add_spark(pos + Vector2(0, 14))
+			effects.add_impact(pos + Vector2(0, 14), side2 == BattleSim.PLAYER)
 			if _sfx_ready(float(e["t"])):
 				audio.play_sfx("hit")
 		"death":
@@ -477,9 +483,9 @@ func _handle_event(e: Dictionary) -> void:
 			var side3 := int(e["side"])
 			var base := _player_base if side3 == BattleSim.PLAYER else _enemy_base
 			base.hit()
-			var bpos := base.position + Vector2(0, -BaseView.H - 4.0)
+			var bpos := base.position + Vector2(0, base.top_y() - 4.0)
 			effects.add_number(bpos, str(int(round(float(e["damage"])))), Color(1, 0.55, 0.2))
-			effects.add_spark(base.position + Vector2(0, -BaseView.H * 0.5), Color(1, 0.6, 0.2))
+			effects.add_impact(base.position + Vector2(0, base.top_y() * 0.5), side3 == BattleSim.PLAYER, Color(1, 0.6, 0.2))
 			if _sfx_ready(float(e["t"])):
 				audio.play_sfx("base_hit")
 		"power":

@@ -143,7 +143,16 @@ func _build_victory(body: VBoxContainer) -> void:
 	rb.add_child(UI.label(Game.t("victory.rewards"), 20, UI.TEAL))
 	_coins_label = UI.label("", 26, UI.INK)
 	_coins_label.name = "coins_label"
-	rb.add_child(_coins_label)
+	var coin_art := SpriteFactory.icon("icon_coin", 32.0)
+	if coin_art != null:
+		var crow := HBoxContainer.new()
+		crow.add_theme_constant_override("separation", 6)
+		crow.add_child(coin_art)
+		_coins_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		crow.add_child(_coins_label)
+		rb.add_child(crow)
+	else:
+		rb.add_child(_coins_label)
 	_update_coins_label()
 	if int(settled.get("gems", 0)) > 0:
 		rb.add_child(UI.label(Game.t("result.gems", [settled["gems"]]), 24, UI.BLUE))
@@ -198,7 +207,16 @@ func _build_defeat(body: VBoxContainer) -> void:
 	rp.add_child(rb)
 	_coins_label = UI.label("", 26, UI.INK)
 	_coins_label.name = "coins_label"
-	rb.add_child(_coins_label)
+	var coin_art := SpriteFactory.icon("icon_coin", 32.0)
+	if coin_art != null:
+		var crow := HBoxContainer.new()
+		crow.add_theme_constant_override("separation", 6)
+		crow.add_child(coin_art)
+		_coins_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		crow.add_child(_coins_label)
+		rb.add_child(crow)
+	else:
+		rb.add_child(_coins_label)
 	_update_coins_label()
 	rb.add_child(UI.label(Game.t("defeat.mercy", [MetaUI.percent(DataDB.bal_f("rewards.loss_fraction", 0.4))]), 16, UI.LOCKED_INK))
 	body.add_child(rp)

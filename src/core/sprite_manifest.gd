@@ -8,12 +8,17 @@ const DEFAULT_PATH := "res://assets/manifest.json"
 static var _path := DEFAULT_PATH
 static var _sprites: Dictionary = {}
 static var _loaded := false
+static var _refs: Dictionary = {}
+## Bumped whenever the manifest is (re)pointed or injected: texture caches key off it.
+static var generation := 0
 
 ## Point at another manifest file (tests) and drop the cache.
 static func use_path(path: String) -> void:
 	_path = path
 	_loaded = false
 	_sprites = {}
+	_refs = {}
+	generation += 1
 
 static func reset() -> void:
 	use_path(DEFAULT_PATH)
@@ -21,13 +26,16 @@ static func reset() -> void:
 ## Inject entries directly (tests / tools). Replaces whatever was loaded.
 static func set_entries(entries: Dictionary) -> void:
 	_sprites = entries.duplicate(true)
+	_refs = {}
 	_loaded = true
+	generation += 1
 
 static func _ensure_loaded() -> void:
 	if _loaded:
 		return
 	_loaded = true
 	_sprites = {}
+	_refs = {}
 	if not FileAccess.file_exists(_path):
 		return
 	var text := FileAccess.get_file_as_string(_path)
@@ -39,6 +47,9 @@ static func _ensure_loaded() -> void:
 	var parsed: Variant = json.data
 	if typeof(parsed) != TYPE_DICTIONARY:
 		return
+	var refs: Variant = (parsed as Dictionary).get("refs", {})
+	if typeof(refs) == TYPE_DICTIONARY:
+		_refs = refs
 	var sprites: Variant = (parsed as Dictionary).get("sprites", {})
 	if typeof(sprites) == TYPE_DICTIONARY:
 		_sprites = sprites
@@ -52,6 +63,11 @@ static func get_entry(id: String) -> Dictionary:
 	_ensure_loaded()
 	var e: Variant = _sprites.get(id, {})
 	return e if typeof(e) == TYPE_DICTIONARY else {}
+
+## Path of the reference image of a character ("" when none), from the manifest "refs" map.
+static func ref_path(id: String) -> String:
+	_ensure_loaded()
+	return str(_refs.get(id, ""))
 
 static func ids() -> Array:
 	_ensure_loaded()

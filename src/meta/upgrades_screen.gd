@@ -118,8 +118,8 @@ func _rebuild_chips() -> void:
 	for c in _chips.get_children():
 		_chips.remove_child(c)
 		c.queue_free()
-	_chips.add_child(UI.chip(Game.t("currency.coins"), str(Game.economy.get_amount("coins"))))
-	_chips.add_child(UI.chip(Game.t("currency.gems"), str(Game.economy.get_amount("gems"))))
+	_chips.add_child(UI.chip(Game.t("currency.coins"), str(Game.economy.get_amount("coins")), "icon_coin"))
+	_chips.add_child(UI.chip(Game.t("currency.gems"), str(Game.economy.get_amount("gems")), "icon_gem"))
 
 
 # ---------------------------------------------------------------- tabs
@@ -214,7 +214,17 @@ func _add_card(key: String, title: String, subtitle: String, lines: Array, lv: i
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	panel.add_child(row)
-	row.add_child(UI.placeholder("", color, Vector2(56, 56)))
+	var art_tex: Texture2D = null
+	if key.begins_with("unit:"):
+		art_tex = SpriteFactory.portrait_trimmed(key.substr(5))
+	elif key.begins_with("power:"):
+		art_tex = SpriteFactory.texture_of("power_" + key.substr(6))
+	var art := SpriteFactory.rect_of(art_tex, 56.0)
+	if art != null:
+		art.name = "Art"
+		row.add_child(art)
+	else:
+		row.add_child(UI.placeholder("", color, Vector2(56, 56)))
 
 	var mid := VBoxContainer.new()
 	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL

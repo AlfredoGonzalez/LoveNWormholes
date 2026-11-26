@@ -70,8 +70,8 @@ static func currency_bar() -> HBoxContainer:
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 8)
 	var e: Economy = Game.economy
-	for pair in [["coins", "●"], ["gems", "◆"], ["capsules", "◉"]]:
-		var c := UI.chip(pair[1], str(e.get_amount(pair[0])))
+	for pair in [["coins", "●", "icon_coin"], ["gems", "◆", "icon_gem"], ["capsules", "◉", "icon_capsule"]]:
+		var c := UI.chip(pair[1], str(e.get_amount(pair[0])), pair[2])
 		c.name = "chip_" + pair[0]
 		h.add_child(c)
 	return h
