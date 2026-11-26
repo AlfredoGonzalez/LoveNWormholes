@@ -91,6 +91,13 @@ preserved (only re-processed files are replaced, each animation is merged into i
 
 ## 4. In the game
 
+Static art is looked up by id convention, with a code-drawn placeholder whenever the id or the file is
+missing (a new piece shows up on its own once its file is processed): `bg_era<N>` (battle background, cover),
+`base_p<N>` / `base_e<N>` (bases; flipped by the manifest `facing`), `icon_coin`, `icon_food`, `icon_gem`,
+`icon_capsule` (chips / HUD), `power_<power id>` (power buttons, pre-battle, upgrades), `proj_<unit id>` /
+`proj_era<N>` / `proj_stone` (Era 1 default) for projectiles, `fx_impact` (hit effect); unit cards use the
+idle frame 0 (or the ref image). Helpers: `SpriteFactory.texture_of(id)`, `icon(id, size)`, `portrait_trimmed(id)`.
+
 `SpriteFactory.make_animated("p1_club_worm")` builds an `AnimatedSprite2D` with one `SpriteFrames`
 animation per existing sheet; `make_static("base_p1")` builds statics. `Actor.play_row("attack")`,
 signals `hit_frame_reached`, `row_finished`. `SpriteManifest` reads the file tolerantly

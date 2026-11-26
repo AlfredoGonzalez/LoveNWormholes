@@ -87,6 +87,11 @@ func build(sim: BattleSim, squad: Array, powers: Array, era: int) -> void:
 	add_child(pause_button)
 	food_bar = _bar(self, Rect2(72, 14, 306, 36), UI.ORANGE)
 	food_text = _bar_text(food_bar, 20)
+	var food_icon := SpriteFactory.icon("icon_food", 40.0)
+	if food_icon != null:   # icon sits on the left end of the Food bar; the text keeps its centre
+		food_icon.name = "FoodIcon"
+		food_icon.position = Vector2(-2, -2)
+		food_bar.add_child(food_icon)
 	income_text = UI.label("", 15, UI.INK, HORIZONTAL_ALIGNMENT_LEFT)
 	income_text.position = Vector2(384, 20)
 	income_text.size = Vector2(76, 26)
@@ -144,6 +149,7 @@ func _build_cards(sim: BattleSim) -> void:
 		c.size = Vector2(cw, CARD_H)
 		c.name = "Card%d" % i
 		c.fit_title()
+		c.set_art(SpriteFactory.portrait_trimmed(id), "portrait")
 		c.activated.connect(func(): card_pressed.emit(i))
 		add_child(c)
 		cards.append(c)
@@ -159,6 +165,7 @@ func _build_powers(sim: BattleSim, powers: Array) -> void:
 			0: x = 12.0
 			1: x = W - POWER_SIZE - 12.0
 			_: x = (W - POWER_SIZE) / 2.0
+		b.set_art(SpriteFactory.texture_of("power_" + pid), "icon")
 		b.position = Vector2(x, 960.0 - POWER_SIZE - 14.0)
 		b.size = Vector2(POWER_SIZE, POWER_SIZE)
 		b.name = "Power%d" % i

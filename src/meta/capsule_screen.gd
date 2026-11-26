@@ -163,8 +163,8 @@ func refresh() -> void:
 func _rebuild_chips() -> void:
 	MetaUI.clear_children(_chips)
 	var e := Game.economy
-	_chips.add_child(UI.chip("◉", str(e.get_amount("capsules"))))
-	_chips.add_child(UI.chip("◆", str(e.get_amount("gems"))))
+	_chips.add_child(UI.chip("◉", str(e.get_amount("capsules")), "icon_capsule"))
+	_chips.add_child(UI.chip("◆", str(e.get_amount("gems")), "icon_gem"))
 	_chips.add_child(UI.chip("✦", str(e.get_amount("chrono_dust"))))
 
 

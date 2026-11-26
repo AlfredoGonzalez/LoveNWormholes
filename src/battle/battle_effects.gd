@@ -7,7 +7,7 @@ extends Node2D
 const MAX_FX := 160
 
 var fx: Array = []
-var projectiles: Array = []     # [{pos: Vector2, side: int}] set by the screen every frame
+var projectiles: Array = []     # [{pos: Vector2, side: int, tex: Texture2D (optional art), art_left: bool}] set by the screen every frame
 var flash_rect := Rect2(0, 0, 540, 960)
 var _rain_t := 0.0
 var _rain_dur := 0.0
@@ -48,6 +48,15 @@ func add_number(pos: Vector2, text: String, color: Color = Color.WHITE) -> void:
 
 func add_spark(pos: Vector2, color: Color = Color(1, 0.9, 0.4)) -> void:
 	_push({"k": "spark", "p": pos, "c": color, "d": 0.25})
+
+
+## Impact art (fx_impact) when it exists, else the code spark. `flip` mirrors it (hit coming from the right).
+func add_impact(pos: Vector2, flip := false, color: Color = Color(1, 0.9, 0.4)) -> void:
+	var tex := SpriteFactory.texture_of("fx_impact")
+	if tex == null:
+		add_spark(pos, color)
+		return
+	_push({"k": "impact", "p": pos, "tex": tex, "flip": flip != (SpriteFactory.facing_of("fx_impact") == "left"), "d": 0.28})
 
 
 func add_puff(pos: Vector2, color: Color = Color(1, 1, 1, 0.8)) -> void:
@@ -114,6 +123,13 @@ func _draw() -> void:
 				for i in 4:
 					var ang := PI / 4.0 + float(i) * PI / 2.0
 					draw_line(p2 + Vector2(cos(ang), sin(ang)) * r * 0.4, p2 + Vector2(cos(ang), sin(ang)) * r, c2, 2.0)
+			"impact":
+				var tex: Texture2D = e["tex"]
+				var w := 40.0 * (0.7 + 0.5 * f)
+				var h := w * float(tex.get_height()) / maxf(1.0, float(tex.get_width()))
+				var cc := Color(1, 1, 1, 1.0 - f * f)
+				var rw := -w if bool(e["flip"]) else w
+				draw_texture_rect(tex, Rect2(e["p"] + Vector2(-rw / 2.0, -h / 2.0), Vector2(rw, h)), false, cc)
 			"puff":
 				var c3: Color = e["c"]
 				c3.a *= 1.0 - f
@@ -149,6 +165,24 @@ func _draw() -> void:
 				draw_circle(Vector2(p7.x, y), 6.0, Color("D9362B"))
 				draw_line(Vector2(p7.x, y - 6), Vector2(p7.x + 2, y - 10), UI.BORDER, 2.0)
 	for pr in projectiles:
+		if pr.get("tex") != null:
+			var tex2: Texture2D = pr["tex"]
+			var w2 := 26.0
+			var h2 := w2 * float(tex2.get_height()) / maxf(1.0, float(tex2.get_width()))
+			var left := int(pr["side"]) != BattleSim.PLAYER   # enemy shots travel left
+			var rw2 := -w2 if left != bool(pr.get("art_left", false)) else w2
+			draw_texture_rect(tex2, Rect2(pr["pos"] + Vector2(-rw2 / 2.0, -h2 / 2.0), Vector2(rw2, h2)), false)
+			continue
 		var col: Color = UI.BLUE.lightened(0.3) if int(pr["side"]) == BattleSim.PLAYER else UI.RED.lightened(0.2)
 		draw_circle(pr["pos"], 5.0, col)
 		draw_arc(pr["pos"], 5.0, 0.0, TAU, 12, Color(0.1, 0.1, 0.1), 1.5)
+
+
+## Art id for a projectile: proj_<unit id>, then proj_era<N>, then the era's default (ERA_PROJ). "" when none.
+const ERA_PROJ := {1: "proj_stone"}
+
+static func projectile_art_id(unit_id: String, era: int) -> String:
+	for cand in ["proj_" + unit_id, "proj_era%d" % era, str(ERA_PROJ.get(era, ""))]:
+		if cand != "" and cand != "proj_" and SpriteFactory.texture_of(cand) != null:
+			return cand
+	return ""

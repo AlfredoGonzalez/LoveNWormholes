@@ -22,6 +22,9 @@ func _initialize() -> void:
 		["squad", {}, 3],
 		["prebattle", {"era": 1, "stage": 1}, 3],
 		["battle", {"era": 1, "stage": 1, "squad": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"], "powers": ["squirm_slam", "apple_rain"]}, 3],
+		["battle", {"era": 1, "stage": 1, "squad": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"], "powers": ["squirm_slam", "apple_rain"]}, 3, "fight"],
+		["battle", {"era": 1, "stage": 1, "squad": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"], "powers": ["squirm_slam", "apple_rain"]}, 3, "projectile"],
+		["battle", {"era": 1, "stage": 1, "squad": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"], "powers": ["squirm_slam", "apple_rain"]}, 3, "impact"],
 		["upgrades", {}, 3],
 		["settings", {"from": "levels"}, 3],
 		["result", {"result": "win", "era": 1, "stage": 1, "time": 95.0, "base_hp_fraction": 0.7, "squad": ["p1_club_worm"], "powers": []}, 3],
@@ -47,6 +50,8 @@ func _initialize() -> void:
 			elif str(sh[3]).begins_with("tutorial"):   # arm the first-battle tutorial (the intro does it in the game)
 				Game.save.profile["progress"]["highest_stage_cleared"] = {}   # earlier shots cleared the campaign
 				Story.mark_seen(Game.save.profile, "intro")
+			elif sh[3] in ["fight", "projectile", "impact"]:
+				pass
 			elif sh[3] == "relics":
 				Capsules.new(Game.economy).open_many(12)
 				Game.economy.add("chrono_dust", 80)
@@ -65,6 +70,21 @@ func _initialize() -> void:
 				b.press_card(i)
 				for k in 40:
 					b.step(1.0 / 30.0)
+			if sh.size() > 3 and (sh[3] == "projectile" or sh[3] == "impact"):   # run until a shot is in the air / an impact shows
+				for k in 1800:
+					b.step(1.0 / 30.0)
+					if k % 45 == 5:
+						b.press_card(k / 45 % 2 + 1)   # slinger (shooter) and the Era 1 thrower
+					if sh[3] == "projectile" and not b.sim.projectiles.is_empty() and k > 200:
+						break
+					if sh[3] == "impact" and b.effects.count_kind("impact") > 0 and k > 200:
+						break
+				b.process_mode = Node.PROCESS_MODE_DISABLED   # freeze the moment (software rendering is slower than the fx)
+			elif sh.size() > 3 and sh[3] == "fight":   # let the lines meet: projectiles, impacts, both bases
+				for k in 330:
+					b.step(1.0 / 30.0)
+					if k % 60 == 20:
+						b.press_card(k / 60 % 3)
 		for _i in int(sh[2]):
 			await process_frame
 		var img := root.get_texture().get_image()

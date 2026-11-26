@@ -215,20 +215,135 @@ static func _needs_flip(entry: Dictionary, facing_override: String) -> bool:
 		return false
 	return facing_override != str(entry.get("facing", facing_override))
 
+static var _tex_cache: Dictionary = {}   # resolved path -> Texture2D (hits only)
+static var _cache_gen := -1
+
 static func _load_texture(entry: Dictionary) -> Texture2D:
 	var p := str(entry.get("path", ""))
 	if p == "":
 		return null
+	return _load_path(p)
+
+static func _load_path(p: String) -> Texture2D:
+	if _cache_gen != SpriteManifest.generation:
+		_tex_cache.clear()
+		_cache_gen = SpriteManifest.generation
 	p = SpriteManifest.resolve_path(p)
+	if _tex_cache.has(p):
+		return _tex_cache[p]
+	var tex: Texture2D = null
 	if ResourceLoader.exists(p):
 		var res: Variant = ResourceLoader.load(p)
 		if res is Texture2D:
-			return res
-	if FileAccess.file_exists(p):
+			tex = res
+	if tex == null and FileAccess.file_exists(p):
 		var img := Image.load_from_file(p)
 		if img != null and not img.is_empty():
-			return ImageTexture.create_from_image(img)
+			tex = ImageTexture.create_from_image(img)
+	if tex != null:
+		_tex_cache[p] = tex
+	return tex
+
+## ---- Reusable art lookups (all return null / empty when the id or the file is missing, so every
+## caller keeps its code-drawn placeholder). Ids by convention: icon_*, power_<id>, proj_*, fx_*,
+## base_p<era> / base_e<era>, bg_era<N>.
+
+## Texture of a static / image entry (icon_coin, bg_era1, base_p1 ...) or null.
+static func texture_of(id: String) -> Texture2D:
+	var e := SpriteManifest.get_entry(id)
+	if e.is_empty() or SpriteManifest.is_anim_format(e):
+		return null
+	return _load_texture(e)
+
+## "facing" of a manifest entry ("right" when unspecified).
+static func facing_of(id: String) -> String:
+	return str(SpriteManifest.get_entry(id).get("facing", "right"))
+
+## First frame of an animation of an animated character (idle by default) or null.
+static func frame_texture(id: String, anim := "idle", index := 0) -> Texture2D:
+	var a := SpriteManifest.get_anim(id, anim)
+	if a.is_empty():
+		return null
+	var tex := _load_texture(a)
+	var fw := int(a.get("frame_w", 0))
+	var fh := int(a.get("frame_h", 0))
+	var cols := maxi(1, int(a.get("cols", 5)))
+	if tex == null or fw <= 0 or fh <= 0 or tex.get_width() < fw * cols or tex.get_height() < fh * (index / cols + 1):
+		return null
+	var at := AtlasTexture.new()
+	at.atlas = tex
+	at.region = Rect2((index % cols) * fw, (index / cols) * fh, fw, fh)
+	return at
+
+## Portrait of a unit: idle frame 0, else the first frame of any animation, else its ref image, else null.
+static func portrait_of(id: String) -> Texture2D:
+	var t := frame_texture(id, "idle", 0)
+	if t != null:
+		return t
+	for anim in SpriteManifest.anim_names(id):
+		t = frame_texture(id, str(anim), 0)
+		if t != null:
+			return t
+	var rp := SpriteManifest.ref_path(id)
+	if rp != "":
+		return _load_path(rp)
 	return null
+
+static var _trim_cache: Dictionary = {}
+
+## Portrait cropped to the visible (non-transparent) part, with a small margin: what a unit card shows.
+static func portrait_trimmed(id: String) -> Texture2D:
+	if _cache_gen != SpriteManifest.generation:
+		_tex_cache.clear()
+		_trim_cache.clear()
+		_cache_gen = SpriteManifest.generation
+	if _trim_cache.has(id):
+		return _trim_cache[id]
+	var t := portrait_of(id)
+	var out := t
+	if t is AtlasTexture:
+		var at := t as AtlasTexture
+		var img := at.get_image()
+		if img != null and not img.is_empty():
+			var ur := img.get_used_rect()
+			if ur.size.x > 0 and ur.size.y > 0:
+				ur = ur.grow(4).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
+				var at2 := AtlasTexture.new()
+				at2.atlas = at.atlas
+				at2.region = Rect2(at.region.position + Vector2(ur.position), Vector2(ur.size))
+				out = at2
+	elif t != null:
+		var img2 := t.get_image()
+		if img2 != null and not img2.is_empty():
+			var ur2 := img2.get_used_rect()
+			if ur2.size.x > 0 and ur2.size.y > 0:
+				ur2 = ur2.grow(4).intersection(Rect2i(Vector2i.ZERO, img2.get_size()))
+				var at3 := AtlasTexture.new()
+				at3.atlas = t
+				at3.region = Rect2(ur2)
+				out = at3
+	if out != null:
+		_trim_cache[id] = out
+	return out
+
+## A TextureRect showing the art `id`, fitted inside `size` (aspect kept), or null when missing.
+## `flip` mirrors it horizontally (to face the other way).
+static func icon(id: String, size: Variant = 28.0, flip := false) -> TextureRect:
+	return rect_of(texture_of(id), size, flip)
+
+static func rect_of(tex: Texture2D, size: Variant = 28.0, flip := false) -> TextureRect:
+	if tex == null:
+		return null
+	var sz: Vector2 = size if size is Vector2 else Vector2(float(size), float(size))
+	var r := TextureRect.new()
+	r.texture = tex
+	r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	r.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	r.custom_minimum_size = sz
+	r.size = sz
+	r.flip_h = flip
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return r
 
 ## "player", "enemy" or "neutral" from the id convention (p1_*, e1_*, b1_*, base_p1, squirmy).
 static func side_of(id: String) -> String:

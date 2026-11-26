@@ -91,8 +91,17 @@ func _build() -> void:
 	ground.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(ground)
 	# Burrow and Squirmy (placeholders until real art).
-	var burrow := UI.placeholder(Game.t("hero.player_base"), Color("B07A4A"), Vector2(210, 170))
-	burrow.position = Vector2(20, 330)
+	var base_tex := SpriteFactory.texture_of("base_p%d" % int(next_stage.get("era", 1)))
+	var burrow: Control
+	if base_tex != null:   # the player's base of the current era (base_p<era>), bottom on the ground line
+		var bw := 230.0
+		var bh := bw * float(base_tex.get_height()) / maxf(1.0, float(base_tex.get_width()))
+		burrow = SpriteFactory.rect_of(base_tex, Vector2(bw, bh), SpriteFactory.facing_of("base_p%d" % int(next_stage.get("era", 1))) == "left")
+		burrow.position = Vector2(10, 500.0 - bh)
+	else:
+		burrow = UI.placeholder(Game.t("hero.player_base"), Color("B07A4A"), Vector2(210, 170))
+		burrow.position = Vector2(20, 330)
+	burrow.name = "burrow"
 	burrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(burrow)
 	var squirmy := SpriteFactory.make_animated("squirmy")
@@ -401,9 +410,17 @@ func _show_offline() -> void:
 	var away := UI.label(Game.t("ui.hours_minutes", [minutes / 60, minutes % 60]), 34, UI.TEAL, HORIZONTAL_ALIGNMENT_CENTER)
 	away.name = "offline_away"
 	box.add_child(away)
-	var coins := UI.label("● %d" % _offline_pending, 40, UI.INK, HORIZONTAL_ALIGNMENT_CENTER)
+	var coin_art := SpriteFactory.icon("icon_coin", 44.0)
+	var coins := UI.label(("%d" if coin_art != null else "● %d") % _offline_pending, 40, UI.INK, HORIZONTAL_ALIGNMENT_CENTER)
 	coins.name = "offline_coins"
-	box.add_child(coins)
+	if coin_art != null:
+		var crow := HBoxContainer.new()
+		crow.alignment = BoxContainer.ALIGNMENT_CENTER
+		crow.add_child(coin_art)
+		crow.add_child(coins)
+		box.add_child(crow)
+	else:
+		box.add_child(coins)
 	var capl := UI.label(Game.t("offline.cap", [int(round(cap))]), 14, UI.LOCKED_INK, HORIZONTAL_ALIGNMENT_CENTER)
 	capl.name = "offline_cap"
 	box.add_child(capl)

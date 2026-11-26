@@ -323,7 +323,7 @@ func test_result_chips_follow_double_coins() -> void:
 	var chip = s.find_child("chip_coins", true, false)
 	assert_true(chip != null)
 	var txt := ""
-	for c in chip.get_children():
+	for c in chip.find_children("*", "Label", true, false):
 		if c is Label:
 			txt = c.text
 	assert_true(txt.contains(str(_g().economy.get_amount("coins"))), "chip shows the new wallet: " + txt)

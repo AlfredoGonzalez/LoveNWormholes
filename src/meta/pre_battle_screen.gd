@@ -222,6 +222,10 @@ func _unit_card(id: String) -> Control:
 	var c := MetaUI.card_button(Vector2(0, 110))
 	c.name = "unit_" + id
 	var cb: Control = c.get_node("box")
+	var pic := SpriteFactory.rect_of(SpriteFactory.portrait_trimmed(id), Vector2(0, 30))
+	if pic != null:
+		pic.name = "Portrait"
+		cb.add_child(pic)
 	cb.add_child(UI.label(Game.t(str(u["name_key"])), 15, UI.INK, HORIZONTAL_ALIGNMENT_CENTER))
 	cb.add_child(UI.label(Game.t("role." + str(u["role"])), 14, UI.TEAL, HORIZONTAL_ALIGNMENT_CENTER))
 	cb.add_child(UI.label(Game.t("prebattle.unit_cost", [int(round(float(stats["cost"])))]), 14, UI.LOCKED_INK, HORIZONTAL_ALIGNMENT_CENTER))
@@ -255,10 +259,24 @@ func _powers_panel() -> Control:
 		var bb: Control = b.get_node("box")
 		if i < powers.size():
 			var d := DataDB.power(str(powers[i]))
-			bb.add_child(UI.label(Game.t(str(d.get("name_key", ""))), 17, UI.INK))
+			var pw_art := SpriteFactory.icon("power_" + str(powers[i]), 48.0)
+			var txt_box: Control = bb
+			if pw_art != null:
+				var prow := HBoxContainer.new()
+				prow.add_theme_constant_override("separation", 8)
+				prow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				pw_art.name = "PowerIcon"
+				prow.add_child(pw_art)
+				var pv := VBoxContainer.new()
+				pv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				pv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				prow.add_child(pv)
+				bb.add_child(prow)
+				txt_box = pv
+			txt_box.add_child(UI.label(Game.t(str(d.get("name_key", ""))), 17, UI.INK))
 			var desc := UI.label(DataDB.describe(d), 13, UI.LOCKED_INK)
 			desc.name = "power_" + str(powers[i])
-			bb.add_child(desc)
+			txt_box.add_child(desc)
 		else:
 			bb.add_child(UI.label(Game.t("prebattle.power_empty"), 15, UI.LOCKED_INK))
 		b.pressed.connect(cycle_power.bind(i))

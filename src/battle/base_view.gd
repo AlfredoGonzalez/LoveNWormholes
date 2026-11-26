@@ -5,17 +5,28 @@ extends Node2D
 
 const W := 68.0
 const H := 112.0
+const ART_W := 150.0          ## on-screen width of the base art (its outer edge sits on the screen edge)
+const SCREEN_W := 540.0
 
 var side := 0
 var caption := ""
 var hp_frac := 1.0
 var shield_frac := 0.0
 var flash := 0.0
+var art: Texture2D = null     ## base_p<era> / base_e<era> when the manifest has it, else the code-drawn base
+var art_flip := false
+var _art_h := H
 
 
-func setup(p_side: int, p_caption: String) -> void:
+func setup(p_side: int, p_caption: String, era := 1) -> void:
 	side = p_side
 	caption = p_caption
+	var id := "base_%s%d" % ["p" if side == BattleSim.PLAYER else "e", era]
+	art = SpriteFactory.texture_of(id)
+	if art != null:
+		var want := "right" if side == BattleSim.PLAYER else "left"
+		art_flip = want != SpriteFactory.facing_of(id)
+		_art_h = ART_W * float(art.get_height()) / maxf(1.0, float(art.get_width()))
 	queue_redraw()
 
 
@@ -26,11 +37,19 @@ func update_from(hp: float, hp_max: float, shield: float, shield_max: float, dt:
 	queue_redraw()
 
 
+## Y (negative = up) of the top of the base, for floating numbers.
+func top_y() -> float:
+	return -_art_h if art != null else -H
+
+
 func hit() -> void:
 	flash = 0.15
 
 
 func _draw() -> void:
+	if art != null:
+		_draw_art()
+		return
 	var accent: Color = UI.BLUE if side == BattleSim.PLAYER else UI.RED
 	var body: Color = Color("B07A4A") if side == BattleSim.PLAYER else Color("A5703E")
 	if flash > 0.0:
@@ -54,3 +73,20 @@ func _draw() -> void:
 	draw_rect(Rect2(br.position, Vector2(bw * hp_frac, br.size.y)), accent.lightened(0.15))
 	if shield_frac > 0.0:
 		draw_arc(Vector2(0, -H * 0.45), H * 0.75, 0.0, TAU, 40, Color(0.7, 0.5, 0.25, 0.35 + 0.5 * shield_frac), 4.0)
+
+
+func _draw_art() -> void:
+	var accent: Color = UI.BLUE if side == BattleSim.PLAYER else UI.RED
+	var cx := ART_W / 2.0 - position.x if side == BattleSim.PLAYER else (SCREEN_W - ART_W / 2.0) - position.x
+	var w := -ART_W if art_flip else ART_W
+	var tint := Color.WHITE.lerp(Color(2, 2, 2), 0.5) if flash > 0.0 else Color.WHITE
+	draw_texture_rect(art, Rect2(cx - w / 2.0, -_art_h, w, _art_h), false, tint)
+	var font := ThemeDB.fallback_font
+	var pos := Vector2(cx - ART_W / 2.0, -10.0)
+	draw_string_outline(font, pos, caption, HORIZONTAL_ALIGNMENT_CENTER, ART_W, 13, 4, Color(0, 0, 0, 0.8))
+	draw_string(font, pos, caption, HORIZONTAL_ALIGNMENT_CENTER, ART_W, 13, Color.WHITE)
+	var br := Rect2(cx - ART_W / 2.0 + 20.0, -_art_h - 16.0, ART_W - 40.0, 8.0)
+	draw_rect(br.grow(2.0), Color(0, 0, 0, 0.75))
+	draw_rect(Rect2(br.position, Vector2(br.size.x * hp_frac, br.size.y)), accent.lightened(0.15))
+	if shield_frac > 0.0:
+		draw_arc(Vector2(cx, -_art_h * 0.45), _art_h * 0.75, 0.0, TAU, 40, Color(0.7, 0.5, 0.25, 0.35 + 0.5 * shield_frac), 4.0)

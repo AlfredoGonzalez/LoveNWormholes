@@ -16,6 +16,7 @@ var _cd_label: Label
 var _state_key := ""
 var _sweep_frac := 0.0
 var _accent: Color = UI.BLUE
+var _art: TextureRect = null
 
 
 func _init(title := "", sub := "", accent: Color = UI.BLUE, min_size := Vector2(96, 112)) -> void:
@@ -58,6 +59,45 @@ func _init(title := "", sub := "", accent: Color = UI.BLUE, min_size := Vector2(
 	add_child(_cd_label)
 	pressed.connect(func(): activated.emit())
 	_apply_style("ready")
+
+
+## Shows art on the card. mode "portrait": unit picture filling the card (cropped), texts get an outline;
+## mode "icon": a centred power icon between the name and the status line. null removes the art.
+func set_art(tex: Texture2D, mode := "portrait", flip := false) -> void:
+	if _art != null:
+		_art.queue_free()
+		_art = null
+	if tex == null:
+		return
+	_art = TextureRect.new()
+	_art.name = "Art"
+	_art.texture = tex
+	_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_art.flip_h = flip
+	_art.set_anchors_preset(Control.PRESET_FULL_RECT)
+	if mode == "portrait":
+		_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		_art.offset_left = 4
+		_art.offset_right = -4
+		_art.offset_top = 30
+		_art.offset_bottom = -30
+	else:
+		_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		_art.offset_left = 8
+		_art.offset_right = -8
+		_art.offset_top = 22
+		_art.offset_bottom = -26
+	add_child(_art)
+	move_child(_art, 0)   # behind the labels and the cooldown sweep
+	for l in [_name_label, _sub_label]:
+		l.add_theme_color_override("font_outline_color", Color(1, 1, 1, 0.9))
+		l.add_theme_constant_override("outline_size", 4)
+	_apply_style(_state_key if _state_key != "" else "ready")
+
+
+func has_art() -> bool:
+	return _art != null
 
 
 func set_title(t: String) -> void:
@@ -124,6 +164,8 @@ func _apply_style(state: String) -> void:
 	var ink: Color = UI.INK if state == "ready" else UI.LOCKED_INK
 	_name_label.add_theme_color_override("font_color", ink)
 	_sub_label.add_theme_color_override("font_color", ink)
+	if _art != null:
+		_art.modulate = Color.WHITE if state == "ready" else Color(0.6, 0.6, 0.6, 0.8)
 
 
 func _draw_sweep() -> void:
