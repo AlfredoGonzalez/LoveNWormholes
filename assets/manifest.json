@@ -154,6 +154,54 @@
       "kind": "static",
       "path": "assets/sprites/icons/fx_impact.png"
     },
+    "home_burrow": {
+      "category": "image",
+      "frame_h": 480,
+      "frame_w": 855,
+      "id": "home_burrow",
+      "kind": "image",
+      "path": "assets/images/home/home_burrow.png"
+    },
+    "home_far": {
+      "category": "image",
+      "frame_h": 768,
+      "frame_w": 1376,
+      "id": "home_far",
+      "kind": "image",
+      "path": "assets/images/home/home_far.png"
+    },
+    "home_front": {
+      "category": "image",
+      "frame_h": 768,
+      "frame_w": 1376,
+      "id": "home_front",
+      "kind": "image",
+      "path": "assets/images/home/home_front.png"
+    },
+    "home_ground": {
+      "category": "image",
+      "frame_h": 768,
+      "frame_w": 1376,
+      "id": "home_ground",
+      "kind": "image",
+      "path": "assets/images/home/home_ground.png"
+    },
+    "home_mid": {
+      "category": "image",
+      "frame_h": 768,
+      "frame_w": 1376,
+      "id": "home_mid",
+      "kind": "image",
+      "path": "assets/images/home/home_mid.png"
+    },
+    "home_sky": {
+      "category": "image",
+      "frame_h": 768,
+      "frame_w": 1376,
+      "id": "home_sky",
+      "kind": "image",
+      "path": "assets/images/home/home_sky.jpg"
+    },
     "icon_coin": {
       "category": "icon",
       "facing": "right",
