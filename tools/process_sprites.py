@@ -236,13 +236,13 @@ def process_anim_sheet(src, key_rgb, cat, x2=False, frames_used=FRAMES_USED_DEFA
     return atlas, fw, fh, anchor, len(cells)
 
 
-IMAGE_PREFIXES = ("bg_", "story_", "logo", "app_icon", "feature_", "paper_", "title_", "map_", "play_", "btn_")
-IMAGE_TARGET_W = {"bg_": 1080, "story_": 1920, "title_": 1080, "map_": 1080}
+IMAGE_PREFIXES = ("bg_", "story_", "logo", "app_icon", "feature_", "paper_", "title_", "map_", "play_", "btn_", "background", "jugar_", "language", "slider", "loader", "progress")
+IMAGE_TARGET_W = {"bg_": 1080, "background": 1080, "story_": 1920, "title_": 1080, "map_": 1080}
 
 
 def image_rel(sid):
-    sub = "backgrounds" if sid.startswith(("bg_", "title_", "map_")) else "story" if sid.startswith("story_") else "ui"
-    ext = "jpg" if sid.startswith(("bg_", "story_", "title_", "map_")) else "png"
+    sub = "backgrounds" if sid.startswith(("bg_", "background", "title_", "map_")) else "story" if sid.startswith("story_") else "ui"
+    ext = "jpg" if sid.startswith(("bg_", "background", "story_", "title_", "map_")) else "png"
     return f"assets/images/{sub}/{sid}.{ext}"
 
 

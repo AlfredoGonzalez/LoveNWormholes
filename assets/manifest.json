@@ -4,6 +4,14 @@
     "p1_club_worm": "assets/sprites/refs/p1_club_worm_ref.png"
   },
   "sprites": {
+    "background": {
+      "category": "image",
+      "frame_h": 1376,
+      "frame_w": 768,
+      "id": "background",
+      "kind": "image",
+      "path": "assets/images/backgrounds/background.jpg"
+    },
     "base_e1": {
       "category": "base",
       "facing": "left",
@@ -166,6 +174,38 @@
       "kind": "static",
       "path": "assets/sprites/icons/icon_food.png"
     },
+    "jugar_en": {
+      "category": "image",
+      "frame_h": 284,
+      "frame_w": 433,
+      "id": "jugar_en",
+      "kind": "image",
+      "path": "assets/images/ui/jugar_en.png"
+    },
+    "jugar_es": {
+      "category": "image",
+      "frame_h": 284,
+      "frame_w": 432,
+      "id": "jugar_es",
+      "kind": "image",
+      "path": "assets/images/ui/jugar_es.png"
+    },
+    "language": {
+      "category": "image",
+      "frame_h": 398,
+      "frame_w": 924,
+      "id": "language",
+      "kind": "image",
+      "path": "assets/images/ui/language.png"
+    },
+    "loader": {
+      "category": "image",
+      "frame_h": 282,
+      "frame_w": 886,
+      "id": "loader",
+      "kind": "image",
+      "path": "assets/images/ui/loader.png"
+    },
     "logo": {
       "category": "image",
       "frame_h": 812,
@@ -306,6 +346,14 @@
       "kind": "static",
       "path": "assets/sprites/icons/power_squirm_slam.png"
     },
+    "progress": {
+      "category": "image",
+      "frame_h": 159,
+      "frame_w": 784,
+      "id": "progress",
+      "kind": "image",
+      "path": "assets/images/ui/progress.png"
+    },
     "proj_stone": {
       "category": "icon",
       "facing": "right",
@@ -315,6 +363,14 @@
       "key_color": "#FF00FF",
       "kind": "static",
       "path": "assets/sprites/icons/proj_stone.png"
+    },
+    "slider": {
+      "category": "image",
+      "frame_h": 634,
+      "frame_w": 642,
+      "id": "slider",
+      "kind": "image",
+      "path": "assets/images/ui/slider.png"
     },
     "squirmy": {
       "anims": {
