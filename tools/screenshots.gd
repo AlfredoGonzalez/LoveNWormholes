@@ -27,6 +27,9 @@ func _initialize() -> void:
 		["battle", {"era": 1, "stage": 1, "squad": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"], "powers": ["squirm_slam", "apple_rain"]}, 3, "fight"],
 		["battle", {"era": 1, "stage": 1, "squad": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"], "powers": ["squirm_slam", "apple_rain"]}, 3, "projectile"],
 		["battle", {"era": 1, "stage": 1, "squad": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"], "powers": ["squirm_slam", "apple_rain"]}, 3, "impact"],
+		["battle", {"era": 1, "stage": 1, "squad": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"], "powers": ["squirm_slam", "apple_rain"]}, 3, "bcam_base"],
+		["battle", {"era": 1, "stage": 1, "squad": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"], "powers": ["squirm_slam", "apple_rain"]}, 3, "bcam_fight"],
+		["battle", {"era": 1, "stage": 1, "squad": ["p1_club_worm", "p1_slinger_worm", "p1_dino_rider_worm"], "powers": ["squirm_slam", "apple_rain"]}, 3, "bcam_enemy"],
 		["upgrades", {}, 3],
 		["settings", {"from": "levels"}, 3],
 		["result", {"result": "win", "era": 1, "stage": 1, "time": 95.0, "base_hp_fraction": 0.7, "squad": ["p1_club_worm"], "powers": []}, 3],
@@ -52,7 +55,7 @@ func _initialize() -> void:
 			elif str(sh[3]).begins_with("tutorial"):   # arm the first-battle tutorial (the intro does it in the game)
 				Game.save.profile["progress"]["highest_stage_cleared"] = {}   # earlier shots cleared the campaign
 				Story.mark_seen(Game.save.profile, "intro")
-			elif sh[3] in ["fight", "projectile", "impact"] or str(sh[3]).begins_with("cam_"):
+			elif sh[3] in ["fight", "projectile", "impact"] or str(sh[3]).begins_with("cam_") or str(sh[3]).begins_with("bcam_"):
 				pass
 			elif sh[3] == "relics":
 				Capsules.new(Game.economy).open_many(12)
@@ -72,6 +75,27 @@ func _initialize() -> void:
 			if sh[3] == "tutorial_spawn":
 				tb.tutorial.overlay.advance.emit()
 				tb.step(0.0)
+		elif sh[0] == "battle" and sh.size() > 3 and str(sh[3]).begins_with("bcam_"):
+			# 3-screen battlefield: camera on the own base / mid-lane fighting / at the enemy base (the follow camera drives it)
+			var bb = Game.nav.current
+			var want_x := {"bcam_base": 0.0, "bcam_fight": 0.45, "bcam_enemy": 0.9}[sh[3]] as float
+			for k in 4000:
+				if k % 40 == 0:
+					bb.press_card((k / 40) % 3)
+				bb.step(1.0 / 30.0)
+				var lead := 0.0
+				for u in bb.sim.units:
+					if u.side == BattleSim.PLAYER and u.alive():
+						lead = maxf(lead, u.x / bb.sim.lane)
+				if sh[3] == "bcam_base" and k >= 60:
+					break
+				if sh[3] != "bcam_base" and lead >= want_x and (sh[3] == "bcam_enemy" or not bb.sim.alive_units(BattleSim.ENEMY).is_empty()) and k > 200:
+					for j in 45:
+						bb.step(1.0 / 30.0)   # let the camera settle
+					break
+				if bb.sim.result != "":
+					break
+			bb.process_mode = Node.PROCESS_MODE_DISABLED
 		elif sh[0] == "battle":
 			var b = Game.nav.current
 			for i in 3:

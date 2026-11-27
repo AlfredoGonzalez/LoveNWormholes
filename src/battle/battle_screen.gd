@@ -13,11 +13,9 @@ signal battle_left(kind: String)                     ## "quit" or "restart" (cou
 
 const SCREEN_W := 540.0
 const SCREEN_H := 960.0
-const LANE_Y := 557.0              # 58% of the screen height
-const LANE_X0 := 70.0              # screen x of sim x = 0
-const LANE_X1 := 470.0             # screen x of sim x = lane
-const PLAYER_BASE_X := 34.0
-const ENEMY_BASE_X := 506.0
+const K := BattleWorld.SCALE       # units, bases and effects are drawn 1.5x
+## The lane is 3 screens wide (BattleWorld.WORLD_W); everything on it lives in `_world`, which the camera shifts.
+## The foot line's height is BattleWorld.FOOT_FRAC per era (58% of the screen today).
 const END_DELAY := 1.0             # seconds the last animation plays before the result screen
 const MAX_FRAME_DT := 0.25
 const POWER_SFX := {
@@ -43,9 +41,16 @@ var effects: BattleEffects
 var overlay: PauseOverlay
 var rule_layer: RuleLayer
 var tutorial: TutorialDirector     # guided first battles (null when there is nothing to teach)
+var cam: BattleCamera             # follows the action; drag / radar / recenter button take over for a while
+var radar: BattleRadar
 var tutorial_hold := false         # a blocking tutorial step is up: the sim clock waits (view-only, the sim is untouched)
 
+var lane_y := 557.0                # foot line (screen y), from BattleWorld.foot_y(era)
 var _bg: BattleBackground
+var _front_holder: Node2D          # parallax front layer, drawn over the units
+var _drag_area: Control
+var _press_pos := Vector2.ZERO
+var _pressed := false
 var _world: Node2D
 var _unit_layer: Node2D
 var _player_base: BaseView
@@ -56,7 +61,7 @@ var _stage_end_logged := false
 var _overtime_shown := false
 var _sfx_last_t := -1.0
 var _max_catchup := 5
-var _px_scale := 0.4               # screen px per sim px
+var _px_scale := 0.4               # world px per sim px
 var _shield_max := 1.0
 var _stage_id := ""
 
@@ -87,7 +92,8 @@ func _begin() -> void:
 		if squad_ids.is_empty():
 			squad_ids = _fallback_squad()
 		sim = BattleSim.new(BattleSetup.make(stage_def, _make_opts()))
-	_px_scale = (LANE_X1 - LANE_X0) / sim.lane
+	_px_scale = BattleWorld.px_per_sim(sim.lane)
+	lane_y = BattleWorld.foot_y(era)
 	Game.audio.play_music_for_battle(era, bool(DataDB.stage(era, stage).get("boss", false)))
 	_shield_max = 1.0
 	_build_ui()
@@ -138,21 +144,23 @@ func _tries() -> int:
 # ------------------------------------------------------------------ construction
 
 func _build_ui() -> void:
+	clip_contents = true
+	cam = BattleCamera.new()
 	_bg = BattleBackground.new()
-	_bg.setup(Vector2(SCREEN_W, SCREEN_H), LANE_Y, era)
+	_bg.setup(Vector2(SCREEN_W, SCREEN_H), lane_y, era)
 	add_child(_bg)
-	rule_layer = RuleLayer.new()
-	rule_layer.setup(LANE_X0, _px_scale, LANE_Y)
-	add_child(rule_layer)
 	_world = Node2D.new()
 	_world.name = "World"
 	add_child(_world)
+	rule_layer = RuleLayer.new()
+	rule_layer.setup(BattleWorld.LANE_X0, _px_scale, lane_y)
+	_world.add_child(rule_layer)
 	_player_base = BaseView.new()
-	_player_base.position = Vector2(PLAYER_BASE_X, LANE_Y + 30.0)
+	_player_base.position = Vector2(BattleWorld.PLAYER_BASE_X, lane_y + 30.0 * K)
 	_player_base.setup(BattleSim.PLAYER, Game.t("battle.base_player_short"), era)
 	_world.add_child(_player_base)
 	_enemy_base = BaseView.new()
-	_enemy_base.position = Vector2(ENEMY_BASE_X, LANE_Y + 30.0)
+	_enemy_base.position = Vector2(BattleWorld.ENEMY_BASE_X, lane_y + 30.0 * K)
 	_enemy_base.setup(BattleSim.ENEMY, Game.t("era.%d.enemy_base" % era), era)
 	_world.add_child(_enemy_base)
 	_unit_layer = Node2D.new()
@@ -161,16 +169,32 @@ func _build_ui() -> void:
 	_world.add_child(_unit_layer)
 	effects = BattleEffects.new()
 	effects.z_index = 700   # above the units (their z is their foot y, ~557)
-	effects.flash_rect = Rect2(0, 0, SCREEN_W, SCREEN_H)
 	_world.add_child(effects)
+	_front_holder = Node2D.new()   # the parallax front layer goes over the world (and the units)
+	_front_holder.name = "Front"
+	add_child(_front_holder)
+	var front := _bg.take_front()
+	if front != null:
+		_front_holder.add_child(front)
+	_drag_area = Control.new()   # empty battlefield: a drag moves the camera (cards / HUD sit above and keep their taps)
+	_drag_area.name = "DragArea"
+	_drag_area.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_drag_area.mouse_filter = Control.MOUSE_FILTER_STOP
+	_drag_area.gui_input.connect(_on_drag_input)
+	add_child(_drag_area)
 	hud = BattleHud.new()
 	add_child(hud)
 	hud.build(sim, squad_ids, power_ids, era)
+	radar = hud.radar
 	hud.set_underdog(int(Game.economy.underdog(era, stage).get("stacks", 0)))
 	hud.card_pressed.connect(press_card)
 	hud.power_pressed.connect(press_power)
 	hud.pause_pressed.connect(pause)
 	hud.speed_pressed.connect(toggle_speed)
+	hud.recenter_pressed.connect(recenter)
+	hud.radar_seek.connect(seek_camera)
+	cam.recenter(_follow_target())
+	_apply_camera()
 
 
 # ------------------------------------------------------------------ time
@@ -308,6 +332,7 @@ func _begin_end() -> void:
 		return
 	ending = true
 	_end_timer = END_DELAY
+	cam.focus(BattleWorld.ENEMY_BASE_X if sim.result == "win" else BattleWorld.PLAYER_BASE_X, END_DELAY + 1.0, true)   # show the base that fell
 	Game.audio.play_sfx("victory" if sim.result == "win" else "defeat")
 	Game.audio.play_result_music(sim.result == "win")
 	_log_stage_end(sim.result, false)
@@ -359,6 +384,7 @@ func _rebuild_views() -> void:
 		(v as Node).queue_free()
 	unit_views.clear()
 	effects.clear_all()
+	cam.recenter(_follow_target())
 	sim.drain_events()
 	_sfx_last_t = -1.0
 
@@ -389,12 +415,84 @@ func _leave(kind: String) -> void:
 
 # ------------------------------------------------------------------ sim -> view
 
+## World x (px) of a sim x: everything on the lane is placed in world coordinates.
 func _sx(sim_x: float) -> float:
-	return LANE_X0 + sim_x * _px_scale
+	return BattleWorld.sim_to_world(sim_x, sim.lane)
 
 
 func _foot_y(uid: int) -> float:
-	return LANE_Y + float(uid % 3 - 1) * 8.0
+	return lane_y + float(uid % 3 - 1) * 8.0 * K
+
+
+# ------------------------------------------------------------------ camera
+
+## World x of a screen x (and back) with the current camera.
+func screen_to_world(screen_x: float) -> float:
+	return BattleWorld.screen_to_world(screen_x, cam.x)
+
+
+func world_to_screen(world_x: float) -> float:
+	return BattleWorld.world_to_screen(world_x, cam.x)
+
+
+## Where the camera wants to be (camera x): the leading player unit (or the player base) and the nearest enemy.
+func _follow_target() -> float:
+	var leader := -1.0
+	for u in sim.units:
+		if u.side == BattleSim.PLAYER and u.alive():
+			leader = maxf(leader, _sx(u.x))
+	if leader < 0.0:
+		leader = BattleWorld.LANE_X0
+	var enemy := -1.0
+	var best := INF
+	for u in sim.units:
+		if u.side == BattleSim.ENEMY and u.alive():
+			var d := absf(_sx(u.x) - leader)
+			if d < best:
+				best = d
+				enemy = _sx(u.x)
+	if absf(BattleWorld.LANE_X1 - leader) < best:   # the enemy base counts as a target too
+		enemy = BattleWorld.LANE_X1
+	return BattleCamera.target_for(leader, enemy)
+
+
+func _apply_camera() -> void:
+	_world.position.x = -cam.x
+	_bg.apply_camera(cam.x)
+	effects.flash_rect = Rect2(cam.x, 0.0, SCREEN_W, SCREEN_H)
+	effects.set_rain_span(cam.x, cam.x + SCREEN_W)
+	if radar != null:
+		radar.refresh(sim, cam.x)
+
+
+## Centre button: back to the follow target at once.
+func recenter() -> void:
+	cam.recenter(_follow_target())
+	_apply_camera()
+
+
+## Radar tap / drag: centre the view on a world x and keep manual control for a while.
+func seek_camera(world_x: float) -> void:
+	cam.pan_to_center(world_x)
+	_apply_camera()
+
+
+func _on_drag_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_pressed = true
+			_press_pos = event.position
+		else:
+			_pressed = false
+			if cam.is_dragging():
+				cam.end_drag()
+	elif event is InputEventMouseMotion and _pressed:
+		if not cam.is_dragging():
+			if (event.position - _press_pos).length() >= BattleCamera.DRAG_THRESHOLD:
+				cam.begin_drag()
+				cam.drag_move(event.position.x - _press_pos.x)
+		else:
+			cam.drag_move(event.relative.x)
 
 
 func _side_of(uid: int) -> int:
@@ -431,7 +529,7 @@ func _update_visuals(dt: float) -> void:
 	for p in sim.projectiles:
 		var f := clampf(float(p["t"]) / maxf(0.001, float(p["dur"])), 0.0, 1.0)
 		var px := _sx(lerpf(float(p["x0"]), float(p["x1"]), f))
-		var pd := {"pos": Vector2(px, LANE_Y - 30.0 - sin(f * PI) * 16.0), "side": int(p["side"])}
+		var pd := {"pos": Vector2(px, lane_y - 30.0 * K - sin(f * PI) * 16.0 * K), "side": int(p["side"])}
 		var src_view: UnitView = unit_views.get(int(p.get("src", -1)))
 		var art_id := BattleEffects.projectile_art_id(src_view.unit_id if src_view != null else "", era)
 		if art_id != "":
@@ -441,6 +539,8 @@ func _update_visuals(dt: float) -> void:
 	effects.projectiles = pr
 	effects.advance(dt)
 	_bg.drift(dt)
+	cam.step(dt, _follow_target())
+	_apply_camera()
 	rule_layer.sync(sim)
 	hud.refresh(sim, speed)
 
@@ -463,27 +563,27 @@ func _handle_event(e: Dictionary) -> void:
 		"spawn":
 			var side := int(e["side"])
 			var gx := _sx(30.0 if side == BattleSim.PLAYER else sim.lane - 30.0)
-			effects.add_puff(Vector2(gx, LANE_Y), Color(1, 1, 1, 0.7))
+			effects.add_puff(Vector2(gx, lane_y), Color(1, 1, 1, 0.7))
 			if side == BattleSim.PLAYER:
 				audio.play_sfx("spawn")
 			elif bool(e.get("boss", false)):
 				audio.play_music_for_battle(era, true)
 		"hit":
 			var side2 := _side_of(int(e["uid"]))
-			var pos := Vector2(_sx(float(e["x"])), LANE_Y - 50.0)
+			var pos := Vector2(_sx(float(e["x"])), lane_y - 50.0 * K)
 			var col := Color(1, 0.35, 0.3) if side2 == BattleSim.PLAYER else Color.WHITE
 			effects.add_number(pos, str(int(round(float(e["damage"])))), col)
-			effects.add_impact(pos + Vector2(0, 14), side2 == BattleSim.PLAYER)
+			effects.add_impact(pos + Vector2(0, 14.0 * K), side2 == BattleSim.PLAYER)
 			if _sfx_ready(float(e["t"])):
 				audio.play_sfx("hit")
 		"death":
-			effects.add_puff(Vector2(_sx(float(e["x"])), LANE_Y - 14.0), Color(0.9, 0.9, 0.9, 0.8))
+			effects.add_puff(Vector2(_sx(float(e["x"])), lane_y - 14.0 * K), Color(0.9, 0.9, 0.9, 0.8))
 			audio.play_sfx("death")
 		"base_hit":
 			var side3 := int(e["side"])
 			var base := _player_base if side3 == BattleSim.PLAYER else _enemy_base
 			base.hit()
-			var bpos := base.position + Vector2(0, base.top_y() - 4.0)
+			var bpos := base.position + Vector2(0, base.top_y() - 24.0 * K)
 			effects.add_number(bpos, str(int(round(float(e["damage"])))), Color(1, 0.55, 0.2))
 			effects.add_impact(base.position + Vector2(0, base.top_y() * 0.5), side3 == BattleSim.PLAYER, Color(1, 0.6, 0.2))
 			if _sfx_ready(float(e["t"])):
@@ -495,27 +595,28 @@ func _handle_event(e: Dictionary) -> void:
 			var wx := _sx(float(e["x"]))
 			var wdur := DataDB.bal_f("boss.telegraph_warning_s", 1.5)
 			# Danger strip in front of the boss (toward the player side), clamped to the lane.
-			var zx0 := maxf(LANE_X0 - 20.0, wx - 150.0 * _px_scale * 2.5)
-			effects.add_warning(Vector2(wx, LANE_Y - 120.0), wdur, Rect2(zx0, LANE_Y - 42.0, maxf(0.0, wx - zx0), 84.0))
+			var zx0 := maxf(BattleWorld.LANE_X0 - 20.0 * K, wx - 150.0 * _px_scale * 2.5)
+			effects.add_warning(Vector2(wx, lane_y - 120.0 * K), wdur, Rect2(zx0, lane_y - 42.0 * K, maxf(0.0, wx - zx0), 84.0 * K))
+			cam.focus(wx, wdur + 0.5)   # short pan to the boss that is about to strike (not while the player drags)
 			hud.toast(Game.t("battle.boss_warning"), wdur + 0.5, true)
 			audio.play_sfx("boss_warning")
 		"boss_attack":
 			var bx := _sx(float(e["x"]))
 			if str(e["id"]) == "stomp":
-				effects.add_ring(Vector2(bx, LANE_Y), float(e.get("reach", 120.0)) * _px_scale, Color(0.55, 0.35, 0.15), 0.5)
+				effects.add_ring(Vector2(bx, lane_y), float(e.get("reach", 120.0)) * _px_scale, Color(0.55, 0.35, 0.15), 0.5)
 			else:
-				effects.add_puff(Vector2(bx, LANE_Y - 20.0), Color(0.8, 0.3, 0.9, 0.8))
+				effects.add_puff(Vector2(bx, lane_y - 20.0 * K), Color(0.8, 0.3, 0.9, 0.8))
 		"phase2":
 			effects.add_flash(Color(0.9, 0.1, 0.1), 0.6)
 		"teleport":   # Count Magpie 3000 hop (phase 2)
-			effects.add_puff(Vector2(_sx(float(e["x"])), LANE_Y - 20.0), Color(0.3, 0.9, 1.0, 0.8))
-			effects.add_puff(Vector2(_sx(float(e["to"])), LANE_Y - 20.0), Color(0.3, 0.9, 1.0, 0.8))
+			effects.add_puff(Vector2(_sx(float(e["x"])), lane_y - 20.0 * K), Color(0.3, 0.9, 1.0, 0.8))
+			effects.add_puff(Vector2(_sx(float(e["to"])), lane_y - 20.0 * K), Color(0.3, 0.9, 1.0, 0.8))
 		"bomb_drop":
 			var bdx := _sx(float(e["x"]))
 			var bdur := float(e.get("delay", 1.0))
-			effects.add_warning(Vector2(bdx, LANE_Y - 90.0), bdur, Rect2(bdx - 40.0 * _px_scale * 2.0, LANE_Y - 42.0, 80.0 * _px_scale * 2.0, 84.0))
+			effects.add_warning(Vector2(bdx, lane_y - 90.0 * K), bdur, Rect2(bdx - 40.0 * _px_scale * 2.0, lane_y - 42.0 * K, 80.0 * _px_scale * 2.0, 84.0 * K))
 		"bomb_hit":
-			effects.add_ring(Vector2(_sx(float(e["x"])), LANE_Y), float(e.get("radius", 80.0)) * _px_scale, Color(1.0, 0.8, 0.2), 0.5)
+			effects.add_ring(Vector2(_sx(float(e["x"])), lane_y), float(e.get("radius", 80.0)) * _px_scale, Color(1.0, 0.8, 0.2), 0.5)
 			effects.add_flash(Color(1.0, 0.9, 0.5), 0.15)
 
 
@@ -533,20 +634,20 @@ func _power_visual(e: Dictionary) -> void:
 	match pid:
 		"squirm_slam":
 			var r := float(e.get("radius", 120.0)) * _px_scale
-			effects.add_ring(Vector2(_sx(float(e["x"])), LANE_Y), r, Color(0.6, 0.4, 0.2), 0.6)
+			effects.add_ring(Vector2(_sx(float(e["x"])), lane_y), r, Color(0.6, 0.4, 0.2), 0.6)
 			effects.add_flash(Color(1, 0.9, 0.6), 0.2)
 		"apple_rain":
 			var dur := 5.0
 			for p in sim.powers:
 				if str(p["id"]) == pid:
 					dur = float((p["effect"] as Dictionary).get("duration_s", 5.0))
-			effects.start_rain(LANE_X0, LANE_X1, 130.0, LANE_Y, dur)
+			effects.start_rain(cam.x, cam.x + SCREEN_W, 130.0, lane_y, dur)
 		"time_freeze":
 			effects.add_flash(Color(0.5, 0.85, 1.0), 0.8)
 		"rewind":
 			effects.add_flash(Color(0.6, 1.0, 0.7), 0.6)
-			effects.add_ring(base_pos + Vector2(40, -20), 70.0, Color(0.4, 0.9, 0.5), 0.6)
+			effects.add_ring(base_pos + Vector2(40, -20) * K, 70.0 * K, Color(0.4, 0.9, 0.5), 0.6)
 		"dirt_shield":
-			effects.add_ring(base_pos + Vector2(0, -50), 90.0, Color(0.7, 0.5, 0.25), 0.6)
+			effects.add_ring(base_pos + Vector2(0, -50) * K, 90.0 * K, Color(0.7, 0.5, 0.25), 0.6)
 		"fast_forward":
 			effects.add_flash(Color(1.0, 0.9, 0.3), 0.5)

@@ -78,7 +78,7 @@ func test_layout_and_touch_targets() -> void:
 	all.append(s.hud.speed_button)
 	for b in all:
 		assert_true(b.size.x >= 48.0 and b.size.y >= 48.0, "touch target >= 48 px: %s" % b.name)
-	var lane_bottom: float = s.LANE_Y
+	var lane_bottom: float = s.lane_y
 	assert_true(absf(lane_bottom / s.SCREEN_H - 0.58) < 0.01, "lane at ~58% of the height")
 	for c in s.hud.cards:
 		assert_true(c.position.y >= s.SCREEN_H * 0.7 - 1.0, "cards in the bottom 30%")

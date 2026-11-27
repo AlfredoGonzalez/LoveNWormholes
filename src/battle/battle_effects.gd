@@ -5,10 +5,11 @@ extends Node2D
 ## projectile dots. Time advances only through advance(dt), so pausing the battle freezes it.
 
 const MAX_FX := 160
+const K := BattleWorld.SCALE   ## drawing scale (units are 1.5x): sizes below are the old px times K
 
 var fx: Array = []
 var projectiles: Array = []     # [{pos: Vector2, side: int, tex: Texture2D (optional art), art_left: bool}] set by the screen every frame
-var flash_rect := Rect2(0, 0, 540, 960)
+var flash_rect := Rect2(0, 0, 540, 960)   # world coords of the visible screen (the screen updates it with the camera)
 var _rain_t := 0.0
 var _rain_dur := 0.0
 var _rain_span := Vector2.ZERO  # x0, x1
@@ -87,6 +88,11 @@ func start_rain(x0: float, x1: float, y_top: float, y_ground: float, duration: f
 	_rain_y = Vector2(y_top, y_ground)
 
 
+## The rain falls over this world x range (the visible window), updated by the screen as the camera moves.
+func set_rain_span(x0: float, x1: float) -> void:
+	_rain_span = Vector2(x0, x1)
+
+
 func advance(dt: float) -> void:
 	if _rain_t > 0.0:
 		_rain_t -= dt
@@ -94,7 +100,7 @@ func advance(dt: float) -> void:
 		while _rain_acc >= 1.0:
 			_rain_acc -= 1.0
 			var rx := randf_range(_rain_span.x, _rain_span.y)
-			_push({"k": "apple", "p": Vector2(rx, _rain_y.x), "g": _rain_y.y - randf_range(0.0, 14.0), "d": 0.55})
+			_push({"k": "apple", "p": Vector2(rx, _rain_y.x), "g": _rain_y.y - randf_range(0.0, 14.0 * K), "d": 0.55})
 	var keep: Array = []
 	for e in fx:
 		e["t"] = float(e["t"]) + dt
@@ -110,22 +116,22 @@ func _draw() -> void:
 		var f := clampf(float(e["t"]) / float(e["d"]), 0.0, 1.0)
 		match str(e["k"]):
 			"num":
-				var p: Vector2 = e["p"] + Vector2(0, -34.0 * f)
+				var p: Vector2 = e["p"] + Vector2(0, -34.0 * K * f)
 				var c: Color = e["c"]
 				c.a = 1.0 - f * f
-				draw_string_outline(font, p, str(e["s"]), HORIZONTAL_ALIGNMENT_CENTER, 120.0, 18, 5, Color(0, 0, 0, c.a))
-				draw_string(font, p - Vector2(0, 0), str(e["s"]), HORIZONTAL_ALIGNMENT_CENTER, 120.0, 18, c)
+				draw_string_outline(font, p, str(e["s"]), HORIZONTAL_ALIGNMENT_CENTER, 180.0, int(18 * K), 6, Color(0, 0, 0, c.a))
+				draw_string(font, p, str(e["s"]), HORIZONTAL_ALIGNMENT_CENTER, 180.0, int(18 * K), c)
 			"spark":
 				var c2: Color = e["c"]
 				c2.a = 1.0 - f
 				var p2: Vector2 = e["p"]
-				var r := 6.0 + 10.0 * f
+				var r := (6.0 + 10.0 * f) * K
 				for i in 4:
 					var ang := PI / 4.0 + float(i) * PI / 2.0
-					draw_line(p2 + Vector2(cos(ang), sin(ang)) * r * 0.4, p2 + Vector2(cos(ang), sin(ang)) * r, c2, 2.0)
+					draw_line(p2 + Vector2(cos(ang), sin(ang)) * r * 0.4, p2 + Vector2(cos(ang), sin(ang)) * r, c2, 2.0 * K)
 			"impact":
 				var tex: Texture2D = e["tex"]
-				var w := 40.0 * (0.7 + 0.5 * f)
+				var w := 40.0 * K * (0.7 + 0.5 * f)
 				var h := w * float(tex.get_height()) / maxf(1.0, float(tex.get_width()))
 				var cc := Color(1, 1, 1, 1.0 - f * f)
 				var rw := -w if bool(e["flip"]) else w
@@ -133,12 +139,12 @@ func _draw() -> void:
 			"puff":
 				var c3: Color = e["c"]
 				c3.a *= 1.0 - f
-				draw_circle(e["p"], 6.0 + 14.0 * f, c3)
+				draw_circle(e["p"], (6.0 + 14.0 * f) * K, c3)
 			"ring":
 				var c4: Color = e["c"]
 				c4.a = 0.8 * (1.0 - f)
 				var rad := float(e["r"]) * (0.25 + 0.75 * f)
-				draw_arc(e["p"], rad, 0.0, TAU, 40, c4, 5.0)
+				draw_arc(e["p"], rad, 0.0, TAU, 40, c4, 5.0 * K)
 				c4.a *= 0.35
 				draw_circle(e["p"], rad, c4)
 			"warn":
@@ -147,14 +153,14 @@ func _draw() -> void:
 				var zone: Rect2 = e.get("z", Rect2())
 				if zone.size.x > 0.0:
 					draw_rect(zone, Color(1.0, 0.15, 0.1, 0.18 + 0.2 * (0.5 + 0.5 * sin(float(e["t"]) * 14.0))))
-					draw_rect(zone, Color(1.0, 0.2, 0.1, 0.8), false, 3.0)
-				var s := 30.0 * pulse
+					draw_rect(zone, Color(1.0, 0.2, 0.1, 0.8), false, 3.0 * K)
+				var s := 30.0 * K * pulse
 				var tri := PackedVector2Array([p5 + Vector2(0, -s), p5 + Vector2(s, s * 0.8), p5 + Vector2(-s, s * 0.8)])
 				draw_colored_polygon(tri, Color(1.0, 0.8, 0.1))
 				var tri2 := tri.duplicate()
 				tri2.append(tri[0])
-				draw_polyline(tri2, Color(0.55, 0.1, 0.05), 3.0)
-				draw_string(font, p5 + Vector2(-20, s * 0.55), "!", HORIZONTAL_ALIGNMENT_CENTER, 40.0, int(s * 1.2), Color(0.55, 0.1, 0.05))
+				draw_polyline(tri2, Color(0.55, 0.1, 0.05), 3.0 * K)
+				draw_string(font, p5 + Vector2(-30, s * 0.55), "!", HORIZONTAL_ALIGNMENT_CENTER, 60.0, int(s * 1.2), Color(0.55, 0.1, 0.05))
 			"flash":
 				var c6: Color = e["c"]
 				c6.a *= 0.5 * (1.0 - f)
@@ -162,20 +168,20 @@ func _draw() -> void:
 			"apple":
 				var p7: Vector2 = e["p"]
 				var y := lerpf(p7.y, float(e["g"]), f)
-				draw_circle(Vector2(p7.x, y), 6.0, Color("D9362B"))
-				draw_line(Vector2(p7.x, y - 6), Vector2(p7.x + 2, y - 10), UI.BORDER, 2.0)
+				draw_circle(Vector2(p7.x, y), 6.0 * K, Color("D9362B"))
+				draw_line(Vector2(p7.x, y - 6 * K), Vector2(p7.x + 2 * K, y - 10 * K), UI.BORDER, 2.0 * K)
 	for pr in projectiles:
 		if pr.get("tex") != null:
 			var tex2: Texture2D = pr["tex"]
-			var w2 := 26.0
+			var w2 := 26.0 * K
 			var h2 := w2 * float(tex2.get_height()) / maxf(1.0, float(tex2.get_width()))
 			var left := int(pr["side"]) != BattleSim.PLAYER   # enemy shots travel left
 			var rw2 := -w2 if left != bool(pr.get("art_left", false)) else w2
 			draw_texture_rect(tex2, Rect2(pr["pos"] + Vector2(-rw2 / 2.0, -h2 / 2.0), Vector2(rw2, h2)), false)
 			continue
 		var col: Color = UI.BLUE.lightened(0.3) if int(pr["side"]) == BattleSim.PLAYER else UI.RED.lightened(0.2)
-		draw_circle(pr["pos"], 5.0, col)
-		draw_arc(pr["pos"], 5.0, 0.0, TAU, 12, Color(0.1, 0.1, 0.1), 1.5)
+		draw_circle(pr["pos"], 5.0 * K, col)
+		draw_arc(pr["pos"], 5.0 * K, 0.0, TAU, 12, Color(0.1, 0.1, 0.1), 1.5 * K)
 
 
 ## Art id for a projectile: proj_<unit id>, then proj_era<N>, then the era's default (ERA_PROJ). "" when none.

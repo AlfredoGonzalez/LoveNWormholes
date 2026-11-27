@@ -1,6 +1,6 @@
 class_name RuleLayer
 extends Node2D
-## Draws the stage rule on the lane (placeholder art): Era 2 sand patches as sandy translucent strips, and the
+## Draws the stage rule on the lane, in WORLD coordinates (it lives inside the camera's world node) (placeholder art): Era 2 sand patches as sandy translucent strips, and the
 ## other rule types (walls, steam vents, gravity wells) as simple tinted zones. Reads the sim defensively:
 ## `sim.rule` (Dictionary with `type`) and `sim.patches` (Array of {x, w} in lane px) may not exist yet or
 ## may hold unknown types; nothing here ever crashes on that.
@@ -19,7 +19,7 @@ const ZONE_FIELDS := {"walls": "walls", "vents": "steam_vent", "steam_vents": "s
 const DEFAULT_W := 36.0
 
 var x0 := 70.0
-var px_scale := 0.4
+var px_scale := 0.4   ## world px per sim px (the screen passes BattleWorld.px_per_sim)
 var lane_y := 557.0
 var rule_type := "none"
 var zones: Array = []   # [{x, w, kind}] in sim px
@@ -120,17 +120,17 @@ func _draw() -> void:
 		var tint: Color = ZONE_TINTS.get(kind, Color(1, 0, 1, 0.25))   # unknown types: neutral magenta tint, no crash
 		var sx := x0 + float(z["x"]) * px_scale
 		var w := maxf(2.0, float(z["w"]) * px_scale)
-		var r := Rect2(sx, lane_y - 38.0, w, 76.0)
+		var r := Rect2(sx, lane_y - 38.0 * BattleWorld.SCALE, w, 76.0 * BattleWorld.SCALE)
 		if kind == "gravity_well" or kind == "steam_vent" or kind == "fire":
 			tint.a *= 0.75 + 0.25 * sin(_t * 4.0)
 		draw_rect(r, tint)
 		if kind == "sand_patch":
-			draw_rect(r, SAND_EDGE, false, 2.0)
-			var d := 10.0
+			draw_rect(r, SAND_EDGE, false, 2.0 * BattleWorld.SCALE)
+			var d := 10.0 * BattleWorld.SCALE
 			var y := r.position.y + 8.0
 			while y < r.end.y - 4.0:
 				var xx := r.position.x + 6.0 + fmod(y * 1.7, maxf(8.0, w - 12.0))
-				draw_circle(Vector2(xx, y), 1.6, SAND_EDGE)
+				draw_circle(Vector2(xx, y), 1.6 * BattleWorld.SCALE, SAND_EDGE)
 				y += d
 		else:
-			draw_rect(r, Color(tint.r, tint.g, tint.b, 0.9), false, 2.0)
+			draw_rect(r, Color(tint.r, tint.g, tint.b, 0.9), false, 2.0 * BattleWorld.SCALE)

@@ -8,6 +8,8 @@ signal card_pressed(index: int)
 signal power_pressed(index: int)
 signal pause_pressed
 signal speed_pressed
+signal recenter_pressed
+signal radar_seek(world_x: float)   ## radar tapped / dragged: the world x to centre the camera on
 
 const W := 540.0
 const CARD_Y := 690.0
@@ -22,6 +24,8 @@ var enemy_text: Label
 var food_text: Label
 var income_text: Label
 var speed_button: Button
+var radar: BattleRadar
+var recenter_button: RecenterButton
 var pause_button: Button
 var toast_label: Label
 var underdog_label: Label
@@ -110,24 +114,35 @@ func build(sim: BattleSim, squad: Array, powers: Array, era: int) -> void:
 	enemy_bar = _bar(self, Rect2(275, 70, 255, 24), UI.RED)
 	enemy_text = _bar_text(enemy_bar)
 	underdog_label = UI.label("", 14, UI.INK, HORIZONTAL_ALIGNMENT_CENTER)
-	underdog_label.position = Vector2(10, 98)
+	underdog_label.position = Vector2(10, 128)
 	underdog_label.size = Vector2(250, 22)
 	underdog_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	underdog_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(underdog_label)
-	# Boss HP bar (hidden unless a boss is on the field), under the enemy base bar.
-	boss_bar = _bar(self, Rect2(275, 98, 255, 22), UI.ORANGE)
+	# Lane radar (camera window + units) right under the base bars; tap / drag it to move the camera.
+	radar = BattleRadar.new()
+	radar.position = Vector2(10, 98)
+	radar.size = Vector2(W - 20.0, 24)
+	radar.seek.connect(func(wx: float): radar_seek.emit(wx))
+	add_child(radar)
+	# Boss HP bar (hidden unless a boss is on the field), under the radar.
+	boss_bar = _bar(self, Rect2(275, 126, 255, 22), UI.ORANGE)
 	boss_text = _bar_text(boss_bar, 13)
 	boss_bar.visible = false
 	# Toast line under the bars.
 	toast_label = UI.label("", 22, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER)
-	toast_label.position = Vector2(20, 126)
+	toast_label.position = Vector2(20, 158)
 	toast_label.size = Vector2(500, 60)
 	toast_label.add_theme_color_override("font_outline_color", Color(0.2, 0.05, 0.0, 0.95))
 	toast_label.add_theme_constant_override("outline_size", 7)
 	toast_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	toast_label.visible = false
 	add_child(toast_label)
+	recenter_button = RecenterButton.new()   # over the ground strip between the lane and the cards
+	recenter_button.position = Vector2(W - 58.0, 628.0)
+	recenter_button.size = Vector2(48, 48)
+	recenter_button.pressed.connect(func(): recenter_pressed.emit())
+	add_child(recenter_button)
 	_build_cards(sim)
 	_build_powers(sim, powers)
 

@@ -3,7 +3,8 @@ extends Node2D
 ## Presentation of one SimUnit: sprite (placeholder until art), side marker, HP bar, tint and small pose
 ## offsets. Holds no rules; BattleScreen feeds it the sim state every frame.
 
-const MARKER_Y := 6.0
+const K := BattleWorld.SCALE
+const MARKER_Y := 6.0 * K
 const PLAYER_MARK := Color("2F6DB5")
 const ENEMY_MARK := Color("C8453B")
 
@@ -21,7 +22,7 @@ var _time := 0.0
 var _attack_t := 0.0
 var _boss := false
 var slowed := false      # standing on a sand patch
-var _height := 70.0
+var _height := 70.0 * K
 var _die_time := 0.6
 var _die_view_t := 0.0   # own clock so the fade-out still plays while the sim is stopped
 
@@ -35,7 +36,7 @@ func setup(u: SimUnit) -> void:
 	var facing := "right" if side == BattleSim.PLAYER else "left"
 	actor = SpriteFactory.make_animated(u.id, facing)
 	add_child(actor)
-	_height = 110.0 if _boss else 70.0
+	_height = (110.0 if _boss else 70.0) * K
 	var fh := 0.0
 	var fs: Variant = actor.get("frame_size")
 	if fs is Vector2i:
@@ -84,9 +85,9 @@ func update_from(u: SimUnit, sx: float, sy: float, dt := 0.0) -> void:
 	var pose := Vector2.ZERO
 	if u.state == SimUnit.State.ATTACK:
 		_attack_t += dt
-		pose.x = dir * 8.0 * sin(clampf(_attack_t / 0.17, 0.0, 1.0) * PI)
+		pose.x = dir * 8.0 * K * sin(clampf(_attack_t / 0.17, 0.0, 1.0) * PI)
 	elif moved and u.state == SimUnit.State.WALK:
-		pose.y = -absf(sin(_time * 10.0)) * 3.0
+		pose.y = -absf(sin(_time * 10.0)) * 3.0 * K
 	actor.position = pose
 	# Tint: stun yellow, freeze cyan, hit flash bright, death fade.
 	var tint := Color.WHITE
@@ -112,21 +113,21 @@ func _draw() -> void:
 	var edge := Color(0.1, 0.1, 0.1, a)
 	# Side marker under the feet: blue circle for the player, red diamond for the enemy (shape + colour).
 	if side == BattleSim.PLAYER:
-		draw_circle(Vector2(0, MARKER_Y), 5.0, col)
-		draw_arc(Vector2(0, MARKER_Y), 5.0, 0.0, TAU, 14, edge, 1.5)
+		draw_circle(Vector2(0, MARKER_Y), 5.0 * K, col)
+		draw_arc(Vector2(0, MARKER_Y), 5.0 * K, 0.0, TAU, 14, edge, 1.5 * K)
 	else:
-		var pts := PackedVector2Array([Vector2(0, MARKER_Y - 6), Vector2(6, MARKER_Y), Vector2(0, MARKER_Y + 6), Vector2(-6, MARKER_Y)])
+		var pts := PackedVector2Array([Vector2(0, MARKER_Y - 6 * K), Vector2(6 * K, MARKER_Y), Vector2(0, MARKER_Y + 6 * K), Vector2(-6 * K, MARKER_Y)])
 		draw_colored_polygon(pts, col)
 		pts.append(pts[0])
-		draw_polyline(pts, edge, 1.5)
+		draw_polyline(pts, edge, 1.5 * K)
 	if slowed:
-		var c := Vector2(0, MARKER_Y + 12.0)
-		draw_circle(c, 6.0, Color(0.93, 0.75, 0.3, a))
-		draw_arc(c, 6.0, 0.0, TAU, 14, Color(0.4, 0.25, 0.05, a), 1.5)
-		draw_arc(c, 2.5, 0.0, TAU * 0.8, 8, Color(0.4, 0.25, 0.05, a), 1.2)
-		draw_line(c + Vector2(-6, 6), c + Vector2(9, 6), Color(0.4, 0.25, 0.05, a), 2.0)
+		var c := Vector2(0, MARKER_Y + 12.0 * K)
+		draw_circle(c, 6.0 * K, Color(0.93, 0.75, 0.3, a))
+		draw_arc(c, 6.0 * K, 0.0, TAU, 14, Color(0.4, 0.25, 0.05, a), 1.5 * K)
+		draw_arc(c, 2.5 * K, 0.0, TAU * 0.8, 8, Color(0.4, 0.25, 0.05, a), 1.2 * K)
+		draw_line(c + Vector2(-6, 6) * K, c + Vector2(9, 6) * K, Color(0.4, 0.25, 0.05, a), 2.0 * K)
 	if show_hp:
-		var w := 70.0 if _boss else 40.0
-		var r := Rect2(-w / 2.0, -_height - 10.0, w, 5.0)
-		draw_rect(r.grow(1.0), Color(0, 0, 0, 0.7))
+		var w := (70.0 if _boss else 40.0) * K
+		var r := Rect2(-w / 2.0, -_height - 10.0 * K, w, 5.0 * K)
+		draw_rect(r.grow(1.5), Color(0, 0, 0, 0.7))
 		draw_rect(Rect2(r.position, Vector2(w * hp_frac, r.size.y)), UI.GREEN if hp_frac > 0.35 else UI.RED)
