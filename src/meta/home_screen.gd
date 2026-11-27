@@ -12,6 +12,23 @@ const NAV_ROUTES := {"squad": "squad", "upgrades": "upgrades", "capsules": "caps
 const SKY := Color("CFE9F2")
 const GROUND := Color("8FBF6A")
 
+# --- sliding Home (parallax) tuning ---
+const SCREEN := Vector2(540, 960)
+const LAYER_IDS := ["home_sky", "home_far", "home_mid", "home_ground", "home_front"]
+const LAYER_FACTORS := {"home_sky": 0.10, "home_far": 0.25, "home_mid": 0.50, "home_ground": 1.0, "home_front": 1.0}
+const OVERSCROLL := 60.0        # px of soft edge give on each side
+const DRAG_THRESHOLD := 8.0     # px before a press becomes a drag
+const PATH_FRAC := 0.60         # height fraction of the ground art where the dirt path (feet line) lies
+const BURROW_WIDTH_FRAC := 0.35 # house width / screen width
+const BURROW_X := 160.0         # house left edge, screen px at camera 0
+const BURROW_FOOT_DY := 14.0    # house bottom below the path line (its own dirt patch)
+const SQUIRMY_WIDTH_FRAC := 0.15
+const SQUIRMY_VISIBLE_W := 245.0  # visible width of the idle frame (px) used to scale to SQUIRMY_WIDTH_FRAC
+const SQUIRMY_X := 425.0        # Squirmy feet x, screen px at camera 0
+const HINT_DELAY := 0.7
+const HINT_DURATION := 1.8
+const HINT_PX := 100.0
+
 var play_button: Button
 var settings_button: Button
 var daily_button: Button
@@ -36,6 +53,16 @@ var _bar_slot: HBoxContainer
 var _bar: Control
 var _daily_body: VBoxContainer
 var _offline_pending := 0
+var cam: HomeCamera            # null in the fallback scene
+var layers := {}               # art id -> TextureRect (parallax layers)
+var drag_area: Control
+var world_width := 0.0
+var hint_chevron: Label
+var _press_pos := Vector2.ZERO
+var _pressed := false
+var _hint_t := -1.0            # < 0: not started / finished
+var _hint_done := false
+var _hint_done_by_user := false
 
 
 func _now() -> float:
@@ -79,9 +106,9 @@ func _connect_signals() -> void:
 	Game.ads.availability_changed.connect(_on_availability)
 
 
-# ------------------------------------------------------------------ layout
+# ------------------------------------------------------------------ scene (background, burrow, Squirmy)
 
-func _build() -> void:
+func _build_legacy_scene() -> void:
 	add_child(UI.background(SKY))
 	var ground := ColorRect.new()
 	ground.color = GROUND
@@ -104,13 +131,154 @@ func _build() -> void:
 	burrow.name = "burrow"
 	burrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(burrow)
+	_spawn_squirmy(self, Vector2(390, 470), 0.5)
+
+
+func _spawn_squirmy(parent: Node, feet: Vector2, sc: float) -> void:
 	var squirmy := SpriteFactory.make_animated("squirmy")
 	squirmy.name = "squirmy"
-	squirmy.position = Vector2(390, 470)
-	squirmy.scale = Vector2(0.5, 0.5)
-	add_child(squirmy)
+	squirmy.position = feet
+	squirmy.scale = Vector2(sc, sc)
+	parent.add_child(squirmy)
 	if squirmy.has_method("play_row"):
 		squirmy.play_row("idle")
+
+
+## Builds the parallax world; false (nothing added) when any layer art is missing.
+func _build_parallax() -> bool:
+	var texs := {}
+	for id in LAYER_IDS:
+		var t := SpriteFactory.texture_of(id)
+		if t == null:
+			return false
+		texs[id] = t
+	var gt: Texture2D = texs["home_ground"]
+	var gscale := SCREEN.y / float(gt.get_height())
+	world_width = float(gt.get_width()) * gscale - 2.0 * OVERSCROLL
+	cam = HomeCamera.new(maxf(0.0, world_width - SCREEN.x), OVERSCROLL)
+	var world := Control.new()
+	world.name = "world"
+	world.set_anchors_preset(Control.PRESET_FULL_RECT)
+	world.clip_contents = true
+	world.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(world)
+	for id in LAYER_IDS:
+		var t: Texture2D = texs[id]
+		var f: float = LAYER_FACTORS[id]
+		# cover vertically; wider when the slower layer needs more to span screen + travel (+ overscroll)
+		var sc := maxf(SCREEN.y / float(t.get_height()), (SCREEN.x + (cam.max_x + 2.0 * OVERSCROLL) * f) / float(t.get_width()))
+		var r := TextureRect.new()
+		r.name = id
+		r.texture = t
+		r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		r.stretch_mode = TextureRect.STRETCH_SCALE
+		r.size = Vector2(t.get_width(), t.get_height()) * sc
+		r.position = Vector2(0, SCREEN.y - r.size.y)
+		r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		world.add_child(r)
+		layers[id] = r
+	# Burrow and Squirmy ride on the ground layer, feet on the dirt path.
+	var ground: TextureRect = layers["home_ground"]
+	var path_y := ground.size.y * PATH_FRAC
+	var bt := SpriteFactory.texture_of("home_burrow")
+	var burrow: Control
+	if bt != null:
+		var bw := SCREEN.x * BURROW_WIDTH_FRAC
+		var bh := bw * float(bt.get_height()) / float(bt.get_width())
+		burrow = SpriteFactory.rect_of(bt, Vector2(bw, bh))
+		burrow.position = Vector2(BURROW_X + OVERSCROLL, path_y + BURROW_FOOT_DY - bh)
+	else:
+		burrow = UI.placeholder(Game.t("hero.player_base"), Color("B07A4A"), Vector2(190, 150))
+		burrow.position = Vector2(BURROW_X + OVERSCROLL, path_y - 150.0)
+	burrow.name = "burrow"
+	burrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ground.add_child(burrow)
+	_spawn_squirmy(ground, Vector2(SQUIRMY_X + OVERSCROLL, path_y), SCREEN.x * SQUIRMY_WIDTH_FRAC / SQUIRMY_VISIBLE_W)
+	# the front layer is drawn after (over) the characters
+	world.move_child(layers["home_front"], -1)
+	drag_area = Control.new()
+	drag_area.name = "drag_area"
+	drag_area.set_anchors_preset(Control.PRESET_FULL_RECT)
+	drag_area.mouse_filter = Control.MOUSE_FILTER_STOP
+	drag_area.gui_input.connect(_on_drag_input)
+	add_child(drag_area)
+	hint_chevron = UI.label("\u203a", 56, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER)
+	hint_chevron.name = "swipe_hint"
+	hint_chevron.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	hint_chevron.offset_left = -40
+	hint_chevron.offset_top = -40
+	hint_chevron.offset_right = -4
+	hint_chevron.offset_bottom = 40
+	hint_chevron.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hint_chevron.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.5))
+	hint_chevron.add_theme_constant_override("outline_size", 6)
+	add_child(hint_chevron)
+	_hint_t = -HINT_DELAY
+	apply_camera()
+	set_process(true)
+	return true
+
+
+## Positions every parallax layer from the camera.
+func apply_camera() -> void:
+	if cam == null:
+		return
+	for id in layers:
+		(layers[id] as Control).position.x = cam.layer_x(LAYER_FACTORS[id])
+
+
+func _process(delta: float) -> void:
+	if cam == null:
+		return
+	if not _hint_done and _hint_t < HINT_DURATION and not cam.dragging:
+		_hint_t += delta
+		if _hint_t >= 0.0:
+			var u := clampf(_hint_t / HINT_DURATION, 0.0, 1.0)
+			cam.x = HINT_PX * sin(PI * u) * sin(PI * u)
+			cam.vel = 0.0
+			if u >= 1.0:
+				_hint_done = true
+				cam.x = 0.0
+	else:
+		cam.step(delta)
+	if hint_chevron != null:   # subtle blink at the right edge until the first drag
+		hint_chevron.modulate.a = (0.35 + 0.45 * absf(sin(Time.get_ticks_msec() / 400.0))) if not _hint_done_by_user else 0.0
+	apply_camera()
+
+
+func _on_drag_input(event: InputEvent) -> void:
+	if cam == null:
+		return
+	if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_pressed = true
+			_press_pos = event.position
+		else:
+			_pressed = false
+			if cam.dragging:
+				cam.end_drag()
+	elif event is InputEventMouseMotion and _pressed:
+		if not cam.dragging:
+			if (event.position - _press_pos).length() >= DRAG_THRESHOLD:
+				start_drag()
+				cam.drag_move(event.position.x - _press_pos.x)
+		else:
+			cam.drag_move(event.relative.x)
+
+
+## Begins a drag (also cancels the intro hint).
+func start_drag() -> void:
+	_hint_done = true
+	_hint_done_by_user = true
+	cam.begin_drag()
+
+
+
+# ------------------------------------------------------------------ layout
+
+func _build() -> void:
+	if not _build_parallax():
+		_build_legacy_scene()
 
 	var m := MarginContainer.new()
 	m.set_anchors_preset(Control.PRESET_FULL_RECT)

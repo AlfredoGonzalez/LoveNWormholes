@@ -18,6 +18,8 @@ func _initialize() -> void:
 	var shots := [
 		["title", {}, 3],
 		["home", {}, 3],
+		["home", {}, 3, "cam_mid"],
+		["home", {}, 3, "cam_right"],
 		["levels", {}, 3],
 		["squad", {}, 3],
 		["prebattle", {"era": 1, "stage": 1}, 3],
@@ -50,12 +52,18 @@ func _initialize() -> void:
 			elif str(sh[3]).begins_with("tutorial"):   # arm the first-battle tutorial (the intro does it in the game)
 				Game.save.profile["progress"]["highest_stage_cleared"] = {}   # earlier shots cleared the campaign
 				Story.mark_seen(Game.save.profile, "intro")
-			elif sh[3] in ["fight", "projectile", "impact"]:
+			elif sh[3] in ["fight", "projectile", "impact"] or str(sh[3]).begins_with("cam_"):
 				pass
 			elif sh[3] == "relics":
 				Capsules.new(Game.economy).open_many(12)
 				Game.economy.add("chrono_dust", 80)
 		Game.nav.go(sh[0], sh[1])
+		if sh.size() > 3 and str(sh[3]).begins_with("cam_"):   # sliding Home at a camera position
+			var hs = Game.nav.current
+			if hs.cam != null:
+				hs._hint_done = true
+				hs._hint_done_by_user = true
+				hs.cam.x = {"cam_left": 0.0, "cam_mid": hs.cam.max_x * 0.5, "cam_right": hs.cam.max_x}[sh[3]]
 		if sh[0] == "battle" and sh.size() > 3 and str(sh[3]).begins_with("tutorial"):
 			var tb = Game.nav.current
 			tb.step(0.0)

@@ -346,3 +346,115 @@ func test_title_goes_home_and_spanish_builds() -> void:
 	_drop(s)
 	_drop(_make("res://src/meta/level_select_screen.gd"))
 	Localization.set_language("en")
+
+
+# ------------------------------------------------------------------ sliding Home (camera, parallax, fallback)
+
+func test_camera_limits_and_layer_factors() -> void:
+	var c := HomeCamera.new(1000.0, 60.0)
+	c.begin_drag()
+	c.drag_move(-5000.0)            # finger far left: camera pushed to the right limit (+ overscroll)
+	assert_true(c.x <= 1000.0 + 60.0 + 0.001 and c.x > 1000.0)
+	c.end_drag()
+	for i in 240:
+		c.step(1.0 / 60.0)
+	assert_near(c.x, 1000.0, 0.01, "springs back to the right edge")
+	c.x = 400.0
+	assert_near(c.layer_x(1.0), -460.0)
+	assert_near(c.layer_x(0.5), -230.0)
+	assert_near(c.layer_x(0.1), -46.0)
+	assert_true(c.layer_x(0.1) > c.layer_x(0.25) and c.layer_x(0.25) > c.layer_x(0.5) and c.layer_x(0.5) > c.layer_x(1.0), "far layers move less")
+
+
+func test_camera_inertia_is_deterministic_and_stops() -> void:
+	var runs := []
+	for k in 2:
+		var c := HomeCamera.new(2000.0, 60.0)
+		c.x = 500.0
+		c.begin_drag()
+		for i in 6:
+			c.drag_move(-10.0)       # 600 px/s to the right, at 60 Hz
+			c.step(1.0 / 60.0)
+		c.end_drag()
+		var v0 := c.vel
+		assert_true(v0 > 300.0, "release velocity")
+		var prev := c.x
+		for i in 600:
+			c.step(1.0 / 60.0)
+		assert_true(c.x > prev + 20.0, "kept moving after release")
+		assert_eq(c.vel, 0.0, "inertia decays to a stop")
+		runs.append(c.x)
+	assert_eq(runs[0], runs[1], "same input, same result")
+
+
+func test_home_parallax_scene_layers_and_drag() -> void:
+	if _skip():
+		return
+	_fresh()
+	var s = _home()
+	if s.cam == null:
+		_drop(s)
+		return   # art missing in this checkout: the fallback test covers it
+	assert_true(s.world_width >= 3.0 * 540.0 * 0.95, "world is about 3 screens wide")
+	assert_near(s.cam.max_x, s.world_width - 540.0, 0.01)
+	for id in s.LAYER_IDS:
+		var r: Control = s.layers[id]
+		var f: float = s.LAYER_FACTORS[id]
+		# no gaps at either extreme of the camera (overscroll included)
+		for cx in [-s.OVERSCROLL, s.cam.max_x + s.OVERSCROLL]:
+			s.cam.x = cx
+			s.apply_camera()
+			assert_true(r.position.x <= 0.01 and r.position.x + r.size.x >= 540.0 - 0.01, "%s covers the screen at cam %s" % [id, cx])
+		assert_true(r.size.y >= 960.0 - 0.01 and f > 0.0)
+	s.cam.x = 200.0
+	s.apply_camera()
+	assert_near(s.layers["home_ground"].position.x, -(200.0 + s.OVERSCROLL), 0.01)
+	assert_near(s.layers["home_far"].position.x, -(200.0 + s.OVERSCROLL) * 0.25, 0.01)
+	assert_true(s.layers["home_ground"].find_child("squirmy", false, false) != null, "Squirmy rides the ground layer")
+	assert_true(s.layers["home_ground"].find_child("burrow", false, false) != null)
+	var root: Node = s.layers["home_front"].get_parent()
+	assert_true(root.get_child_count() > 0 and root.get_child(root.get_child_count() - 1) == s.layers["home_front"], "front is drawn last")
+	# drag: below the threshold nothing moves; above it the world follows the finger
+	s._hint_done = true
+	s.cam.x = 300.0
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = Vector2(200, 300)
+	s._on_drag_input(press)
+	var mv := InputEventMouseMotion.new()
+	mv.position = Vector2(204, 300)
+	mv.relative = Vector2(4, 0)
+	s._on_drag_input(mv)
+	assert_true(not s.cam.dragging and s.cam.x == 300.0, "under the threshold is a tap")
+	mv = InputEventMouseMotion.new()
+	mv.position = Vector2(230, 300)
+	mv.relative = Vector2(26, 0)
+	s._on_drag_input(mv)
+	assert_true(s.cam.dragging)
+	assert_near(s.cam.x, 270.0, 0.01, "finger right 30 px -> camera left 30 px")
+	var rel := InputEventMouseButton.new()
+	rel.button_index = MOUSE_BUTTON_LEFT
+	rel.pressed = false
+	s._on_drag_input(rel)
+	assert_true(not s.cam.dragging)
+	s._process(1.0 / 60.0)
+	_drop(s)
+
+
+func test_home_fallback_without_layer_art() -> void:
+	if _skip():
+		return
+	_fresh()
+	var entries := {}
+	for id in SpriteManifest.ids():
+		if id != "home_ground":
+			entries[id] = SpriteManifest.get_entry(id)
+	SpriteManifest.set_entries(entries)
+	var s = _home()
+	assert_true(s.cam == null and s.layers.is_empty(), "no parallax without the art")
+	assert_true(s.find_child("squirmy", true, false) != null and s.find_child("burrow", true, false) != null, "legacy scene kept")
+	assert_true(s.play_button != null)
+	s._process(0.016)   # must not fail
+	_drop(s)
+	SpriteManifest.reset()
