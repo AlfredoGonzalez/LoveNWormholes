@@ -314,6 +314,16 @@
       "kind": "image",
       "path": "assets/images/home/home_sky.jpg"
     },
+    "icon_capsule": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 128,
+      "frame_w": 106,
+      "id": "icon_capsule",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/icon_capsule.png"
+    },
     "icon_coin": {
       "category": "icon",
       "facing": "right",
@@ -333,6 +343,16 @@
       "key_color": "#FF00FF",
       "kind": "static",
       "path": "assets/sprites/icons/icon_food.png"
+    },
+    "icon_gem": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 128,
+      "frame_w": 122,
+      "id": "icon_gem",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/icon_gem.png"
     },
     "icon_lock": {
       "category": "icon",

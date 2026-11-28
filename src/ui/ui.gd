@@ -17,6 +17,30 @@ const BLUE := Color("2F6DB5")
 const LOCKED := Color("D9CDB4")
 const LOCKED_INK := Color("6B5A48")
 const MIN_TOUCH := 48.0
+const FONT_TITLE := "res://assets/fonts/Baloo2-ExtraBold.ttf"   # titles, buttons, big numbers (body text: Quicksand, set in project settings)
+const TITLE_FROM_SIZE := 22
+
+static var _title_font: Font = null
+
+
+const FONT_BODY := "res://assets/fonts/Quicksand-SemiBold.ttf"
+
+
+## Makes Quicksand the default font of every control (done in code, not in the project settings, so a fresh
+## checkout does not hit a "no loader" error before the font is imported).
+static func install_fonts() -> void:
+	if ResourceLoader.exists(FONT_BODY):
+		var f := load(FONT_BODY) as Font
+		if f != null:
+			ThemeDB.fallback_font = f
+
+
+## The display font (Baloo 2); null when the file is missing (the default font is used).
+static func title_font() -> Font:
+	if _title_font == null and ResourceLoader.exists(FONT_TITLE):
+		_title_font = load(FONT_TITLE) as Font
+	return _title_font
+
 
 
 static func style(bg: Color, border := BORDER, radius := 18, border_w := 3, shadow := true) -> StyleBoxFlat:
@@ -41,6 +65,8 @@ static func label(text: String, size := 20, color := INK, align := HORIZONTAL_AL
 	l.text = text
 	l.add_theme_font_size_override("font_size", size)
 	l.add_theme_color_override("font_color", color)
+	if size >= TITLE_FROM_SIZE and title_font() != null:
+		l.add_theme_font_override("font", title_font())
 	l.horizontal_alignment = align
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return l
@@ -52,6 +78,8 @@ static func button(text: String, kind := "primary", min_size := Vector2(0, MIN_T
 	b.text = text
 	b.custom_minimum_size = Vector2(maxf(min_size.x, 0.0), maxf(min_size.y, MIN_TOUCH))
 	b.add_theme_font_size_override("font_size", font_size)
+	if title_font() != null:
+		b.add_theme_font_override("font", title_font())
 	var bg := ORANGE
 	var fg := INK
 	match kind:

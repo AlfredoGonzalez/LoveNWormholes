@@ -28,6 +28,7 @@ var offline_popup_shown := false   # the offline Worm Farm popup shows once per 
 
 
 func _ready() -> void:
+	UI.install_fonts()
 	boot()
 
 
