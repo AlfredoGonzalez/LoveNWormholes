@@ -151,7 +151,17 @@ func _spawn_squirmy(parent: Node, feet: Vector2, sc: float) -> void:
 	squirmy.scale = Vector2(sc, sc)
 	parent.add_child(squirmy)
 	if squirmy.has_method("play_row"):
-		squirmy.play_row("idle")
+		if squirmy.has_method("has_row") and squirmy.has_row("rest"):
+			squirmy.play_row("rest")   # calm loop (blinks); the wave ("idle") plays now and then
+			var tm := Timer.new()
+			tm.name = "wave_timer"
+			tm.one_shot = true
+			tm.wait_time = randf_range(5.0, 9.0)
+			tm.timeout.connect(func(): _squirmy_wave(squirmy, tm))
+			squirmy.add_child(tm)
+			tm.start()
+		else:
+			squirmy.play_row("idle")
 
 
 ## Fixed one-picture background (`bg_home_static`): covers the screen, burrow and Squirmy stand on its path.
@@ -187,6 +197,20 @@ func _build_static() -> bool:
 	add_child(burrow)
 	_spawn_squirmy(self, Vector2(SCREEN.x * STATIC_SQUIRMY_X, path_y), SCREEN.x * STATIC_SQUIRMY_W / SQUIRMY_VISIBLE_W)
 	return true
+
+
+## Squirmy waves once (one loop of "idle"), then goes back to resting.
+func _squirmy_wave(squirmy: Node, tm: Timer) -> void:
+	if not is_instance_valid(squirmy) or not squirmy.is_inside_tree():
+		return
+	squirmy.play_row("idle")
+	var sf: SpriteFrames = squirmy.sprite.sprite_frames
+	var secs := float(sf.get_frame_count("idle")) / maxf(1.0, sf.get_animation_speed("idle"))
+	await get_tree().create_timer(secs).timeout
+	if is_instance_valid(squirmy) and squirmy.is_inside_tree():
+		squirmy.play_row("rest")
+		tm.wait_time = randf_range(7.0, 12.0)
+		tm.start()
 
 
 ## Builds the parallax world; false (nothing added) when any layer art is missing.
@@ -380,6 +404,11 @@ func _build() -> void:
 	v.add_child(spacer)
 
 	v.add_child(_build_stage_panel())
+	var gap := Control.new()   # lifts the stage card clear of the (grown) active tab
+	gap.name = "nav_gap"
+	gap.custom_minimum_size = Vector2(0, 26)
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(gap)
 	v.add_child(_build_nav())
 	_refresh_alerts()
 
@@ -549,28 +578,24 @@ func _skin_tab(b: Button, f: String, locked: bool) -> bool:
 	if not UI.skin_button(b, id, 16.0, Vector2(4, 4), "ui_tab_locked"):
 		return false
 	b.custom_minimum_size = Vector2(0, 84)
-	b.add_theme_font_size_override("font_size", 13)
 	b.add_theme_constant_override("outline_size", 0)
+	b.tooltip_text = b.text   # no printed title on the tab (icon only); kept for accessibility / hover
+	b.text = ""
 	var icon_id := "icon_lock" if locked else ("icon_capsule" if f == "capsules" else "icon_nav_" + f)
-	var art := SpriteFactory.icon(icon_id, 44.0 if not locked else 36.0)
+	var isz := 48.0 if not locked else 40.0
+	var art := SpriteFactory.icon(icon_id, isz)
 	if art != null:
 		art.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-		art.offset_top = 8
-		art.offset_bottom = 8 + (44.0 if not locked else 36.0)
-		art.offset_left = -22
-		art.offset_right = 22
+		art.offset_top = 14 if not locked else 10
+		art.offset_bottom = art.offset_top + isz
+		art.offset_left = -isz * 0.5
+		art.offset_right = isz * 0.5
 		b.add_child(art)
 		if f == "map" and not locked:
 			art.z_index = 2
-			art.pivot_offset = Vector2(22.0, 44.0)
+			art.pivot_offset = Vector2(isz * 0.5, isz)
 			if DisplayServer.get_name() != "headless":
 				b.ready.connect(func(): _animate_active_tab(art), CONNECT_ONE_SHOT)
-	if locked:
-		b.text = ""   # the padlock and the level (small) replace the label
-	else:
-		b.add_theme_constant_override("h_separation", 0)
-		for st in ["normal", "hover", "pressed", "disabled"]:
-			(b.get_theme_stylebox(st) as StyleBox).content_margin_top = 54
 	return true
 
 

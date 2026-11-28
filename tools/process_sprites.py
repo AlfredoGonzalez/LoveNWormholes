@@ -20,15 +20,15 @@ GRID = 5
 DEFAULT_KEY = "#FF00FF"
 ROWS_STD = ["idle", "walk", "attack", "hurt", "defeat"]
 ROWS_HERO = ["idle", "cast_slam", "cast_power", "hurt", "celebrate"]
-ALL_ANIMS = ["idle", "walk", "attack", "hurt", "defeat", "cast_slam", "cast_power", "celebrate"]
+ALL_ANIMS = ["idle", "walk", "attack", "hurt", "defeat", "cast_slam", "cast_power", "celebrate", "rest"]
 # Legacy (deprecated) 5-row sheet: fps per row.
 FPS_LEGACY = {"idle": 6, "walk": 10, "attack": 12, "hurt": 10, "defeat": 8,
               "cast_slam": 12, "cast_power": 12, "celebrate": 8}
 FPS = FPS_LEGACY
 # New format: one 5x5 sheet (25 frames) per animation.
 ANIM_FPS = {"idle": 12, "walk": 14, "attack": 18, "hurt": 15, "defeat": 14,
-            "cast_slam": 16, "cast_power": 16, "celebrate": 12}
-ANIM_LOOP = {"idle": True, "walk": True, "celebrate": True}  # everything else: no loop
+            "cast_slam": 16, "cast_power": 16, "celebrate": 12, "rest": 10}
+ANIM_LOOP = {"idle": True, "walk": True, "celebrate": True, "rest": True}  # everything else: no loop
 FRAMES_USED_DEFAULT = 25  # of 25; a hand-set anims.<a>.frames_used in the manifest survives
 ATTACK_HIT_RATIO = 0.48   # default hit frame = frames_used * 0.48 (frame 13 of 25) (hand-set hit_frame survives)
 MANIFEST_VERSION = 2

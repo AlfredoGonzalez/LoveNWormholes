@@ -4,7 +4,7 @@ extends RefCounted
 ## placeholder rectangle (with the id as label) is returned instead.
 ## Node origin is the bottom-centre of the sprite (feet), so units can sit on a lane line.
 
-const LOOP_ROWS := ["idle", "walk"]
+const LOOP_ROWS := ["idle", "walk", "rest"]
 const PLAYER_COLOR := Color(0.2, 0.45, 0.9)
 const ENEMY_COLOR := Color(0.9, 0.25, 0.2)
 const NEUTRAL_COLOR := Color(0.5, 0.5, 0.5)
