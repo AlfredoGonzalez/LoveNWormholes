@@ -236,3 +236,27 @@ A single tiny market stall with a red-and-cream striped awning, a wooden counter
 ```text
 A single unrolled treasure map with curled corners, a dotted path and a red X mark. Storybook watercolor illustration with soft hand-painted washes, subtle paper grain, thin warm dark-brown ink outlines (#5B3A22), cute rounded shapes and friendly saturated colors. A single front-facing game icon, centered with a wide empty margin, drawn on a perfectly flat solid magenta background (#FF00FF) with no shadow, no ground, no gradient, no text. Crisp clean edges. Do not use magenta or pink anywhere on the object. Square 1:1 image.
 ```
+
+### I-019 · Squirmy: rest (reposo tranquilo de Home)
+- **Tipo:** Hoja de animación 5x5 (25 fotogramas, orden izquierda→derecha y arriba→abajo)
+- **Aplica a:** `squirmy`, Squirmy (héroe). Se ve en Home entre saludos: el saludo es la animación `idle` que ya existe, y esta sustituye al saludo continuo.
+- **Referencia a adjuntar:** `squirmy_ref.png`
+- **Archivo de salida:** `squirmy_rest_sheet.png`
+- **Archivo con lienzo doble (solo si te sale cortado):** `squirmy_rest_x2_sheet.png` (celda 768 px / hoja 3840x3840 px)
+- **Datos técnicos:** cuadrícula 5x5 de celdas cuadradas, fondo magenta plano #FF00FF, mirada a la derecha, celda 384 px / hoja 1920x1920 px; imagen 1:1
+- **¿Puede sobresalir de la celda?:** no, movimiento contenido junto al cuerpo. Lienzo normal.
+
+```text
+Using the attached reference image (squirmy_ref.png) as the exact design of the character, draw an animation sprite sheet of the hero Squirmy performing the 'rest' animation.
+Character identity, to stay consistent: Squirmy: small bright-green earthworm, lighter yellow-green belly, big round brown eyes, peach-pink cheeks, curly dark hair on his head and no hat.
+Same storybook watercolor look as the reference: soft hand-painted washes, subtle paper grain, thin ink outlines, cute rounded shapes, friendly saturated colors.
+Layout: one strict grid of 5 columns by 5 rows, 25 equal square cells, read left to right then top to bottom (frame 1 is the top-left cell, frame 25 the bottom-right cell). Each cell holds exactly one full-body copy of the same character, side view facing right, with identical size, identical proportions and the same standing line in every cell, centered in its cell with an empty margin so nothing touches the cell edges.
+Background: one perfectly flat solid magenta (#FF00FF) with no grid lines, no borders, no labels, no numbers, no text, no shadows and no ground. Do not use magenta or pink anywhere on the character. Square 1:1 image.
+Animation: A very calm looping rest: Squirmy stands upright, relaxed, smiling softly, both little hands resting at his sides, only breathing and blinking. He does NOT wave and does not move his arms. It must be smooth and fluid, like a hand-drawn animation: use all 25 frames, draw gentle in-between poses so no pose jumps from one frame to the next, and keep the volumes and the character design identical in every frame.
+This is a LOOP: frame 25 must flow smoothly into frame 1 (the pose after frame 25 is the pose of frame 1), so the cycle repeats with no jump or pause.
+Motion by frames:
+- Frames 1-8: Standing tall, the whole body slowly rises a few pixels (inhale), the curls on his head bounce very slightly.
+- Frames 9-12: Highest point of the breath, a tiny pause, the head tilts a little to one side.
+- Frames 13-18: The body slowly sinks (exhale), the head tilts back to the center; around frames 15-17 the eyes blink once (about 2 frames closed).
+- Frames 19-25: Body at its lowest, a very small weight shift, then it rises back to exactly the pose of frame 1.
+```
