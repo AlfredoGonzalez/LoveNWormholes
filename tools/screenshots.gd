@@ -17,7 +17,7 @@ func _initialize() -> void:
 	Game.start_services()
 	var shots := [
 		["title", {}, 3],
-		["home", {}, 3],
+		["home", {}, 60],
 		["home", {}, 3, "cam_mid"],
 		["home", {}, 3, "cam_right"],
 		["levels", {}, 3],

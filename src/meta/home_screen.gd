@@ -13,6 +13,10 @@ const STATIC_BURROW_X := 0.06
 const STATIC_BURROW_W := 0.46
 const STATIC_SQUIRMY_X := 0.78
 const STATIC_SQUIRMY_W := 0.20
+# active tab: rises and grows (scale about its bottom-centre), then trembles every so often
+const ACTIVE_SCALE := 1.5
+const ACTIVE_RISE := 14.0
+const ACTIVE_WOBBLE_DEG := 3.0
 const NAV := ["squad", "upgrades", "capsules", "shop", "map"]
 const NAV_ROUTES := {"squad": "squad", "upgrades": "upgrades", "capsules": "capsules", "shop": "shop", "map": "levels"}
 const SKY := Color("CFE9F2")
@@ -556,6 +560,12 @@ func _skin_tab(b: Button, f: String, locked: bool) -> bool:
 		art.offset_left = -22
 		art.offset_right = 22
 		b.add_child(art)
+	if f == "map" and not locked:
+		b.z_index = 2
+		b.resized.connect(func(): b.pivot_offset = Vector2(b.size.x * 0.5, b.size.y))
+		b.pivot_offset = Vector2(b.size.x * 0.5, b.size.y)
+		if DisplayServer.get_name() != "headless":
+			b.ready.connect(func(): _animate_active_tab(b), CONNECT_ONE_SHOT)
 	if locked:
 		b.text = ""   # the padlock and the level (small) replace the label
 	else:
@@ -563,6 +573,34 @@ func _skin_tab(b: Button, f: String, locked: bool) -> bool:
 		for st in ["normal", "hover", "pressed", "disabled"]:
 			(b.get_theme_stylebox(st) as StyleBox).content_margin_top = 54
 	return true
+
+
+## Selected-tab feel: pops up and grows with a bounce, then gives a quick tremble every ~2 s.
+func _animate_active_tab(b: Button) -> void:
+	if not is_instance_valid(b) or not b.is_inside_tree():
+		return
+	var t := b.create_tween().bind_node(b)
+	t.set_parallel(true)
+	t.tween_property(b, "scale", Vector2.ONE * ACTIVE_SCALE, 0.45).from(Vector2.ONE).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_property(b, "position:y", b.position.y - ACTIVE_RISE, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# keep the grown tab inside the screen (the active one is the last, at the right edge)
+	var right := b.global_position.x + b.size.x * 0.5 + b.size.x * ACTIVE_SCALE * 0.5
+	var over := maxf(0.0, right - (SCREEN.x - 6.0))
+	if over > 0.0:
+		t.tween_property(b, "position:x", b.position.x - over, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.chain().tween_callback(func(): _wobble_loop(b))
+
+
+func _wobble_loop(b: Button) -> void:
+	if not is_instance_valid(b) or not b.is_inside_tree():
+		return
+	var t := b.create_tween().bind_node(b)
+	for i in 3:
+		t.tween_property(b, "rotation_degrees", ACTIVE_WOBBLE_DEG, 0.06)
+		t.tween_property(b, "rotation_degrees", -ACTIVE_WOBBLE_DEG, 0.06)
+	t.tween_property(b, "rotation_degrees", 0.0, 0.06)
+	t.tween_interval(1.8)
+	t.tween_callback(func(): _wobble_loop(b))
 
 
 # ------------------------------------------------------------------ chips, alerts
