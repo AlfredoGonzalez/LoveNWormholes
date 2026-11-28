@@ -7,6 +7,12 @@ extends Screen
 ## Ad rewards are applied by Game's global listener (Quests.apply_reward); this screen only reacts to the
 ## resulting Economy / Quests signals. params.now (optional) overrides the clock, for tests.
 
+# static background layout (fractions of the screen), tuned with the artist's mock
+const STATIC_PATH_FRAC := 0.52
+const STATIC_BURROW_X := 0.06
+const STATIC_BURROW_W := 0.46
+const STATIC_SQUIRMY_X := 0.78
+const STATIC_SQUIRMY_W := 0.20
 const NAV := ["squad", "upgrades", "capsules", "shop", "map"]
 const NAV_ROUTES := {"squad": "squad", "upgrades": "upgrades", "capsules": "capsules", "shop": "shop", "map": "levels"}
 const SKY := Color("CFE9F2")
@@ -144,6 +150,41 @@ func _spawn_squirmy(parent: Node, feet: Vector2, sc: float) -> void:
 		squirmy.play_row("idle")
 
 
+## Fixed one-picture background (`bg_home_static`): covers the screen, burrow and Squirmy stand on its path.
+## False (nothing added) when that art is missing.
+func _build_static() -> bool:
+	var t := SpriteFactory.texture_of("bg_home_static")
+	if t == null:
+		return false
+	var sc := maxf(SCREEN.x / float(t.get_width()), SCREEN.y / float(t.get_height()))
+	var size := Vector2(t.get_width(), t.get_height()) * sc
+	var bg := TextureRect.new()
+	bg.name = "bg_static"
+	bg.texture = t
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg.stretch_mode = TextureRect.STRETCH_SCALE
+	bg.size = size
+	bg.position = (SCREEN - size) * 0.5
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(bg)
+	var path_y := SCREEN.y * STATIC_PATH_FRAC
+	var bt := SpriteFactory.texture_of("home_burrow")
+	var burrow: Control
+	if bt != null:
+		var bw := SCREEN.x * STATIC_BURROW_W
+		var bh := bw * float(bt.get_height()) / float(bt.get_width())
+		burrow = SpriteFactory.rect_of(bt, Vector2(bw, bh))
+		burrow.position = Vector2(SCREEN.x * STATIC_BURROW_X, path_y + BURROW_FOOT_DY - bh)
+	else:
+		burrow = UI.placeholder(Game.t("hero.player_base"), Color("B07A4A"), Vector2(190, 150))
+		burrow.position = Vector2(SCREEN.x * STATIC_BURROW_X, path_y - 150.0)
+	burrow.name = "burrow"
+	burrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(burrow)
+	_spawn_squirmy(self, Vector2(SCREEN.x * STATIC_SQUIRMY_X, path_y), SCREEN.x * STATIC_SQUIRMY_W / SQUIRMY_VISIBLE_W)
+	return true
+
+
 ## Builds the parallax world; false (nothing added) when any layer art is missing.
 func _build_parallax() -> bool:
 	var texs := {}
@@ -277,7 +318,7 @@ func start_drag() -> void:
 # ------------------------------------------------------------------ layout
 
 func _build() -> void:
-	if not _build_parallax():
+	if not _build_static() and not _build_parallax():
 		_build_legacy_scene()
 
 	var m := MarginContainer.new()
