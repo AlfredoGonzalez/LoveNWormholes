@@ -76,6 +76,26 @@ static func button(text: String, kind := "primary", min_size := Vector2(0, MIN_T
 	return b
 
 
+## Dresses `b` with the painted frame `id` (normal / hover / pressed / disabled); false (unchanged) when the art is missing.
+static func skin_button(b: Button, id: String, corner: float, pad := Vector2(10, 4), disabled_id := "") -> bool:
+	var n := NineStyle.make(id, corner, pad)
+	if n == null:
+		return false
+	var h := NineStyle.make(id, corner, pad)
+	h.tint = Color(1.06, 1.06, 1.06)
+	var d := NineStyle.make(id, corner, pad)
+	d.tint = Color(0.86, 0.84, 0.8)
+	var pr := NineStyle.make(id, corner, pad)
+	pr.tint = Color(0.82, 0.80, 0.76)
+	var off := NineStyle.make(disabled_id, corner, pad) if disabled_id != "" else null
+	b.add_theme_stylebox_override("normal", n)
+	b.add_theme_stylebox_override("hover", h)
+	b.add_theme_stylebox_override("pressed", pr)
+	b.add_theme_stylebox_override("disabled", off if off != null else d)
+	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	return true
+
+
 ## Click feedback for every UI.button (no-op before the services are booted).
 static func _tap_sound() -> void:
 	if Game.audio != null:
@@ -92,7 +112,8 @@ static func panel(bg := PANEL) -> PanelContainer:
 ## icon_coin) replaces the symbol with the art when it exists; otherwise the symbol text stays.
 static func chip(icon_text: String, value: String, icon_id := "") -> PanelContainer:
 	var p := PanelContainer.new()
-	p.add_theme_stylebox_override("panel", style(PANEL, BORDER, 18, 2, false))
+	var painted := NineStyle.make("ui_chip", 18.0, Vector2(14, 4))
+	p.add_theme_stylebox_override("panel", painted if painted != null else style(PANEL, BORDER, 18, 2, false))
 	var art := SpriteFactory.icon(icon_id, 26.0) if icon_id != "" else null
 	if art == null:
 		var l := label("%s %s" % [icon_text, value], 18)

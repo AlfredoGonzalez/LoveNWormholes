@@ -105,7 +105,7 @@ func test_nav_locked_unlocked_and_coming_soon() -> void:
 	var s = _home()
 	for f in ["squad", "upgrades", "capsules", "shop"]:
 		assert_true((s.nav_buttons[f] as Button).disabled, f)
-		assert_eq((s.nav_notes[f] as Label).text, _g().t("ui.unlocks_level", [Progress.feature_unlock_stage(f)]), f)
+		assert_eq((s.nav_notes[f] as Label).text, _g().t("ui.level_short", [Progress.feature_unlock_stage(f)]), f)
 	assert_true(not (s.nav_buttons["map"] as Button).disabled)
 	s.nav_buttons["map"].pressed.emit()
 	assert_eq(nav.calls[-1][0], "levels")

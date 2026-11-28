@@ -4,6 +4,110 @@
     "p1_club_worm": "assets/sprites/refs/p1_club_worm_ref.png"
   },
   "sprites": {
+    "ally": {
+      "anims": {
+        "walk": {
+          "anchor": [
+            157,
+            282
+          ],
+          "cols": 5,
+          "fps": 14,
+          "frame_h": 287,
+          "frame_w": 319,
+          "frames": 25,
+          "frames_used": 25,
+          "loop": true,
+          "path": "assets/sprites/characters/ally_walk_sheet.png",
+          "x2": false
+        }
+      },
+      "category": "character",
+      "expected_anims": [
+        "walk"
+      ],
+      "facing": "right",
+      "format": 2,
+      "frame_h": 384,
+      "frame_w": 319,
+      "id": "ally",
+      "key_color": "#FF00FF",
+      "kind": "sheet",
+      "nominal_h": 384
+    },
+    "ally_ally": {
+      "anims": {
+        "defeat": {
+          "anchor": [
+            154,
+            308
+          ],
+          "cols": 5,
+          "fps": 14,
+          "frame_h": 313,
+          "frame_w": 304,
+          "frames": 25,
+          "frames_used": 25,
+          "loop": false,
+          "path": "assets/sprites/characters/ally_ally_defeat_sheet.png",
+          "x2": false
+        },
+        "hurt": {
+          "anchor": [
+            153,
+            293
+          ],
+          "cols": 5,
+          "fps": 15,
+          "frame_h": 301,
+          "frame_w": 304,
+          "frames": 25,
+          "frames_used": 25,
+          "loop": false,
+          "path": "assets/sprites/characters/ally_ally_hurt_sheet.png",
+          "x2": false
+        },
+        "idle": {
+          "anchor": [
+            140,
+            298
+          ],
+          "cols": 5,
+          "fps": 12,
+          "frame_h": 304,
+          "frame_w": 256,
+          "frames": 25,
+          "frames_used": 25,
+          "loop": true,
+          "path": "assets/sprites/characters/ally_ally_idle_sheet.png",
+          "x2": false
+        }
+      },
+      "category": "character",
+      "expected_anims": [
+        "idle",
+        "hurt",
+        "defeat"
+      ],
+      "facing": "right",
+      "format": 2,
+      "frame_h": 384,
+      "frame_w": 256,
+      "id": "ally_ally",
+      "key_color": "#FF00FF",
+      "kind": "sheet",
+      "nominal_h": 384
+    },
+    "ant_hit_react": {
+      "category": "character",
+      "facing": "right",
+      "frame_h": 384,
+      "frame_w": 387,
+      "id": "ant_hit_react",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/characters/ant-hit_react-v1.png"
+    },
     "background": {
       "category": "image",
       "frame_h": 1376,
@@ -47,6 +151,14 @@
       "id": "bg_home",
       "kind": "image",
       "path": "assets/images/backgrounds/bg_home.jpg"
+    },
+    "bg_home_static": {
+      "category": "image",
+      "frame_h": 1376,
+      "frame_w": 768,
+      "id": "bg_home_static",
+      "kind": "image",
+      "path": "assets/images/backgrounds/bg_home_static.jpg"
     },
     "e1_ant_clubber": {
       "anims": {
@@ -221,6 +333,86 @@
       "key_color": "#FF00FF",
       "kind": "static",
       "path": "assets/sprites/icons/icon_food.png"
+    },
+    "icon_lock": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 128,
+      "frame_w": 99,
+      "id": "icon_lock",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/icon_lock.png"
+    },
+    "icon_nav_map": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 106,
+      "frame_w": 128,
+      "id": "icon_nav_map",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/icon_nav_map.png"
+    },
+    "icon_nav_shop": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 128,
+      "frame_w": 128,
+      "id": "icon_nav_shop",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/icon_nav_shop.png"
+    },
+    "icon_nav_squad": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 99,
+      "frame_w": 128,
+      "id": "icon_nav_squad",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/icon_nav_squad.png"
+    },
+    "icon_nav_upgrades": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 128,
+      "frame_w": 68,
+      "id": "icon_nav_upgrades",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/icon_nav_upgrades.png"
+    },
+    "icon_quests": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 127,
+      "frame_w": 128,
+      "id": "icon_quests",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/icon_quests.png"
+    },
+    "icon_settings": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 128,
+      "frame_w": 128,
+      "id": "icon_settings",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/icon_settings.png"
+    },
+    "icon_shard": {
+      "category": "icon",
+      "facing": "right",
+      "frame_h": 128,
+      "frame_w": 70,
+      "id": "icon_shard",
+      "key_color": "#FF00FF",
+      "kind": "static",
+      "path": "assets/sprites/icons/icon_shard.png"
     },
     "jugar_en": {
       "category": "image",
@@ -438,6 +630,21 @@
           "path": "assets/sprites/hero/squirmy_cast_slam_x2_sheet.png",
           "x2": true
         },
+        "celebrate": {
+          "anchor": [
+            152,
+            326
+          ],
+          "cols": 5,
+          "fps": 12,
+          "frame_h": 331,
+          "frame_w": 302,
+          "frames": 25,
+          "frames_used": 25,
+          "loop": true,
+          "path": "assets/sprites/hero/squirmy_celebrate_sheet.png",
+          "x2": false
+        },
         "hurt": {
           "anchor": [
             153,
@@ -485,6 +692,78 @@
       "key_color": "#FF00FF",
       "kind": "sheet",
       "nominal_h": 384
+    },
+    "ui_badge": {
+      "category": "image",
+      "frame_h": 562,
+      "frame_w": 564,
+      "id": "ui_badge",
+      "kind": "image",
+      "path": "assets/images/ui/ui_badge.png"
+    },
+    "ui_btn_play": {
+      "category": "image",
+      "frame_h": 238,
+      "frame_w": 853,
+      "id": "ui_btn_play",
+      "kind": "image",
+      "path": "assets/images/ui/ui_btn_play.png"
+    },
+    "ui_btn_square": {
+      "category": "image",
+      "frame_h": 555,
+      "frame_w": 556,
+      "id": "ui_btn_square",
+      "kind": "image",
+      "path": "assets/images/ui/ui_btn_square.png"
+    },
+    "ui_chip": {
+      "category": "image",
+      "frame_h": 298,
+      "frame_w": 843,
+      "id": "ui_chip",
+      "kind": "image",
+      "path": "assets/images/ui/ui_chip.png"
+    },
+    "ui_panel_stage": {
+      "category": "image",
+      "frame_h": 367,
+      "frame_w": 835,
+      "id": "ui_panel_stage",
+      "kind": "image",
+      "path": "assets/images/ui/ui_panel_stage.png"
+    },
+    "ui_tab": {
+      "category": "image",
+      "frame_h": 566,
+      "frame_w": 562,
+      "id": "ui_tab",
+      "kind": "image",
+      "path": "assets/images/ui/ui_tab.png"
+    },
+    "ui_tab_active": {
+      "category": "image",
+      "frame_h": 684,
+      "frame_w": 490,
+      "id": "ui_tab_active",
+      "kind": "image",
+      "path": "assets/images/ui/ui_tab_active.png"
+    },
+    "ui_tab_locked": {
+      "category": "image",
+      "frame_h": 673,
+      "frame_w": 586,
+      "id": "ui_tab_locked",
+      "kind": "image",
+      "path": "assets/images/ui/ui_tab_locked.png"
+    },
+    "ui_tag": {
+      "category": "image",
+      "frame_h": 312,
+      "frame_w": 850,
+      "id": "ui_tag",
+      "kind": "image",
+      "path": "assets/images/ui/ui_tag.png"
     }
   },
   "version": 2

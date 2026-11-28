@@ -8,7 +8,7 @@ extends Screen
 ## resulting Economy / Quests signals. params.now (optional) overrides the clock, for tests.
 
 # static background layout (fractions of the screen), tuned with the artist's mock
-const STATIC_PATH_FRAC := 0.52
+const STATIC_PATH_FRAC := 0.51
 const STATIC_BURROW_X := 0.06
 const STATIC_BURROW_W := 0.46
 const STATIC_SQUIRMY_X := 0.78
@@ -338,11 +338,11 @@ func _build() -> void:
 	_bar_slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(_bar_slot)
 	_refresh_bar()
-	settings_button = UI.button("⚙", "ghost", Vector2(52, 52), 24)
+	settings_button = _square_button("⚙", "icon_settings")
 	settings_button.name = "settings_button"
 	settings_button.pressed.connect(func(): Game.nav.go("settings"))
 	top.add_child(settings_button)
-	daily_button = UI.button("◉", "ghost", Vector2(52, 52), 24)
+	daily_button = _square_button("◉", "icon_quests")
 	daily_button.name = "daily_button"
 	daily_button.tooltip_text = Game.t("home.daily_badge")
 	daily_button.pressed.connect(open_daily)
@@ -350,7 +350,10 @@ func _build() -> void:
 	daily_badge = UI.label("", 12, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER)
 	daily_badge.name = "daily_badge"
 	daily_badge.autowrap_mode = TextServer.AUTOWRAP_OFF
-	daily_badge.add_theme_stylebox_override("normal", UI.style(UI.RED, UI.BORDER, 10, 2, false))
+	var badge_art := NineStyle.make("ui_badge", 9.0, Vector2(5, 0))
+	daily_badge.add_theme_stylebox_override("normal", badge_art if badge_art != null else UI.style(UI.RED, UI.BORDER, 10, 2, false))
+	daily_badge.add_theme_color_override("font_color", Color.WHITE)
+	daily_badge.custom_minimum_size = Vector2(18, 18)
 	daily_badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	daily_badge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	daily_badge.offset_left = 4
@@ -361,7 +364,8 @@ func _build() -> void:
 	v.add_child(top)
 
 	var row2 := HBoxContainer.new()
-	shards_chip = UI.chip("◇", Game.t("home.shards", [_shards(), DataDB.bal_i("campaign.eras", 5)]))
+	shards_chip = UI.chip("◇", Game.t("home.shards", [_shards(), DataDB.bal_i("campaign.eras", 5)]), "icon_shard")
+	shards_chip.custom_minimum_size.y = 40
 	shards_chip.name = "shards_chip"
 	row2.add_child(shards_chip)
 	v.add_child(row2)
@@ -378,6 +382,9 @@ func _build() -> void:
 
 func _build_stage_panel() -> Control:
 	var p := UI.panel()
+	var frame := NineStyle.make("ui_panel_stage", 16.0, Vector2(18, 12))
+	if frame != null:
+		p.add_theme_stylebox_override("panel", frame)
 	p.name = "stage_panel"
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
@@ -402,12 +409,17 @@ func _build_stage_panel() -> Control:
 	for r in DataDB.ROLES:
 		if mix.has(r):
 			var c := UI.chip("", Game.t("home.scout_item", [Game.t("role." + r), mix[r]]))
+			var tag := NineStyle.make("ui_tag", 11.0, Vector2(12, 2))
+			if tag != null:
+				c.add_theme_stylebox_override("panel", tag)
 			c.name = "role_" + r
 			chips.add_child(c)
 			role_chips.append(c)
 	box.add_child(chips)
 	play_button = UI.button(Game.t("home.play"), "primary", Vector2(0, 72), 32)
 	play_button.name = "play_button"
+	if UI.skin_button(play_button, "ui_btn_play", 36.0, Vector2(16, 6)):
+		play_button.add_theme_constant_override("outline_size", 0)
 	play_button.pressed.connect(_on_play)
 	box.add_child(play_button)
 	return p
@@ -460,6 +472,8 @@ func _build_nav() -> Control:
 		b.name = "nav_" + f
 		b.clip_text = true
 		col.add_child(b)
+		var locked_now: bool = f != "map" and (not Progress.feature_unlocked(_profile, f) or not Game.nav.can_go(NAV_ROUTES[f]))
+		var painted := _skin_tab(b, f, locked_now)
 		nav_buttons[f] = b
 		var dot := Panel.new()
 		dot.name = "dot_" + f
@@ -486,12 +500,69 @@ func _build_nav() -> Control:
 			b.pressed.connect(func(): Game.nav.go(route))
 			note = UI.label("", 12, UI.LOCKED_INK, HORIZONTAL_ALIGNMENT_CENTER)
 		note.name = "note_" + f
-		note.add_theme_font_size_override("font_size", 12)
-		note.custom_minimum_size = Vector2(0, 30)
-		col.add_child(note)
+		if b.disabled and not Progress.feature_unlocked(_profile, f):   # short "Lv. N" note
+			note.text = Game.t("ui.level_short", [Progress.feature_unlock_stage(f)])
+		if painted:   # painted tab: the unlock level sits small inside the tab, under the padlock
+			note.add_theme_font_size_override("font_size", 12)
+			note.add_theme_color_override("font_color", UI.INK)
+			note.autowrap_mode = TextServer.AUTOWRAP_OFF
+			note.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+			note.offset_top = -22
+			note.offset_bottom = -8
+			note.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			b.add_child(note)
+		else:
+			note.add_theme_font_size_override("font_size", 12)
+			note.custom_minimum_size = Vector2(0, 30)
+			col.add_child(note)
 		nav_notes[f] = note
 		h.add_child(col)
 	return h
+
+
+# ------------------------------------------------------------------ painted frames
+
+## Square top-corner button: painted frame + icon (text symbol only when the art is missing).
+func _square_button(symbol: String, icon_id: String) -> Button:
+	var b := UI.button(symbol, "ghost", Vector2(52, 52), 24)
+	if UI.skin_button(b, "ui_btn_square", 14.0, Vector2(0, 0)):
+		b.custom_minimum_size = Vector2(46, 46)
+		var art := SpriteFactory.icon(icon_id, 30.0)
+		if art != null:
+			b.text = ""
+			art.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+			art.offset_left = -15
+			art.offset_right = 15
+			art.offset_top = -15
+			art.offset_bottom = 15
+			b.add_child(art)
+	return b
+
+
+## Dresses a navigation button with its tab frame (normal / active / locked) and icon. False when art is missing.
+func _skin_tab(b: Button, f: String, locked: bool) -> bool:
+	var id := "ui_tab_locked" if locked else ("ui_tab_active" if f == "map" else "ui_tab")
+	if not UI.skin_button(b, id, 16.0, Vector2(4, 4), "ui_tab_locked"):
+		return false
+	b.custom_minimum_size = Vector2(0, 84)
+	b.add_theme_font_size_override("font_size", 13)
+	b.add_theme_constant_override("outline_size", 0)
+	var icon_id := "icon_lock" if locked else ("icon_capsule" if f == "capsules" else "icon_nav_" + f)
+	var art := SpriteFactory.icon(icon_id, 44.0 if not locked else 36.0)
+	if art != null:
+		art.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+		art.offset_top = 8
+		art.offset_bottom = 8 + (44.0 if not locked else 36.0)
+		art.offset_left = -22
+		art.offset_right = 22
+		b.add_child(art)
+	if locked:
+		b.text = ""   # the padlock and the level (small) replace the label
+	else:
+		b.add_theme_constant_override("h_separation", 0)
+		for st in ["normal", "hover", "pressed", "disabled"]:
+			(b.get_theme_stylebox(st) as StyleBox).content_margin_top = 54
+	return true
 
 
 # ------------------------------------------------------------------ chips, alerts
