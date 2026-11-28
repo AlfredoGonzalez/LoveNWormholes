@@ -2,51 +2,51 @@
 
 Generado por `python3 tools/art_status.py`. Prompts en `docs/art-prompts/` (ver su `README.md`).
 
-**1 de 324 piezas listas o en inbox.**
+**28 de 324 piezas listas o en inbox.**
 
 | Fase | Contenido | Total | Integrado | En inbox | Pendiente |
 |---|---|---|---|---|---|
-| A | Era 1 jugable | 58 | 0 | 1 | 57 |
-| B | Menús y Home | 16 | 0 | 0 | 16 |
+| A | Era 1 jugable | 58 | 26 | 0 | 32 |
+| B | Menús y Home | 16 | 2 | 0 | 14 |
 | C | Era 2 (Egipto) | 48 | 0 | 0 | 48 |
 | D | Tienda, cápsulas y reliquias | 40 | 0 | 0 | 40 |
 | E | Era 3 (Medieval) | 49 | 0 | 0 | 49 |
 | F | Era 4 (Industrial) | 49 | 0 | 0 | 49 |
 | G | Era 5 (Futuro lejano) | 48 | 0 | 0 | 48 |
 | H | Historia y tienda de Play | 16 | 0 | 0 | 16 |
-| | **Total** | **324** | **0** | **1** | **323** |
+| | **Total** | **324** | **28** | **0** | **296** |
 
 ## Fase A: Era 1 jugable
 
 | ID | Tipo | Pieza | Archivo esperado | Estado |
 |---|---|---|---|---|
 | A-001 | ref | Squirmy (héroe): referencia de personaje | `squirmy_ref.png` | pendiente |
-| A-002 | hoja | Squirmy (héroe): idle (reposo) | `squirmy_idle_sheet.png` | en inbox |
-| A-003 | hoja | Squirmy (héroe): cast_slam (poder Squirm Slam) | `squirmy_cast_slam_x2_sheet.png` | pendiente |
-| A-004 | hoja | Squirmy (héroe): cast_power (poder genérico) | `squirmy_cast_power_x2_sheet.png` | pendiente |
-| A-005 | hoja | Squirmy (héroe): hurt (herido) | `squirmy_hurt_sheet.png` | pendiente |
-| A-006 | hoja | Squirmy (héroe): celebrate (celebrar) | `squirmy_celebrate_x2_sheet.png` | pendiente |
-| A-007 | ref | Club Worm: referencia de personaje | `p1_club_worm_ref.png` | pendiente |
-| A-008 | hoja | Club Worm: idle (reposo) | `p1_club_worm_idle_sheet.png` | pendiente |
-| A-009 | hoja | Club Worm: walk (desplazamiento) | `p1_club_worm_walk_sheet.png` | pendiente |
-| A-010 | hoja | Club Worm: attack (ataque) | `p1_club_worm_attack_x2_sheet.png` | pendiente |
-| A-011 | hoja | Club Worm: hurt (herido) | `p1_club_worm_hurt_sheet.png` | pendiente |
-| A-012 | hoja | Club Worm: defeat (derrota) | `p1_club_worm_defeat_sheet.png` | pendiente |
-| A-013 | ref | Ant Clubber: referencia de personaje | `e1_ant_clubber_ref.png` | pendiente |
-| A-014 | hoja | Ant Clubber: idle (reposo) | `e1_ant_clubber_idle_sheet.png` | pendiente |
-| A-015 | hoja | Ant Clubber: walk (desplazamiento) | `e1_ant_clubber_walk_sheet.png` | pendiente |
-| A-016 | hoja | Ant Clubber: attack (ataque) | `e1_ant_clubber_attack_x2_sheet.png` | pendiente |
-| A-017 | hoja | Ant Clubber: hurt (herido) | `e1_ant_clubber_hurt_sheet.png` | pendiente |
-| A-018 | hoja | Ant Clubber: defeat (derrota) | `e1_ant_clubber_defeat_sheet.png` | pendiente |
-| A-019 | estático | Fondo de batalla, Era 1 (Edad de Piedra) | `bg_era1.png` | pendiente |
-| A-020 | estático | Base del jugador, Era 1 (madriguera) | `base_p1.png` | pendiente |
-| A-021 | estático | Base enemiga, Era 1 (hormiguero) | `base_e1.png` | pendiente |
-| A-022 | estático | Icono de moneda | `icon_coin.png` | pendiente |
-| A-023 | estático | Icono de comida (manzana) | `icon_food.png` | pendiente |
-| A-024 | estático | Efecto de impacto | `fx_impact.png` | pendiente |
-| A-025 | estático | Proyectil: piedra | `proj_stone.png` | pendiente |
-| A-026 | estático | Icono de poder: Squirm Slam | `power_squirm_slam.png` | pendiente |
-| A-027 | estático | Icono de poder: Apple Rain | `power_apple_rain.png` | pendiente |
+| A-002 | hoja | Squirmy (héroe): idle (reposo) | `squirmy_idle_sheet.png` | integrado |
+| A-003 | hoja | Squirmy (héroe): cast_slam (poder Squirm Slam) | `squirmy_cast_slam_x2_sheet.png` | integrado |
+| A-004 | hoja | Squirmy (héroe): cast_power (poder genérico) | `squirmy_cast_power_x2_sheet.png` | integrado |
+| A-005 | hoja | Squirmy (héroe): hurt (herido) | `squirmy_hurt_sheet.png` | integrado |
+| A-006 | hoja | Squirmy (héroe): celebrate (celebrar) | `squirmy_celebrate_x2_sheet.png` | integrado |
+| A-007 | ref | Club Worm: referencia de personaje | `p1_club_worm_ref.png` | integrado |
+| A-008 | hoja | Club Worm: idle (reposo) | `p1_club_worm_idle_sheet.png` | integrado |
+| A-009 | hoja | Club Worm: walk (desplazamiento) | `p1_club_worm_walk_sheet.png` | integrado |
+| A-010 | hoja | Club Worm: attack (ataque) | `p1_club_worm_attack_x2_sheet.png` | integrado |
+| A-011 | hoja | Club Worm: hurt (herido) | `p1_club_worm_hurt_sheet.png` | integrado |
+| A-012 | hoja | Club Worm: defeat (derrota) | `p1_club_worm_defeat_sheet.png` | integrado |
+| A-013 | ref | Ant Clubber: referencia de personaje | `e1_ant_clubber_ref.png` | integrado |
+| A-014 | hoja | Ant Clubber: idle (reposo) | `e1_ant_clubber_idle_sheet.png` | integrado |
+| A-015 | hoja | Ant Clubber: walk (desplazamiento) | `e1_ant_clubber_walk_sheet.png` | integrado |
+| A-016 | hoja | Ant Clubber: attack (ataque) | `e1_ant_clubber_attack_x2_sheet.png` | integrado |
+| A-017 | hoja | Ant Clubber: hurt (herido) | `e1_ant_clubber_hurt_sheet.png` | integrado |
+| A-018 | hoja | Ant Clubber: defeat (derrota) | `e1_ant_clubber_defeat_sheet.png` | integrado |
+| A-019 | estático | Fondo de batalla, Era 1 (Edad de Piedra) | `bg_era1.png` | integrado |
+| A-020 | estático | Base del jugador, Era 1 (madriguera) | `base_p1.png` | integrado |
+| A-021 | estático | Base enemiga, Era 1 (hormiguero) | `base_e1.png` | integrado |
+| A-022 | estático | Icono de moneda | `icon_coin.png` | integrado |
+| A-023 | estático | Icono de comida (manzana) | `icon_food.png` | integrado |
+| A-024 | estático | Efecto de impacto | `fx_impact.png` | integrado |
+| A-025 | estático | Proyectil: piedra | `proj_stone.png` | integrado |
+| A-026 | estático | Icono de poder: Squirm Slam | `power_squirm_slam.png` | integrado |
+| A-027 | estático | Icono de poder: Apple Rain | `power_apple_rain.png` | integrado |
 | A-028 | ref | Slinger Worm: referencia de personaje | `p1_slinger_worm_ref.png` | pendiente |
 | A-029 | hoja | Slinger Worm: idle (reposo) | `p1_slinger_worm_idle_sheet.png` | pendiente |
 | A-030 | hoja | Slinger Worm: walk (desplazamiento) | `p1_slinger_worm_walk_sheet.png` | pendiente |
@@ -83,8 +83,8 @@ Generado por `python3 tools/art_status.py`. Prompts en `docs/art-prompts/` (ver 
 
 | ID | Tipo | Pieza | Archivo esperado | Estado |
 |---|---|---|---|---|
-| B-001 | estático | Logo del juego | `logo.png` | pendiente |
-| B-002 | estático | Fondo de título y Home | `bg_home.png` | pendiente |
+| B-001 | estático | Logo del juego | `logo.png` | integrado |
+| B-002 | estático | Fondo de título y Home | `bg_home.png` | integrado |
 | B-003 | estático | Textura de papel para paneles | `paper_texture.png` | pendiente |
 | B-004 | estático | Icono de gema | `icon_gem.png` | pendiente |
 | B-005 | estático | Icono de cápsula del tiempo | `icon_capsule.png` | pendiente |

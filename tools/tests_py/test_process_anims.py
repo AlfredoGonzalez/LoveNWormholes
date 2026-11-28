@@ -149,3 +149,15 @@ def test_background_is_an_image_not_a_sprite(tmp_path):
     Image.new("RGB", (1536, 2752), (160, 210, 240)).save(tmp_path / "art-inbox" / "bg_era1.jpg")
     e = run(tmp_path)["sprites"]["bg_era1"]
     assert e["kind"] == "image" and e["path"].endswith("backgrounds/bg_era1.jpg") and e["frame_w"] == 1080
+
+
+def test_ui_frame_is_keyed_and_trimmed(tmp_path):
+    (tmp_path / "art-inbox").mkdir()
+    (tmp_path / "assets").mkdir()
+    img = Image.new("RGB", (400, 300), (255, 0, 255))
+    ImageDraw.Draw(img).rounded_rectangle([100, 100, 299, 199], 20, fill=(250, 240, 220), outline=(90, 58, 34), width=6)
+    img.save(tmp_path / "art-inbox" / "ui_chip.png")
+    e = run(tmp_path)["sprites"]["ui_chip"]
+    assert e["kind"] == "image" and e["path"].endswith("images/ui/ui_chip.png")
+    out = Image.open(tmp_path / e["path"])
+    assert out.mode == "RGBA" and out.size[0] <= 210 and out.getpixel((0, 0))[3] == 0

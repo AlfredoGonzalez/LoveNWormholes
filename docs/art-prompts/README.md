@@ -5,7 +5,7 @@ Sustituye a `docs/ART_PROMPTS_ORIGINAL.md` (los 89 prompts originales, que se co
 El estado de cada pieza (pendiente, en inbox, integrado) lo genera `python3 tools/art_status.py` en `docs/ART_STATUS.md`.
 
 **Total: 324 prompts** (39 referencias de personaje, 195 hojas de animación, 90 imágenes y sprites estáticos),
-repartidos en 8 fases. Los prompts de Gemini están en inglés; todo lo demás, en español.
+repartidos en 8 fases (más la fase I, a mano: `fase-i-home.md`, marcos e iconos de Home). Los prompts de Gemini están en inglés; todo lo demás, en español.
 
 ## Qué cambia respecto al original
 
